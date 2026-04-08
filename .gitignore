@@ -1,0 +1,19 @@
+node_modules
+.pnpm-store
+.turbo
+.next
+dist
+build
+coverage
+
+.env
+.env.*
+!.env.example
+
+.DS_Store
+Thumbs.db
+
+# Expo
+.expo
+web-build
+

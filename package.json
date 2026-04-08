@@ -1,0 +1,32 @@
+{
+  "name": "kanunibaat",
+  "private": true,
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "typecheck": "turbo typecheck",
+    "test": "turbo test",
+    "format": "prettier -w .",
+    "format:check": "prettier -c ."
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["@nestjs/core", "sharp", "unrs-resolver"]
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "@types/node": "^24.0.0",
+    "eslint": "^9.39.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "prettier": "^3.6.2",
+    "turbo": "^2.5.6",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.38.0"
+  }
+}
+

@@ -1,0 +1,185 @@
+---
+alwaysApply: true
+---
+
+# ENGINEERING STANDARDS — UNIVERSAL RULE
+
+## Core Philosophy
+Always produce the **best possible code** — not just working code.
+Every decision must optimize for scalability, maintainability, and long-term architectural health.
+When in doubt between two approaches, always pick the one that scales better and is easier to reason about.
+Think like a senior staff engineer at a world-class tech company on every single task — no exceptions.
+
+---
+
+## Architecture & Design
+
+- **Component-first thinking**: Break everything into the smallest meaningful, reusable units. No monoliths. No god files.
+- **Separation of concerns**: UI, business logic, data fetching, state management, and utilities must live in clearly distinct layers.
+- **Feature-based folder structure** over type-based: group by domain/feature, not by file type (`/auth`, `/payments`, `/dashboard` — not `/components`, `/hooks`, `/utils`).
+- **Dependency inversion**: Depend on abstractions, not implementations. Use interfaces, adapters, and contracts wherever integration points exist.
+- **Never over-engineer early, but always design for extensibility.** The architecture should handle 10x the current scope without a rewrite.
+- **Design patterns**: Apply the right pattern for the right problem — Factory, Strategy, Observer, Repository, CQRS, etc. Never force a pattern; let the problem demand it.
+- **Modular boundaries**: Every module must have a clearly defined public API. Internal implementation details must never leak across boundaries.
+
+---
+
+## Code Quality
+
+- **DRY (Don't Repeat Yourself)**: Every piece of logic lives in exactly one place.
+- **Single Responsibility**: Every function, class, and module does one thing well.
+- **Small functions**: If a function is longer than ~30 lines, it's doing too much. Break it down.
+- **Explicit over implicit**: Code should be readable without comments. Name things so clearly that comments become redundant.
+- **No magic numbers or strings**: Use named constants and enums everywhere.
+- **Fail fast**: Validate inputs at boundaries. Surface errors early and loudly.
+- **Pure functions first**: Prefer stateless, side-effect-free functions. Isolate and contain side effects deliberately.
+- **Immutability by default**: Never mutate data unless absolutely necessary. Prefer immutable data structures and patterns.
+- **Avoid premature abstraction**: Don't abstract until you see the pattern repeat at least twice. Wrong abstractions are worse than duplication.
+
+---
+
+## Technology Choices
+
+- Always use the **latest stable version** of languages, frameworks, and libraries.
+- Choose **battle-tested, widely adopted dependencies** with active maintenance and strong community backing.
+- Prefer **smaller, composable dependencies** over heavy monolithic ones.
+- Avoid deprecated APIs, legacy patterns, and anything with a known successor.
+- Evaluate trade-offs explicitly: performance, bundle size, ecosystem health, and long-term support.
+- Before introducing any new dependency, ask: can this be done simply without it? If yes, do it without.
+- Regularly flag outdated dependencies and suggest modern replacements proactively.
+
+---
+
+## Scalability
+
+- **Stateless by default**: Design services and modules to scale horizontally without shared state.
+- **Async-first**: Prefer non-blocking, event-driven patterns wherever I/O is involved.
+- **Caching strategy**: Always think about what should be cached and at which layer — in-memory, distributed (Redis), CDN, or HTTP caching.
+- **Database**: Use indexes deliberately. Avoid N+1 queries. Prefer lazy loading unless eager is clearly better. Think about query performance at scale, not just correctness.
+- **API design**: RESTful or GraphQL with versioning from day one. Never expose internal implementation details. Paginate all list endpoints.
+- **Queue-based architecture**: Offload heavy, slow, or failure-prone operations to background jobs and queues. Never block the critical path.
+- **Rate limiting & backpressure**: Always design for what happens when traffic spikes or downstream services slow down.
+
+---
+
+## Testing & Reliability
+
+- **Test behavior, not implementation**: Tests must survive refactors without breaking.
+- **Unit → Integration → E2E pyramid**: Maximum coverage at unit level. Selective integration tests for service boundaries. E2E only for critical user journeys.
+- **Every edge case matters**: Empty states, error states, loading states, null/undefined, boundary values, and race conditions must all be handled and tested.
+- **No silent failures**: Every error must be caught, logged, and surfaced at the right level — never swallowed.
+- **Deterministic tests**: No flaky tests. No time-dependent logic. No order-dependent tests. Ever.
+- **Test data management**: Use factories and fixtures — never hardcode test data inline.
+- **Contract testing**: For microservices and external API integrations, always define and test contracts explicitly.
+
+---
+
+## Performance
+
+- Measure before optimizing. Never optimize without data.
+- Lazy load everything not critical to the initial render or execution path.
+- Minimize unnecessary re-renders (frontend), redundant computations, and repeated I/O operations.
+- Think about time and space complexity on every algorithm. Default to optimal — not just correct.
+- **Frontend**: Code-split aggressively. Optimize assets. Target Core Web Vitals (LCP, CLS, INP) from the start.
+- **Backend**: Profile before tuning. Optimize the database layer first — it's almost always the bottleneck.
+- **Memory management**: Be deliberate about object lifecycles, memory leaks, and cleanup in long-running processes.
+
+---
+
+## Security
+
+- Never trust user input. Sanitize, validate, and escape at every boundary — client and server.
+- Secrets never in code. Always in environment variables or a dedicated secret manager (Vault, AWS Secrets Manager, etc.).
+- Principle of least privilege for all access controls, roles, and permissions.
+- OWASP Top 10 awareness in all web-facing code — XSS, SQLi, CSRF, IDOR, etc.
+- **Authentication & authorization**: Always separate authn from authz. Use proven libraries — never roll your own auth.
+- **Dependency security**: Flag known vulnerabilities in dependencies. Treat `npm audit` / `pip audit` / equivalent as mandatory.
+- **Data privacy**: PII must be identified, minimized, encrypted at rest and in transit, and handled per compliance requirements (GDPR, etc.).
+- **Input size limits**: Always enforce limits on input size, request body, file uploads. Prevent abuse by design.
+
+---
+
+## Observability
+
+- **Structured logging**: Always log in structured format (JSON). Never use raw `console.log` / `print` in production code. Every log must have: timestamp, severity, context, and a clear message.
+- **Log the right things**: Log at boundaries — incoming requests, outgoing calls, errors, and key business events. Not every line.
+- **Error tracking**: Integrate error tracking (Sentry or equivalent) from day one. Every unhandled exception must be captured with full context.
+- **Distributed tracing**: For any multi-service architecture, use trace IDs that propagate across service boundaries. Every request must be traceable end-to-end.
+- **Metrics**: Instrument key operations — latency, error rates, queue depths, cache hit rates. Expose health check endpoints.
+- **Alerting mindset**: Write code with the on-call engineer in mind. Error messages must be actionable, not cryptic. Include context, not just stack traces.
+- **Audit logs**: For any sensitive operation (auth, payments, data deletion), maintain immutable audit logs.
+
+---
+
+## Documentation
+
+- **Self-documenting code first**: Names, structure, and types should tell the story. Comments explain *why*, not *what*.
+- **Every public API must be documented**: Functions, classes, and modules exposed to other layers need clear docstrings — parameters, return values, exceptions, and usage intent.
+- **README for every major module**: What it does, how to set it up, how to run it, and key architectural decisions. Keep it short and current.
+- **Architecture Decision Records (ADRs)**: For any significant technical decision, document the context, the options considered, and the decision made. Future engineers (and you) will thank you.
+- **Inline TODOs are not documentation**: Every TODO must have a ticket reference or a specific action. No orphaned TODOs.
+- **Changelog discipline**: Maintain a CHANGELOG for any library, API, or shared module. Breaking changes must be explicitly marked.
+
+---
+
+## Git & Version Control
+
+- **Atomic commits**: Each commit must represent one logical change. Never bundle unrelated changes.
+- **Meaningful commit messages**: Use conventional commits format — `feat:`, `fix:`, `refactor:`, `chore:`, `docs:`, etc. The message must explain *what changed and why*, not just *what*.
+- **Branch naming**: `feature/`, `fix/`, `chore/`, `release/` prefixes. Always tied to a ticket or issue.
+- **No direct commits to main/master**: All changes via pull requests. No exceptions, even for small fixes.
+- **Small, frequent PRs**: Large PRs are a code review anti-pattern. Keep them focused and reviewable.
+- **Never commit**: secrets, `.env` files, build artifacts, IDE configs, or debug code. `.gitignore` must be set up correctly from day one.
+- **Rebase over merge** for feature branches to keep history linear and readable.
+
+---
+
+## Environment & Configuration Management
+
+- **Strict environment parity**: dev, staging, and prod must be as identical as possible. "Works on my machine" is not acceptable.
+- **All config via environment variables**: No hardcoded URLs, credentials, feature flags, or environment-specific logic in code.
+- **Config schema validation at startup**: Validate all required env vars exist and are correctly typed when the app boots. Fail loudly if not — never start in a broken config state.
+- **`.env.example` always maintained**: Every env var must be documented with a placeholder and description. Never commit actual `.env` files.
+- **Environment-aware defaults**: Sensible, safe defaults for dev. Strict, explicit config for prod — never the other way around.
+- **Feature flags**: Use a proper feature flag system for any functionality that needs to be toggled without a deploy. Never use env vars as long-lived feature flags.
+- **Infrastructure as Code**: All infrastructure must be defined in code (Terraform, Pulumi, CDK, etc.). No manual cloud console changes.
+
+---
+
+## Accessibility (Frontend)
+
+- **Semantic HTML always**: Use the correct HTML element for the correct purpose. Never use `<div>` where a `<button>`, `<nav>`, `<header>`, or `<main>` belongs.
+- **WCAG 2.1 AA compliance minimum**: Color contrast, text sizing, focus states, and interactive element sizing must meet AA standards.
+- **Keyboard navigability**: Every interactive element must be reachable and operable via keyboard alone.
+- **ARIA attributes**: Use ARIA roles and labels only when semantic HTML is insufficient. Never use ARIA to fix bad HTML.
+- **Focus management**: Manage focus deliberately in modals, drawers, and dynamic content. Trap focus where appropriate.
+- **Screen reader testing**: Test critical flows with a screen reader. VoiceOver (Mac/iOS) or NVDA (Windows) at minimum.
+- **Accessible error states**: Form errors must be programmatically associated with inputs. Never rely on color alone to communicate state.
+
+---
+
+## Planning & Communication
+
+- **Before writing code for any non-trivial task**: Briefly outline the architecture and approach first. Think, then build.
+- **Flag trade-offs**: When multiple valid approaches exist, state the options, the trade-offs, and your recommendation with reasoning.
+- **Explicit assumptions**: If a requirement is ambiguous, state your assumption clearly before proceeding. Never silently assume.
+- **Proactive improvement**: Always flag obvious architectural gaps, tech debt, or improvement opportunities spotted during a task — even if outside the current scope.
+- **Scope discipline**: Implement exactly what's asked. Don't gold-plate. But do flag when a small additional effort would yield disproportionate value.
+- **Ticket-driven thinking**: Every non-trivial change should be traceable to a requirement. Build what's needed, not what seems cool.
+
+---
+
+## Universal Across All Tech Stacks
+
+These rules apply without exception across all languages and frameworks:
+**Python, JavaScript, TypeScript, Go, Rust, Java, Kotlin, Swift, Ruby, C#, C++** — the principles are universal.
+
+Adapt idioms and patterns to the language's conventions and strengths. But never compromise on:
+- Architecture and separation of concerns
+- Scalability and extensibility
+- Code quality and readability
+- Security and reliability
+- Observability and operability
+- Documentation and maintainability
+
+The best engineers are not defined by the stack they use. They're defined by the standards they refuse to drop regardless of the stack.
