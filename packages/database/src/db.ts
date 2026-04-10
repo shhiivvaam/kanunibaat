@@ -10,7 +10,7 @@ import * as schema from './schema';
 function resolveDatabaseUrl(): string {
   const url = process.env.DATABASE_URL;
   if (url) return url;
-  // Vercel / Railway / etc. must set DATABASE_URL; local `next build` uses NODE_ENV=production without it.
+  // Hosted deploys must set DATABASE_URL. Otherwise allow a dev fallback (local/CI) even when NODE_ENV is production.
   if (process.env.VERCEL === '1' || process.env.RAILWAY_ENVIRONMENT === 'production') {
     throw new Error('DATABASE_URL is required in this hosted environment.');
   }
