@@ -8,10 +8,11 @@ import { account, session, user, verification } from '@kb/database/schema';
 function getAuthSecret(): string {
   const secret = process.env.BETTER_AUTH_SECRET;
   if (secret) return secret;
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error('BETTER_AUTH_SECRET is required in production.');
+  // `next build` sets NODE_ENV=production without .env — allow a placeholder locally only.
+  if (process.env.VERCEL === '1' || process.env.RAILWAY_ENVIRONMENT === 'production') {
+    throw new Error('BETTER_AUTH_SECRET is required in this hosted environment.');
   }
-  return 'dev-only-placeholder-change-me';
+  return 'local-build-placeholder-set-better-auth-secret-in-env';
 }
 
 export const auth = betterAuth({

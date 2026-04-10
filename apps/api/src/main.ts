@@ -1,6 +1,7 @@
-import type { Application } from 'express';
+import type { Application, RequestHandler } from 'express';
 import { NestFactory } from '@nestjs/core';
 import * as Sentry from '@sentry/node';
+import type { AnyRouter } from '@trpc/server';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
 
 import { AppModule } from './app.module';
@@ -14,23 +15,28 @@ if (process.env.SENTRY_DSN) {
   });
 }
 
+function resolveCorsOrigins(): string[] {
+  const raw = process.env.CORS_ORIGIN;
+  if (!raw) return ['http://localhost:3000'];
+  const parsed = raw
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return parsed.length > 0 ? parsed : ['http://localhost:3000'];
+}
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const corsOrigins =
-    process.env.CORS_ORIGIN?.split(',')
-      .map((s) => s.trim())
-      .filter(Boolean) ?? ['http://localhost:3000'];
-  app.enableCors({ origin: corsOrigins, credentials: true });
+  app.enableCors({ origin: resolveCorsOrigins(), credentials: true });
 
   const httpServer = app.getHttpAdapter().getInstance() as Application;
-  httpServer.use(
-    '/trpc',
-    createExpressMiddleware({
-      router: appRouter,
-      createContext: createTrpcContext,
-    }),
-  );
+  const trpcMiddleware: RequestHandler = createExpressMiddleware({
+    router: appRouter as AnyRouter,
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- pnpm workspace: ESLint TS program mis-resolves `@kb/trpc` (tsc is clean)
+    createContext: createTrpcContext,
+  });
+  httpServer.use('/trpc', trpcMiddleware);
 
   const port = Number(process.env.PORT ?? 4000);
   await app.listen(port);
