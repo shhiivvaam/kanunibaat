@@ -1,0 +1,26 @@
+{
+  "name": "@kb/trpc",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc -b",
+    "lint": "eslint .",
+    "test": "node -e \"console.log('no tests')\""
+  },
+  "dependencies": {
+    "@trpc/server": "^11.16.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  }
+}

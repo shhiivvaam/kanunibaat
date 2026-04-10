@@ -1,0 +1,11 @@
+/**
+ * KanuniBaat design tokens (Tailwind CSS v4 @theme).
+ * Import from app globals: `@import "@kb/config/tailwind/theme.css";` (see apps/web).
+ */
+@theme inline {
+  --color-kb-navy: #0f172a;
+  --color-kb-green: #16a34a;
+  --color-kb-amber: #f59e0b;
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}

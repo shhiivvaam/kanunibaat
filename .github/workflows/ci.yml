@@ -6,6 +6,12 @@ on:
 jobs:
   lint-typecheck-build:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/ci
+      BETTER_AUTH_SECRET: ci-ci-ci-ci-ci-ci-ci-ci-ci-ci-ci-ci-ci-ci
+      BETTER_AUTH_URL: http://localhost:3000
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NEXT_PUBLIC_API_URL: http://localhost:4000
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -19,5 +25,8 @@ jobs:
       - run: pnpm -w approve-builds --all
       - run: pnpm lint
       - run: pnpm typecheck
-      - run: pnpm build
-
+      - run: pnpm test
+      - name: Build
+        run: pnpm build
+        env:
+          NODE_ENV: production
