@@ -2,6 +2,18 @@
   "name": "@kb/config",
   "private": true,
   "version": "0.0.0",
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "build": "node -e \"process.exit(0)\"",
+    "lint": "node -e \"process.exit(0)\"",
+    "typecheck": "node -e \"process.exit(0)\"",
+    "test": "node -e \"process.exit(0)\""
+  },
+  "exports": {
+    "./tailwind/theme.css": "./tailwind/theme.css",
+    "./typescript/base.json": "./typescript/base.json",
+    "./prettier/index.cjs": "./prettier/index.cjs",
+    "./eslint/base.cjs": "./eslint/base.cjs"
+  }
 }
 

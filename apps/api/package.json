@@ -22,9 +22,12 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@kb/trpc": "workspace:*",
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
+    "@sentry/node": "^9.34.0",
+    "@trpc/server": "^11.16.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },

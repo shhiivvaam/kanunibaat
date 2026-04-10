@@ -1,0 +1,38 @@
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
+
+import * as schema from './schema';
+
+/**
+ * Resolves the Postgres connection string.
+ * Allows `next build` / CI without a real DB process by defaulting in non-production only.
+ */
+function resolveDatabaseUrl(): string {
+  const url = process.env.DATABASE_URL;
+  if (url) return url;
+  // Vercel / Railway / etc. must set DATABASE_URL; local `next build` uses NODE_ENV=production without it.
+  if (process.env.VERCEL === '1' || process.env.RAILWAY_ENVIRONMENT === 'production') {
+    throw new Error('DATABASE_URL is required in this hosted environment.');
+  }
+  return 'postgresql://postgres:postgres@127.0.0.1:5432/kanunibaat';
+}
+
+const globalForDb = globalThis as unknown as {
+  kbSql?: ReturnType<typeof postgres>;
+};
+
+/**
+ * Single connection per server process. For Next.js dev HMR, reuse the same client.
+ * In production (Vercel/serverless), use Supabase pooler + `max: 1` (or a pooler-aware driver).
+ */
+const sql =
+  globalForDb.kbSql ??
+  postgres(resolveDatabaseUrl(), {
+    max: 1,
+  });
+
+if (process.env.NODE_ENV !== 'production') {
+  globalForDb.kbSql = sql;
+}
+
+export const db = drizzle(sql, { schema });

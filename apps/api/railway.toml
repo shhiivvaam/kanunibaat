@@ -1,0 +1,11 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+healthcheckPath = "/health"
+healthcheckTimeout = 100
+restartPolicyType = "on_failure"
+
+# Set in Railway UI: install from repo root, build Nest app, start `node dist/main.js`.
+# Example build: cd ../.. && pnpm install --frozen-lockfile && pnpm turbo build --filter=api
+# Example start: cd apps/api && node dist/main.js

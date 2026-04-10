@@ -7,6 +7,8 @@ export default tseslint.config(
   {
     ignores: [
       '**/node_modules/**',
+      '**/packages/database/drizzle.config.ts',
+      '**/packages/database/drizzle/**',
       '**/.next/**',
       '**/.turbo/**',
       '**/dist/**',
