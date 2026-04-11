@@ -6,7 +6,7 @@ import { lawyerProfile, user, userProfile, userRole } from '@kb/database/schema'
 
 import type { KbRole } from './context';
 
-export type ProfileBundle = {
+export interface ProfileBundle {
   user: {
     id: string;
     name: string;
@@ -29,7 +29,7 @@ export type ProfileBundle = {
     enrollmentNumber: string | null;
     verificationStatus: (typeof lawyerProfile.$inferSelect)['verificationStatus'];
   } | null;
-};
+}
 
 export async function ensureDefaultUserRole(
   db: PostgresJsDatabase<typeof DbSchema>,

@@ -16,13 +16,13 @@ This checklist maps to [KanuniBaat.md](../KanuniBaat.md) §6 (Phase 2) and the P
 | Web | Authenticated `/app` shell (server session gate) | Done | `apps/web/src/app/app/` |
 | Web | tRPC same-origin proxy (session cookies → API) | Done | `apps/web/src/app/api/trpc/[[...path]]/route.ts`, `apps/web/src/components/providers.tsx` |
 | API | Resolve session from Bearer + Better Auth session cookie | Done | `packages/trpc/src/context.ts`, `packages/trpc/src/session-resolve.ts` |
-| API | `protectedProcedure`, role guards, `profile.*`, `admin.*` stubs | Done | `packages/trpc/src/router.ts`, `packages/trpc/src/routers/*` |
+| API | `protectedProcedure`, role guards, `profile.*`, `admin.*` stubs | Done | `packages/trpc/src/router.ts`, `packages/trpc/src/profile-service.ts` |
 | OTP | Email OTP (Better Auth `email-otp` + Resend) | Done | `apps/web/src/lib/auth.ts`, `apps/web/src/lib/email-otp-delivery.ts` |
 | OTP | Phone OTP (Better Auth `phone-number` + MSG91) + throttling | Done | `apps/web/src/lib/msg91-otp.ts`, `apps/web/src/lib/otp-rate-limit.ts` |
 | Mobile | Secure session token + `Authorization: Bearer` on tRPC | Done | `apps/mobile/components/TrpcProvider.tsx`, `apps/mobile/lib/auth-token.ts` |
 | Mobile | Deep-link strategy (documented) | Done | [docs/MOBILE-AUTH-DEEPLINKS.md](./MOBILE-AUTH-DEEPLINKS.md) |
 | API | Swagger on REST surface | Done | `apps/api/src/main.ts`, controllers |
-| Tests | Session token parsing + profile/admin procedure behaviour | Done | `packages/trpc/src/*.spec.ts`, `apps/api/src/*.spec.ts` |
+| Tests | Session token parsing (+ Swagger e2e) | Partial | `apps/api/src/session-token.spec.ts`, `apps/api/test/app.e2e-spec.ts`; integration tests for `protectedProcedure` with a DB fixture are still a good follow-up |
 
 ## Explicitly not in this phase
 
