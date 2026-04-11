@@ -24,6 +24,11 @@ export function Navbar({ onOpenAuth }: NavbarProps) {
   const pathname = usePathname();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const handleMobileAuthOpen = (tab: AuthTab) => {
+    setMobileOpen(false);
+    onOpenAuth(tab);
+  };
+
   useEffect(() => {
     let cancelled = false;
     queueMicrotask(() => {
@@ -226,7 +231,7 @@ export function Navbar({ onOpenAuth }: NavbarProps) {
             <div className="mt-4 space-y-3 border-t border-[#E7E5E4] pt-4">
               <button
                 type="button"
-                onClick={() => onOpenAuth('login')}
+                onClick={() => handleMobileAuthOpen('login')}
                 className="h-12 w-full rounded-[16px] border border-[#1C1917] text-base text-[#1C1917]"
                 style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
               >
@@ -234,7 +239,7 @@ export function Navbar({ onOpenAuth }: NavbarProps) {
               </button>
               <button
                 type="button"
-                onClick={() => onOpenAuth('signup')}
+                onClick={() => handleMobileAuthOpen('signup')}
                 className="h-12 w-full rounded-[16px] bg-[#C2410C] text-base text-white"
                 style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}
               >
