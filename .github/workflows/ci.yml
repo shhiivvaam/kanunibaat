@@ -99,13 +99,19 @@ jobs:
           node apps/api/dist/main.js &
           PID=$!
           trap 'kill "$PID" 2>/dev/null || true' EXIT
-          for i in $(seq 1 45); do
+          READY=""
+          for _ in $(seq 1 45); do
             if curl -fsS "http://127.0.0.1:4000/" | grep -q "Hello World"; then
-              exit 0
+              READY=1
+              break
             fi
             sleep 1
           done
-          echo "API did not become healthy in time"
-          exit 1
+          if [ -z "$READY" ]; then
+            echo "API did not become healthy in time"
+            exit 1
+          fi
+          pnpm --filter api run smoke:trpc
         env:
           PORT: '4000'
+          SMOKE_API_URL: http://127.0.0.1:4000

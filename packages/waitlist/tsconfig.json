@@ -10,6 +10,5 @@
     "sourceMap": true
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist"],
-  "references": [{ "path": "../database" }, { "path": "../waitlist" }]
+  "exclude": ["node_modules", "dist"]
 }

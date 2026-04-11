@@ -1,5 +1,5 @@
 {
-  "name": "@kb/trpc",
+  "name": "@kb/waitlist",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -15,15 +15,14 @@
     "build": "tsc -b",
     "typecheck": "tsc -b",
     "lint": "eslint .",
-    "test": "node -e \"console.log('no tests')\""
+    "test": "node --import tsx/esm --test src/schemas.test.ts"
   },
   "dependencies": {
-    "@kb/database": "workspace:*",
-    "@kb/waitlist": "workspace:*",
-    "@trpc/server": "^11.16.0",
-    "drizzle-orm": "^0.45.2"
+    "resend": "^6.10.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
+    "tsx": "^4.21.0",
     "typescript": "^5.9.2"
   }
 }

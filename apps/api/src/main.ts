@@ -1,22 +1,26 @@
-import type { Application, RequestHandler } from 'express';
 import { NestFactory } from '@nestjs/core';
 import * as Sentry from '@sentry/node';
-import type { AnyRouter } from '@trpc/server';
-import { createExpressMiddleware } from '@trpc/server/adapters/express';
+import pino from 'pino';
+
+import { db } from '@kb/database';
+import { createTrpcContextFactory } from '@kb/trpc';
 
 import { AppModule } from './app.module';
-import { appRouter, createTrpcContext } from '@kb/trpc';
+import { buildWaitlistEnv, loadApiEnv } from './env';
+import { attachPublicHttpMiddlewares } from './http-stack';
 
-if (process.env.SENTRY_DSN) {
+const apiEnv = loadApiEnv();
+
+if (apiEnv.SENTRY_DSN) {
   Sentry.init({
-    dsn: process.env.SENTRY_DSN,
-    environment: process.env.SENTRY_ENVIRONMENT ?? process.env.NODE_ENV,
-    tracesSampleRate: Number(process.env.SENTRY_TRACES_SAMPLE_RATE ?? 0),
+    dsn: apiEnv.SENTRY_DSN,
+    environment: apiEnv.SENTRY_ENVIRONMENT ?? apiEnv.NODE_ENV,
+    tracesSampleRate: apiEnv.SENTRY_TRACES_SAMPLE_RATE,
   });
 }
 
 function resolveCorsOrigins(): string[] {
-  const raw = process.env.CORS_ORIGIN;
+  const raw = apiEnv.CORS_ORIGIN ?? process.env.CORS_ORIGIN;
   if (!raw) return ['http://localhost:3000'];
   const parsed = raw
     .split(',')
@@ -26,20 +30,24 @@ function resolveCorsOrigins(): string[] {
 }
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const logger = pino({
+    level: apiEnv.NODE_ENV === 'production' ? 'info' : 'debug',
+    redact: ['req.headers.authorization', 'req.headers.cookie'],
+  });
 
+  const app = await NestFactory.create(AppModule, { logger: false });
   app.enableCors({ origin: resolveCorsOrigins(), credentials: true });
 
-  const httpServer = app.getHttpAdapter().getInstance() as Application;
-  const trpcMiddleware: RequestHandler = createExpressMiddleware({
-    router: appRouter as AnyRouter,
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- pnpm workspace: ESLint TS program mis-resolves `@kb/trpc` (tsc is clean)
-    createContext: createTrpcContext,
+  const createTrpcContext = createTrpcContextFactory({
+    db,
+    waitlistEnv: buildWaitlistEnv(apiEnv),
   });
-  httpServer.use('/trpc', trpcMiddleware);
 
-  const port = Number(process.env.PORT ?? 4000);
+  attachPublicHttpMiddlewares(app, { logger, createTrpcContext });
+
+  const port = apiEnv.PORT;
   await app.listen(port);
+  logger.info({ port }, 'api listening');
 }
 
 void bootstrap();
