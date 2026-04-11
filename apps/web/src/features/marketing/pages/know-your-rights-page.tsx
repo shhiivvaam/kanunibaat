@@ -109,8 +109,20 @@ export function KnowYourRightsPage() {
   const openAuth = useOpenAuth();
   const [activeSection, setActiveSection] = useState('workers');
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
+  const isProgrammaticScrollRef = useRef(false);
+  const targetSectionRef = useRef<string | null>(null);
+  const unlockTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const scrollToSection = (id: string) => {
+    isProgrammaticScrollRef.current = true;
+    targetSectionRef.current = id;
+    if (unlockTimerRef.current) {
+      clearTimeout(unlockTimerRef.current);
+    }
+    unlockTimerRef.current = setTimeout(() => {
+      isProgrammaticScrollRef.current = false;
+      targetSectionRef.current = null;
+    }, 1200);
     setActiveSection(id);
     sectionRefs.current[id]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
@@ -118,11 +130,33 @@ export function KnowYourRightsPage() {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
+        if (isProgrammaticScrollRef.current) {
+          const targetSection = targetSectionRef.current;
+          const targetEntry = entries.find((entry) => entry.isIntersecting && entry.target.id === targetSection);
+          if (targetEntry) {
+            setActiveSection(targetEntry.target.id);
+            isProgrammaticScrollRef.current = false;
+            targetSectionRef.current = null;
+            if (unlockTimerRef.current) {
+              clearTimeout(unlockTimerRef.current);
+              unlockTimerRef.current = null;
+            }
           }
+          return;
+        }
+
+        const intersectingEntries = entries.filter((entry) => entry.isIntersecting);
+        if (intersectingEntries.length === 0) {
+          return;
+        }
+
+        const closestEntry = intersectingEntries.reduce((closest, current) => {
+          const currentDistance = Math.abs(current.boundingClientRect.top);
+          const closestDistance = Math.abs(closest.boundingClientRect.top);
+          return currentDistance < closestDistance ? current : closest;
         });
+
+        setActiveSection(closestEntry.target.id);
       },
       { rootMargin: '-30% 0px -60% 0px' },
     );
@@ -130,7 +164,12 @@ export function KnowYourRightsPage() {
     const nodes = Object.values(sectionRefs.current).filter(Boolean) as HTMLElement[];
     nodes.forEach((el) => observer.observe(el));
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      if (unlockTimerRef.current) {
+        clearTimeout(unlockTimerRef.current);
+      }
+    };
   }, []);
 
   return (
