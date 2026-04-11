@@ -6,7 +6,13 @@ import { useState } from 'react';
 
 import { trpc } from '@kb/api-client';
 
-const defaultApiUrl = 'http://localhost:4000';
+function trpcBaseUrl(): string {
+  if (typeof window !== 'undefined') {
+    return `${window.location.origin}/api/trpc`;
+  }
+  const base = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+  return `${base.replace(/\/$/, '')}/api/trpc`;
+}
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
@@ -15,7 +21,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       links: [
         loggerLink({ enabled: () => process.env.NODE_ENV === 'development' }),
         httpBatchLink({
-          url: `${(process.env.NEXT_PUBLIC_API_URL ?? defaultApiUrl).replace(/\/$/, '')}/trpc`,
+          url: trpcBaseUrl(),
           fetch(url, options) {
             return fetch(url, { ...options, credentials: 'include' });
           },

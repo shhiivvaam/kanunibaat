@@ -2,9 +2,11 @@
 
 import { X } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 
 import type { AuthTab } from '@/features/marketing/open-auth-context';
+import { authClient } from '@/lib/auth-client';
 
 type AuthModalProps = {
   isOpen: boolean;
@@ -12,27 +14,192 @@ type AuthModalProps = {
   defaultTab?: AuthTab;
 };
 
-export function AuthModal({ isOpen, onClose, defaultTab = 'login' }: AuthModalProps) {
-  const [tab, setTab] = useState<AuthTab>(defaultTab);
+type AuthMode = 'password' | 'email-otp' | 'phone-otp';
 
-  if (!isOpen) {
-    return null;
+export function AuthModal({ isOpen, onClose, defaultTab = 'login' }: AuthModalProps) {
+  const router = useRouter();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
+  const errorId = useId();
+
+  const [tab, setTab] = useState<AuthTab>(defaultTab);
+  const [mode, setMode] = useState<AuthMode>('password');
+
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
+  const [otp, setOtp] = useState('');
+
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setTab(defaultTab);
+      setError(null);
+    }
+  }, [isOpen, defaultTab]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen, onClose]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const t = window.setTimeout(() => {
+      panelRef.current?.querySelector<HTMLElement>('input,button')?.focus();
+    }, 0);
+    return () => window.clearTimeout(t);
+  }, [isOpen, mode, tab]);
+
+  const finishAuth = useCallback(() => {
+    onClose();
+    router.push('/app');
+    router.refresh();
+  }, [onClose, router]);
+
+  const mapErr = (e: unknown): string => {
+    if (e && typeof e === 'object' && 'message' in e && typeof (e as { message: unknown }).message === 'string') {
+      return (e as { message: string }).message;
+    }
+    return 'Something went wrong. Try again.';
+  };
+
+  if (!isOpen) return null;
+
+  const isLawyerTab = tab === 'signup';
+
+  async function onPasswordSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setPending(true);
+    try {
+      if (tab === 'login') {
+        const { error: err } = await authClient.signIn.email({ email, password });
+        if (err) {
+          setError(err.message ?? 'Sign-in failed.');
+          return;
+        }
+        finishAuth();
+        return;
+      }
+      const { error: err } = await authClient.signUp.email({
+        email,
+        password,
+        name: name.trim() || email.split('@')[0] || 'User',
+      });
+      if (err) {
+        setError(err.message ?? 'Sign-up failed.');
+        return;
+      }
+      finishAuth();
+    } catch (caught) {
+      setError(mapErr(caught));
+    } finally {
+      setPending(false);
+    }
   }
 
-  const isLawyer = tab === 'signup';
+  async function onSendEmailOtp(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setPending(true);
+    try {
+      const { error: err } = await authClient.emailOtp.sendVerificationOtp({
+        email,
+        type: 'sign-in',
+      });
+      if (err) {
+        setError(err.message ?? 'Could not send code.');
+        return;
+      }
+    } catch (caught) {
+      setError(mapErr(caught));
+    } finally {
+      setPending(false);
+    }
+  }
+
+  async function onVerifyEmailOtp(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setPending(true);
+    try {
+      const { error: err } = await authClient.signIn.emailOtp({
+        email,
+        otp,
+        name: name.trim() || undefined,
+      });
+      if (err) {
+        setError(err.message ?? 'Invalid code.');
+        return;
+      }
+      finishAuth();
+    } catch (caught) {
+      setError(mapErr(caught));
+    } finally {
+      setPending(false);
+    }
+  }
+
+  async function onSendPhoneOtp(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setPending(true);
+    try {
+      const { error: err } = await authClient.phoneNumber.sendOtp({ phoneNumber: phone });
+      if (err) {
+        setError(err.message ?? 'Could not send SMS.');
+        return;
+      }
+    } catch (caught) {
+      setError(mapErr(caught));
+    } finally {
+      setPending(false);
+    }
+  }
+
+  async function onVerifyPhoneOtp(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setPending(true);
+    try {
+      const { error: err } = await authClient.phoneNumber.verify({
+        phoneNumber: phone,
+        code: otp,
+      });
+      if (err) {
+        setError(err.message ?? 'Invalid code.');
+        return;
+      }
+      finishAuth();
+    } catch (caught) {
+      setError(mapErr(caught));
+    } finally {
+      setPending(false);
+    }
+  }
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ backgroundColor: 'rgba(28,25,23,0.5)', backdropFilter: 'blur(4px)' }}
-      onClick={(e) => e.target === e.currentTarget && onClose()}
+      onMouseDown={(e) => e.target === e.currentTarget && onClose()}
       role="presentation"
     >
       <div
-        className="relative w-full max-w-md overflow-hidden rounded-[24px] bg-white shadow-2xl"
+        ref={panelRef}
+        className="relative max-h-[90vh] w-full max-w-md overflow-y-auto rounded-[24px] bg-white shadow-2xl"
         role="dialog"
         aria-modal="true"
-        aria-labelledby="auth-modal-title"
+        aria-labelledby={titleId}
+        aria-describedby={error ? errorId : undefined}
       >
         <div className="border-b border-[#E7E5E4] px-8 pb-6 pt-8">
           <div className="mb-6 flex items-center justify-between">
@@ -49,11 +216,11 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'login' }: AuthModalPr
                 </svg>
               </div>
               <span
-                id="auth-modal-title"
+                id={titleId}
                 className="text-[#1C1917]"
                 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '18px' }}
               >
-                KanooniBaat
+                Sign in to KanuniBaat
               </span>
             </div>
             <button
@@ -66,17 +233,15 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'login' }: AuthModalPr
             </button>
           </div>
 
-          <p className="mb-4 text-sm text-[#57534E]" style={{ fontFamily: 'var(--font-body)', lineHeight: 1.6 }}>
-            Full sign-in with phone OTP and verified accounts is coming in the next release. For now, join a waitlist and
-            we will notify you as soon as your access is ready.
-          </p>
-
           <div className="flex rounded-[12px] border border-[#E7E5E4] bg-[#FAFAF9] p-1">
             {(['login', 'signup'] as const).map((t) => (
               <button
                 key={t}
                 type="button"
-                onClick={() => setTab(t)}
+                onClick={() => {
+                  setTab(t);
+                  setError(null);
+                }}
                 className="flex-1 rounded-[10px] py-2 text-sm transition-all duration-150"
                 style={{
                   fontFamily: 'var(--font-body)',
@@ -89,38 +254,218 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'login' }: AuthModalPr
               </button>
             ))}
           </div>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            {(['password', 'email-otp', 'phone-otp'] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => {
+                  setMode(m);
+                  setError(null);
+                }}
+                className="rounded-full border px-3 py-1 text-xs"
+                style={{
+                  fontFamily: 'var(--font-body)',
+                  borderColor: mode === m ? '#C2410C' : '#E7E5E4',
+                  background: mode === m ? '#FFF7ED' : 'white',
+                  color: mode === m ? '#9a3409' : '#57534E',
+                  fontWeight: mode === m ? 600 : 400,
+                }}
+              >
+                {m === 'password' ? 'Email & password' : m === 'email-otp' ? 'Email code' : 'Phone code'}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="space-y-4 px-8 py-6">
-          {isLawyer ? (
-            <>
-              <p className="text-sm text-[#57534E]" style={{ fontFamily: 'var(--font-body)', lineHeight: 1.65 }}>
-                Get early access to the advocate workspace — verification, discovery, and practice tools.
-              </p>
-              <Link
-                href="/waitlist/lawyer"
-                onClick={onClose}
-                className="flex h-12 w-full items-center justify-center rounded-[16px] bg-[#1C1917] text-sm font-semibold text-white transition-colors hover:bg-[#292524]"
+          {error ? (
+            <p id={errorId} className="text-sm text-red-700" role="alert" style={{ fontFamily: 'var(--font-body)' }}>
+              {error}
+            </p>
+          ) : null}
+
+          {mode === 'password' ? (
+            <form className="space-y-3" onSubmit={onPasswordSubmit}>
+              {tab === 'signup' ? (
+                <label className="block">
+                  <span className="mb-1 block text-xs font-medium text-[#57534E]" style={{ fontFamily: 'var(--font-body)' }}>
+                    Name
+                  </span>
+                  <input
+                    className="h-11 w-full rounded-[12px] border border-[#E7E5E4] px-3 text-sm outline-none ring-[#C2410C] focus:ring-2"
+                    value={name}
+                    onChange={(ev) => setName(ev.target.value)}
+                    autoComplete="name"
+                    required
+                  />
+                </label>
+              ) : null}
+              <label className="block">
+                <span className="mb-1 block text-xs font-medium text-[#57534E]" style={{ fontFamily: 'var(--font-body)' }}>
+                  Email
+                </span>
+                <input
+                  className="h-11 w-full rounded-[12px] border border-[#E7E5E4] px-3 text-sm outline-none ring-[#C2410C] focus:ring-2"
+                  type="email"
+                  value={email}
+                  onChange={(ev) => setEmail(ev.target.value)}
+                  autoComplete="email"
+                  required
+                />
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-xs font-medium text-[#57534E]" style={{ fontFamily: 'var(--font-body)' }}>
+                  Password
+                </span>
+                <input
+                  className="h-11 w-full rounded-[12px] border border-[#E7E5E4] px-3 text-sm outline-none ring-[#C2410C] focus:ring-2"
+                  type="password"
+                  value={password}
+                  onChange={(ev) => setPassword(ev.target.value)}
+                  autoComplete={tab === 'login' ? 'current-password' : 'new-password'}
+                  required
+                  minLength={8}
+                />
+              </label>
+              <button
+                type="submit"
+                disabled={pending}
+                className="flex h-12 w-full items-center justify-center rounded-[16px] bg-[#C2410C] text-sm font-semibold text-white transition-colors hover:bg-[#9a3409] disabled:opacity-60"
                 style={{ fontFamily: 'var(--font-body)' }}
               >
-                Join lawyer waitlist
-              </Link>
-            </>
-          ) : (
-            <>
-              <p className="text-sm text-[#57534E]" style={{ fontFamily: 'var(--font-body)', lineHeight: 1.65 }}>
-                Be first in line for the mobile app — notice scanner, emergency guide, and lawyer connect.
+                {pending ? 'Please wait…' : tab === 'login' ? 'Sign in' : 'Create account'}
+              </button>
+            </form>
+          ) : null}
+
+          {mode === 'email-otp' ? (
+            <div className="space-y-4">
+              {tab === 'signup' ? (
+                <label className="block">
+                  <span className="mb-1 block text-xs font-medium text-[#57534E]" style={{ fontFamily: 'var(--font-body)' }}>
+                    Name (for new accounts)
+                  </span>
+                  <input
+                    className="h-11 w-full rounded-[12px] border border-[#E7E5E4] px-3 text-sm outline-none ring-[#C2410C] focus:ring-2"
+                    value={name}
+                    onChange={(ev) => setName(ev.target.value)}
+                    autoComplete="name"
+                  />
+                </label>
+              ) : null}
+              <form className="space-y-3" onSubmit={onSendEmailOtp}>
+                <label className="block">
+                  <span className="mb-1 block text-xs font-medium text-[#57534E]" style={{ fontFamily: 'var(--font-body)' }}>
+                    Email
+                  </span>
+                  <input
+                    className="h-11 w-full rounded-[12px] border border-[#E7E5E4] px-3 text-sm outline-none ring-[#C2410C] focus:ring-2"
+                    type="email"
+                    value={email}
+                    onChange={(ev) => setEmail(ev.target.value)}
+                    required
+                  />
+                </label>
+                <button
+                  type="submit"
+                  disabled={pending}
+                  className="flex h-11 w-full items-center justify-center rounded-[14px] border border-[#E7E5E4] text-sm font-semibold text-[#1C1917] hover:bg-[#FAFAF9] disabled:opacity-60"
+                  style={{ fontFamily: 'var(--font-body)' }}
+                >
+                  Send code
+                </button>
+              </form>
+              <form className="space-y-3" onSubmit={onVerifyEmailOtp}>
+                <label className="block">
+                  <span className="mb-1 block text-xs font-medium text-[#57534E]" style={{ fontFamily: 'var(--font-body)' }}>
+                    Verification code
+                  </span>
+                  <input
+                    className="h-11 w-full rounded-[12px] border border-[#E7E5E4] px-3 text-sm outline-none ring-[#C2410C] focus:ring-2"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    value={otp}
+                    onChange={(ev) => setOtp(ev.target.value)}
+                    required
+                  />
+                </label>
+                <button
+                  type="submit"
+                  disabled={pending}
+                  className="flex h-12 w-full items-center justify-center rounded-[16px] bg-[#1C1917] text-sm font-semibold text-white hover:bg-[#292524] disabled:opacity-60"
+                  style={{ fontFamily: 'var(--font-body)' }}
+                >
+                  {pending ? 'Verifying…' : 'Verify & continue'}
+                </button>
+              </form>
+            </div>
+          ) : null}
+
+          {mode === 'phone-otp' ? (
+            <div className="space-y-4">
+              <p className="text-xs text-[#78716C]" style={{ fontFamily: 'var(--font-body)', lineHeight: 1.5 }}>
+                Use your full number with country code (for example +9198…). SMS is sent via MSG91 when configured.
               </p>
-              <Link
-                href="/waitlist"
-                onClick={onClose}
-                className="flex h-12 w-full items-center justify-center rounded-[16px] bg-[#C2410C] text-sm font-semibold text-white transition-colors hover:bg-[#9a3409]"
-                style={{ fontFamily: 'var(--font-body)' }}
-              >
-                Join app waitlist
+              <form className="space-y-3" onSubmit={onSendPhoneOtp}>
+                <label className="block">
+                  <span className="mb-1 block text-xs font-medium text-[#57534E]" style={{ fontFamily: 'var(--font-body)' }}>
+                    Phone
+                  </span>
+                  <input
+                    className="h-11 w-full rounded-[12px] border border-[#E7E5E4] px-3 text-sm outline-none ring-[#C2410C] focus:ring-2"
+                    type="tel"
+                    value={phone}
+                    onChange={(ev) => setPhone(ev.target.value)}
+                    autoComplete="tel"
+                    required
+                  />
+                </label>
+                <button
+                  type="submit"
+                  disabled={pending}
+                  className="flex h-11 w-full items-center justify-center rounded-[14px] border border-[#E7E5E4] text-sm font-semibold text-[#1C1917] hover:bg-[#FAFAF9] disabled:opacity-60"
+                  style={{ fontFamily: 'var(--font-body)' }}
+                >
+                  Send SMS code
+                </button>
+              </form>
+              <form className="space-y-3" onSubmit={onVerifyPhoneOtp}>
+                <label className="block">
+                  <span className="mb-1 block text-xs font-medium text-[#57534E]" style={{ fontFamily: 'var(--font-body)' }}>
+                    SMS code
+                  </span>
+                  <input
+                    className="h-11 w-full rounded-[12px] border border-[#E7E5E4] px-3 text-sm outline-none ring-[#C2410C] focus:ring-2"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    value={otp}
+                    onChange={(ev) => setOtp(ev.target.value)}
+                    required
+                  />
+                </label>
+                <button
+                  type="submit"
+                  disabled={pending}
+                  className="flex h-12 w-full items-center justify-center rounded-[16px] bg-[#C2410C] text-sm font-semibold text-white hover:bg-[#9a3409] disabled:opacity-60"
+                  style={{ fontFamily: 'var(--font-body)' }}
+                >
+                  {pending ? 'Verifying…' : 'Verify & continue'}
+                </button>
+              </form>
+            </div>
+          ) : null}
+
+          {isLawyerTab ? (
+            <p className="text-center text-xs text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
+              Full lawyer verification and workspace live on a separate portal in a later milestone.{' '}
+              <Link href="/waitlist/lawyer" className="text-[#C2410C] hover:underline" onClick={onClose}>
+                Join the lawyer waitlist
               </Link>
-            </>
-          )}
+            </p>
+          ) : null}
+
           <p className="text-center text-xs text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
             <Link href="/terms" className="text-[#C2410C] hover:underline" onClick={onClose}>
               Terms of Service

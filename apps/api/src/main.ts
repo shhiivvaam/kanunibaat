@@ -8,6 +8,7 @@ import { createTrpcContextFactory } from '@kb/trpc';
 import { AppModule } from './app.module';
 import { buildWaitlistEnv, loadApiEnv } from './env';
 import { attachPublicHttpMiddlewares } from './http-stack';
+import { attachOpenApiDocs } from './open-api';
 
 const apiEnv = loadApiEnv();
 
@@ -37,6 +38,8 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule, { logger: false });
   app.enableCors({ origin: resolveCorsOrigins(), credentials: true });
+
+  attachOpenApiDocs(app);
 
   const createTrpcContext = createTrpcContextFactory({
     db,

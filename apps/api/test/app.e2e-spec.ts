@@ -4,6 +4,7 @@ import request from 'supertest';
 import type { App } from 'supertest/types';
 
 import { AppModule } from '../src/app.module';
+import { attachOpenApiDocs } from '../src/open-api';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication<App>;
@@ -14,6 +15,7 @@ describe('AppController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    attachOpenApiDocs(app);
     await app.init();
   });
 
@@ -32,6 +34,10 @@ describe('AppController (e2e)', () => {
         const body = res.body as { status?: string };
         expect(body.status).toBe('ok');
       });
+  });
+
+  it('/api-docs (GET)', () => {
+    return request(app.getHttpServer()).get('/api-docs').expect(200);
   });
 
   afterEach(async () => {

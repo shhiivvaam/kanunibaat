@@ -17,6 +17,7 @@
     "test": "node -e \"console.log('no tests')\""
   },
   "dependencies": {
+    "@better-auth/utils": "^0.4.0",
     "@kb/database": "workspace:*",
     "@kb/waitlist": "workspace:*",
     "@trpc/server": "^11.16.0",

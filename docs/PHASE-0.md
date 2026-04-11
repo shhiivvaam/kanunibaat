@@ -37,10 +37,11 @@ From repo root (with `DATABASE_URL` set):
 
 ```bash
 pnpm --filter @kb/database db:generate   # drizzle-kit generate
+pnpm --filter @kb/database db:migrate    # apply SQL in packages/database/drizzle (preferred for prod)
 pnpm --filter @kb/database db:push       # dev: push schema (Supabase local or hosted)
 ```
 
-Apply Better Auth–compatible tables before signing up users. The schema in `packages/database/src/schema/auth.ts` matches Better Auth’s core model.
+Apply Better Auth–compatible tables before signing up users. The schema in `packages/database/src/schema/auth.ts` matches Better Auth’s core model. Phase 2 adds `user_profile`, `user_role`, and `lawyer_profile` in `packages/database/src/schema/core.ts` (see [PHASE-2.md](./PHASE-2.md)).
 
 ## Deployment (manual steps in hosts)
 

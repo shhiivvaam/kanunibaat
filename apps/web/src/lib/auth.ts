@@ -1,14 +1,19 @@
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
+import { bearer } from 'better-auth/plugins/bearer';
+import { emailOTP } from 'better-auth/plugins/email-otp';
 import { nextCookies } from 'better-auth/next-js';
+import { phoneNumber } from 'better-auth/plugins/phone-number';
 
 import { db } from '@kb/database';
 import { account, session, user, verification } from '@kb/database/schema';
 
+import { sendEmailVerificationOtp } from '@/lib/email-otp-delivery';
+import { sendMsg91Otp } from '@/lib/msg91-otp';
+
 function getAuthSecret(): string {
   const secret = process.env.BETTER_AUTH_SECRET;
   if (secret) return secret;
-  // Hosted deploys must set a real secret. Local/CI builds may omit it; Next still runs with NODE_ENV=production.
   if (process.env.VERCEL === '1' || process.env.RAILWAY_ENVIRONMENT === 'production') {
     throw new Error('BETTER_AUTH_SECRET is required in this hosted environment.');
   }
@@ -32,5 +37,22 @@ export const auth = betterAuth({
     schema: { user, session, account, verification },
   }),
   emailAndPassword: { enabled: true },
-  plugins: [nextCookies()],
+  plugins: [
+    bearer(),
+    emailOTP({
+      sendVerificationOTP: async ({ email, otp, type }) => {
+        await sendEmailVerificationOtp({ email, otp, type });
+      },
+    }),
+    phoneNumber({
+      sendOTP: async ({ phoneNumber: phone, code }) => {
+        await sendMsg91Otp(phone, code);
+      },
+      signUpOnVerification: {
+        getTempEmail: (phone) => `phone_${phone.replace(/\D/g, '')}@users.kanunibaat.internal`,
+        getTempName: () => 'KanuniBaat user',
+      },
+    }),
+    nextCookies(),
+  ],
 });

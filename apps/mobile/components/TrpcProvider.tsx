@@ -1,10 +1,12 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { httpBatchLink, loggerLink } from '@trpc/client';
 import Constants from 'expo-constants';
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { Platform } from 'react-native';
 
 import { trpc } from '@kb/api-client';
+
+import { getSessionToken, subscribeSessionTokenChanged } from '@/lib/auth-token';
 
 function defaultApiBaseUrl(): string {
   const fromEnv =
@@ -16,15 +18,31 @@ function defaultApiBaseUrl(): string {
 
 export function TrpcProvider({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
-  const [trpcClient] = useState(() =>
-    trpc.createClient({
-      links: [
-        loggerLink({ enabled: () => __DEV__ }),
-        httpBatchLink({
-          url: `${defaultApiBaseUrl()}/trpc`,
-        }),
-      ],
-    }),
+  const [bearerToken, setBearerToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    void getSessionToken().then(setBearerToken);
+    const unsub = subscribeSessionTokenChanged(() => {
+      void getSessionToken().then(setBearerToken);
+    });
+    return unsub;
+  }, []);
+
+  const trpcClient = useMemo(
+    () =>
+      trpc.createClient({
+        links: [
+          loggerLink({ enabled: () => __DEV__ }),
+          httpBatchLink({
+            url: `${defaultApiBaseUrl()}/trpc`,
+            headers: () => {
+              if (!bearerToken) return {};
+              return { authorization: `Bearer ${bearerToken}` };
+            },
+          }),
+        ],
+      }),
+    [bearerToken],
   );
 
   return (
