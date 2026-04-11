@@ -11,7 +11,7 @@ export const renderSafeInlineText = (text: string, keyPrefix: string): ReactNode
   let emphasisTagMatch: RegExpExecArray | null = null;
 
   while ((emphasisTagMatch = allowedInlineEmphasisTags.exec(text)) !== null) {
-    const [fullMatch, _tagName, emphasizedText] = emphasisTagMatch;
+    const [fullMatch, , emphasizedText] = emphasisTagMatch;
     const matchStart = emphasisTagMatch.index;
 
     if (matchStart > currentIndex) {
