@@ -117,24 +117,25 @@ export function LawyerConnectPage() {
   const [activeChips, setActiveChips] = useState<string[]>([]);
 
   const addChip = (key: string, value: string) => {
-    const chipsWithoutKey = activeChips.filter((c) => !c.startsWith(`${key}:`));
-    if (value === 'All' || value === 'all') {
-      setActiveChips(chipsWithoutKey);
-      return;
-    }
-    const chip = `${key}:${value}`;
-    setActiveChips([...chipsWithoutKey, chip]);
+    setActiveChips((prev) => {
+      const chipsWithoutKey = prev.filter((c) => !c.startsWith(`${key}:`));
+      if (value === 'All' || value === 'all') {
+        return chipsWithoutKey;
+      }
+      return [...chipsWithoutKey, `${key}:${value}`];
+    });
   };
 
   const removeChip = (chip: string) => {
-    const [key] = chip.split(':');
-    setActiveChips(activeChips.filter((c) => c !== chip));
-    setFilters({
-      ...filters,
+    const colonIdx = chip.indexOf(':');
+    const key = colonIdx === -1 ? '' : chip.slice(0, colonIdx);
+    setActiveChips((prev) => prev.filter((c) => c !== chip));
+    setFilters((prev) => ({
+      ...prev,
       ...(key === 'spec' ? { spec: 'All' } : {}),
       ...(key === 'city' ? { city: 'All' } : {}),
       ...(key === 'budget' ? { budget: 'all' } : {}),
-    });
+    }));
   };
 
   const filtered = LAWYERS.filter((l) => {
@@ -264,7 +265,7 @@ export function LawyerConnectPage() {
                   className="flex items-center gap-1.5 rounded-full bg-[#FED7AA] px-3 py-1 text-xs text-[#C2410C]"
                   style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
                 >
-                  {chip.split(':')[1]}
+                  {chip.includes(':') ? chip.slice(chip.indexOf(':') + 1) : chip}
                   <button type="button" onClick={() => removeChip(chip)} className="hover:text-[#9a3409]" aria-label="Remove filter">
                     <X size={12} />
                   </button>
