@@ -1,7 +1,7 @@
 'use client';
 
 import { ArrowRight, Search, Send, ThumbsDown, ThumbsUp, X } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useOpenAuth } from '@/features/marketing/open-auth-context';
 
@@ -51,12 +51,28 @@ export function LegalQAPage() {
   const [lang, setLang] = useState<'en' | 'hi'>('en');
   const [helpfulVote, setHelpfulVote] = useState<'up' | 'down' | null>(null);
 
+  const askTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (askTimeoutRef.current !== null) {
+        clearTimeout(askTimeoutRef.current);
+        askTimeoutRef.current = null;
+      }
+    };
+  }, []);
+
   const handleAsk = (q?: string) => {
     const query = q || question;
     if (!query.trim()) return;
+    if (askTimeoutRef.current !== null) {
+      clearTimeout(askTimeoutRef.current);
+      askTimeoutRef.current = null;
+    }
     setLoading(true);
     setAnswer(null);
-    setTimeout(() => {
+    askTimeoutRef.current = setTimeout(() => {
+      askTimeoutRef.current = null;
       setAnswer(mockAnswers[query] || mockAnswers.default);
       setLoading(false);
       setHelpfulVote(null);
@@ -290,8 +306,8 @@ export function LegalQAPage() {
                         type="button"
                         onClick={() => setHelpfulVote('up')}
                         className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-all ${helpfulVote === 'up'
-                            ? 'border-[#15803D] bg-[#15803D] text-white'
-                            : 'border-[#E7E5E4] text-[#78716C] hover:border-[#15803D] hover:text-[#15803D]'
+                          ? 'border-[#15803D] bg-[#15803D] text-white'
+                          : 'border-[#E7E5E4] text-[#78716C] hover:border-[#15803D] hover:text-[#15803D]'
                           }`}
                         aria-label="Helpful"
                       >
@@ -301,8 +317,8 @@ export function LegalQAPage() {
                         type="button"
                         onClick={() => setHelpfulVote('down')}
                         className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-all ${helpfulVote === 'down'
-                            ? 'border-[#DC2626] bg-[#DC2626] text-white'
-                            : 'border-[#E7E5E4] text-[#78716C] hover:border-[#DC2626] hover:text-[#DC2626]'
+                          ? 'border-[#DC2626] bg-[#DC2626] text-white'
+                          : 'border-[#E7E5E4] text-[#78716C] hover:border-[#DC2626] hover:text-[#DC2626]'
                           }`}
                         aria-label="Not helpful"
                       >

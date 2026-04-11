@@ -1,7 +1,7 @@
 'use client';
 
 import { AlertTriangle, CheckCircle, ChevronDown, Download, FileText, Upload, X } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useOpenAuth } from '@/features/marketing/open-auth-context';
 
@@ -56,16 +56,40 @@ export function DocumentReviewPage() {
   const [progress, setProgress] = useState(0);
   const [openAccordion, setOpenAccordion] = useState<string | null>('summary');
   const fileRef = useRef<HTMLInputElement>(null);
+  const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const resultTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearProcessingTimers = useCallback(() => {
+    if (progressIntervalRef.current !== null) {
+      clearInterval(progressIntervalRef.current);
+      progressIntervalRef.current = null;
+    }
+    if (resultTimeoutRef.current !== null) {
+      clearTimeout(resultTimeoutRef.current);
+      resultTimeoutRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => () => clearProcessingTimers(), [clearProcessingTimers]);
 
   const handleFile = () => {
+    clearProcessingTimers();
     setStage('processing');
     let p = 0;
-    const interval = setInterval(() => {
+    progressIntervalRef.current = setInterval(() => {
       p += Math.random() * 15;
       if (p >= 100) {
         p = 100;
-        clearInterval(interval);
-        setTimeout(() => setStage('result'), 400);
+        if (progressIntervalRef.current !== null) {
+          clearInterval(progressIntervalRef.current);
+          progressIntervalRef.current = null;
+        }
+        setProgress(100);
+        resultTimeoutRef.current = setTimeout(() => {
+          resultTimeoutRef.current = null;
+          setStage('result');
+        }, 400);
+        return;
       }
       setProgress(Math.min(p, 100));
     }, 200);
@@ -196,6 +220,7 @@ export function DocumentReviewPage() {
               <button
                 type="button"
                 onClick={() => {
+                  clearProcessingTimers();
                   setStage('upload');
                   setProgress(0);
                 }}
