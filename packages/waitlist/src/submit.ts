@@ -4,17 +4,22 @@ import type { WaitlistEnv } from './env';
 import { isResendConfigured } from './env';
 import type { LawyerWaitlistInput, UserWaitlistInput } from './schemas';
 
-export type WaitlistSubmitSuccess = {
+export interface WaitlistSubmitSuccess {
   ok: true;
   message: string;
-};
+}
 
-export type WaitlistSubmitFailure = {
+export interface WaitlistSubmitFailure {
   ok: false;
   message: string;
-};
+}
 
 export type WaitlistSubmitResult = WaitlistSubmitSuccess | WaitlistSubmitFailure;
+
+function displayOptional(value: string | undefined, fallback: string): string {
+  const t = value?.trim();
+  return t && t.length > 0 ? t : fallback;
+}
 
 async function sendWaitlistEmail(
   env: WaitlistEnv,
@@ -54,8 +59,8 @@ export async function submitUserWaitlist(
     'New user app waitlist submission',
     `Name: ${input.name}`,
     `Email: ${input.email}`,
-    `Phone: ${input.phone || '(not provided)'}`,
-    `Referrer: ${input.referrer || '(not provided)'}`,
+    `Phone: ${displayOptional(input.phone, '(not provided)')}`,
+    `Referrer: ${displayOptional(input.referrer, '(not provided)')}`,
   ];
   const result = await sendWaitlistEmail(env, `[KanooniBaat] App waitlist — ${input.email}`, lines.join('\n'));
 
@@ -82,11 +87,11 @@ export async function submitLawyerWaitlist(
     'New lawyer early-access waitlist submission',
     `Name: ${input.name}`,
     `Email: ${input.email}`,
-    `Phone: ${input.phone || '(not provided)'}`,
+    `Phone: ${displayOptional(input.phone, '(not provided)')}`,
     `Bar state: ${input.barState}`,
     `Enrollment: ${input.enrollmentNumber}`,
-    `Practice areas: ${input.practiceAreas || '(not provided)'}`,
-    `Referrer: ${input.referrer || '(not provided)'}`,
+    `Practice areas: ${displayOptional(input.practiceAreas, '(not provided)')}`,
+    `Referrer: ${displayOptional(input.referrer, '(not provided)')}`,
   ];
   const result = await sendWaitlistEmail(
     env,

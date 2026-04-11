@@ -3,8 +3,8 @@ import { describe, it } from 'node:test';
 
 import { userWaitlistInputSchema } from './schemas';
 
-describe('userWaitlistInputSchema', () => {
-  it('accepts minimal valid payload', () => {
+void describe('userWaitlistInputSchema', () => {
+  void it('accepts minimal valid payload', () => {
     const r = userWaitlistInputSchema.safeParse({
       name: 'A',
       email: 'a@b.co',
@@ -12,7 +12,7 @@ describe('userWaitlistInputSchema', () => {
     assert.equal(r.success, true);
   });
 
-  it('rejects empty name', () => {
+  void it('rejects empty name', () => {
     const r = userWaitlistInputSchema.safeParse({
       name: '',
       email: 'a@b.co',

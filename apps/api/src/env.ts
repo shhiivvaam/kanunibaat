@@ -1,7 +1,10 @@
+import type { WaitlistEnv } from '@kb/waitlist';
 import { z } from 'zod';
 
 const envSchema = z.object({
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  NODE_ENV: z
+    .enum(['development', 'production', 'test'])
+    .default('development'),
   PORT: z.coerce.number().int().positive().max(65535).default(4000),
   CORS_ORIGIN: z.string().optional(),
   DATABASE_URL: z.string().optional(),
@@ -26,7 +29,9 @@ export function loadApiEnv(): ApiEnv {
 
 export function buildWaitlistEnv(env: ApiEnv): WaitlistEnv {
   const from = env.FROM_EMAIL?.trim();
-  const notify = env.WAITLIST_NOTIFY_EMAIL?.trim() || from;
+  const notifyOverride = env.WAITLIST_NOTIFY_EMAIL?.trim();
+  const notify =
+    notifyOverride && notifyOverride.length > 0 ? notifyOverride : from;
   return {
     nodeEnv: env.NODE_ENV,
     resendApiKey: env.RESEND_API_KEY?.trim(),

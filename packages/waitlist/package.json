@@ -2,7 +2,6 @@
   "name": "@kb/waitlist",
   "version": "0.0.0",
   "private": true,
-  "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -15,14 +14,13 @@
     "build": "tsc -b",
     "typecheck": "tsc -b",
     "lint": "eslint .",
-    "test": "node --import tsx/esm --test src/schemas.test.ts"
+    "test": "pnpm run build && node --test dist/schemas.test.js dist/submit.test.js"
   },
   "dependencies": {
     "resend": "^6.10.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "tsx": "^4.21.0",
     "typescript": "^5.9.2"
   }
 }

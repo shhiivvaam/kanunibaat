@@ -18,7 +18,10 @@ describe('AppController (e2e)', () => {
   });
 
   it('/ (GET)', () => {
-    return request(app.getHttpServer()).get('/').expect(200).expect('Hello World!');
+    return request(app.getHttpServer())
+      .get('/')
+      .expect(200)
+      .expect('Hello World!');
   });
 
   it('/health (GET)', () => {
@@ -26,7 +29,8 @@ describe('AppController (e2e)', () => {
       .get('/health')
       .expect(200)
       .expect((res) => {
-        expect(res.body.status).toBe('ok');
+        const body = res.body as { status?: string };
+        expect(body.status).toBe('ok');
       });
   });
 

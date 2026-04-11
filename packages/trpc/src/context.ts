@@ -4,17 +4,17 @@ import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import type * as DbSchema from '@kb/database/schema';
 import type { WaitlistEnv } from '@kb/waitlist';
 
-export type TrpcContext = {
+export interface TrpcContext {
   db: PostgresJsDatabase<typeof DbSchema>;
   /** Set when a valid Bearer session is present (Phase 2+). */
   authUserId: string | null;
   waitlistEnv: WaitlistEnv;
-};
+}
 
-export type TrpcContextDeps = {
+export interface TrpcContextDeps {
   db: PostgresJsDatabase<typeof DbSchema>;
   waitlistEnv: WaitlistEnv;
-};
+}
 
 function resolveAuthUserId(req: CreateExpressContextOptions['req']): string | null {
   const auth = req.headers.authorization;

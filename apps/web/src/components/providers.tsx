@@ -16,6 +16,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
         loggerLink({ enabled: () => process.env.NODE_ENV === 'development' }),
         httpBatchLink({
           url: `${(process.env.NEXT_PUBLIC_API_URL ?? defaultApiUrl).replace(/\/$/, '')}/trpc`,
+          fetch(url, options) {
+            return fetch(url, { ...options, credentials: 'include' });
+          },
         }),
       ],
     }),

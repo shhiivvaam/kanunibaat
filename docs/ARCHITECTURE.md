@@ -24,8 +24,9 @@ This repository implements the **KanuniBaat** platform as a **pnpm + Turborepo**
 
 ## API surface
 
-- **tRPC**: `POST/GET {API_URL}/trpc` (used by `@kb/api-client` from the web app). CORS allows the web origin via `CORS_ORIGIN`.
+- **tRPC**: `POST/GET {API_URL}/trpc` (used by `@kb/api-client` from web and mobile). CORS allows the web origin via `CORS_ORIGIN` (native apps are not browser CORS clients).
 - **Health**: `GET {API_URL}/health`
+- **Waitlist**: tRPC procedures `waitlist.submitUser` and `waitlist.submitLawyer` (shared `@kb/waitlist` logic; Resend env vars on the API process).
 
 ## Environment
 

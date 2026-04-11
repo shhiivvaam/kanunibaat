@@ -1,11 +1,18 @@
 'use client';
 
+import { TRPCClientError } from '@trpc/client';
 import Link from 'next/link';
-import { useActionState } from 'react';
+import { useState } from 'react';
 
-import { submitLawyerWaitlist, type WaitlistResult } from '@/features/marketing/actions/waitlist';
+import { trpc } from '@kb/api-client';
 
-const initial: WaitlistResult = { status: 'idle' };
+function fieldErrorsFromTrpc(err: unknown): Record<string, string[] | undefined> | undefined {
+  if (err instanceof TRPCClientError && err.data && typeof err.data === 'object' && 'zodError' in err.data) {
+    const z = (err.data as { zodError?: { fieldErrors?: Record<string, string[] | undefined> } }).zodError;
+    return z?.fieldErrors;
+  }
+  return undefined;
+}
 
 const barStates = [
   'Andhra Pradesh',
@@ -41,8 +48,28 @@ const barStates = [
 ] as const;
 
 export function WaitlistLawyerPage() {
-  const [state, formAction, pending] = useActionState(submitLawyerWaitlist, initial);
-  const fieldErrors = state.status === 'error' ? state.fieldErrors : undefined;
+  const [submittedMessage, setSubmittedMessage] = useState<string | null>(null);
+  const mutation = trpc.waitlist.submitLawyer.useMutation({
+    onSuccess: (data) => setSubmittedMessage(data.message),
+  });
+
+  const fieldErrors = mutation.isError ? fieldErrorsFromTrpc(mutation.error) : undefined;
+
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setSubmittedMessage(null);
+    const fd = new FormData(e.currentTarget);
+    const practiceRaw = String(fd.get('practiceAreas') ?? '').trim();
+    mutation.mutate({
+      name: String(fd.get('name') ?? ''),
+      email: String(fd.get('email') ?? ''),
+      phone: String(fd.get('phone') ?? ''),
+      referrer: String(fd.get('referrer') ?? '').trim() || undefined,
+      barState: String(fd.get('barState') ?? ''),
+      enrollmentNumber: String(fd.get('enrollmentNumber') ?? ''),
+      practiceAreas: practiceRaw ? practiceRaw : undefined,
+    });
+  };
 
   return (
     <div className="min-h-screen bg-[#FAFAF9] px-6 py-16">
@@ -65,22 +92,22 @@ export function WaitlistLawyerPage() {
           steps and verification requirements.
         </p>
 
-        {state.status === 'success' ? (
+        {submittedMessage ? (
           <div
             className="rounded-[16px] border border-[#BBF7D0] bg-[#F0FDF4] p-6 text-[#166534]"
             style={{ fontFamily: 'var(--font-body)' }}
           >
             <p className="font-semibold">Received.</p>
-            <p className="mt-2 text-sm leading-relaxed">{state.message}</p>
+            <p className="mt-2 text-sm leading-relaxed">{submittedMessage}</p>
             <Link href="/for-lawyers" className="mt-4 inline-block text-sm font-semibold text-[#C2410C] hover:underline">
               Back to For Lawyers
             </Link>
           </div>
         ) : (
-          <form action={formAction} className="space-y-5 rounded-[24px] border border-[#E7E5E4] bg-white p-8 shadow-sm">
-            {state.status === 'error' ? (
+          <form onSubmit={onSubmit} className="space-y-5 rounded-[24px] border border-[#E7E5E4] bg-white p-8 shadow-sm">
+            {mutation.isError ? (
               <p className="rounded-xl bg-[#FEF2F2] px-4 py-3 text-sm text-[#B91C1C]" role="alert">
-                {state.message}
+                {mutation.error.message}
               </p>
             ) : null}
 
@@ -95,6 +122,7 @@ export function WaitlistLawyerPage() {
                 autoComplete="name"
                 className="h-12 w-full rounded-[12px] border border-[#E7E5E4] px-4 text-[#1C1917] outline-none focus:border-[#C2410C]"
                 style={{ fontFamily: 'var(--font-body)' }}
+                aria-invalid={Boolean(fieldErrors?.name)}
               />
               {fieldErrors?.name ? (
                 <p className="mt-1 text-xs text-[#B91C1C]">{fieldErrors.name[0]}</p>
@@ -113,6 +141,7 @@ export function WaitlistLawyerPage() {
                 autoComplete="email"
                 className="h-12 w-full rounded-[12px] border border-[#E7E5E4] px-4 text-[#1C1917] outline-none focus:border-[#C2410C]"
                 style={{ fontFamily: 'var(--font-body)' }}
+                aria-invalid={Boolean(fieldErrors?.email)}
               />
               {fieldErrors?.email ? (
                 <p className="mt-1 text-xs text-[#B91C1C]">{fieldErrors.email[0]}</p>
@@ -131,6 +160,7 @@ export function WaitlistLawyerPage() {
                 autoComplete="tel"
                 className="h-12 w-full rounded-[12px] border border-[#E7E5E4] px-4 text-[#1C1917] outline-none focus:border-[#C2410C]"
                 style={{ fontFamily: 'var(--font-body)' }}
+                aria-invalid={Boolean(fieldErrors?.phone)}
               />
               {fieldErrors?.phone ? (
                 <p className="mt-1 text-xs text-[#B91C1C]">{fieldErrors.phone[0]}</p>
@@ -173,6 +203,7 @@ export function WaitlistLawyerPage() {
                 required
                 className="h-12 w-full rounded-[12px] border border-[#E7E5E4] px-4 text-[#1C1917] outline-none focus:border-[#C2410C]"
                 style={{ fontFamily: 'var(--font-body)' }}
+                aria-invalid={Boolean(fieldErrors?.enrollmentNumber)}
               />
               {fieldErrors?.enrollmentNumber ? (
                 <p className="mt-1 text-xs text-[#B91C1C]">{fieldErrors.enrollmentNumber[0]}</p>
@@ -207,11 +238,11 @@ export function WaitlistLawyerPage() {
 
             <button
               type="submit"
-              disabled={pending}
+              disabled={mutation.isPending}
               className="h-12 w-full rounded-[16px] bg-[#1C1917] text-sm font-semibold text-white transition-colors hover:bg-[#292524] disabled:opacity-60"
               style={{ fontFamily: 'var(--font-body)' }}
             >
-              {pending ? 'Submitting…' : 'Request early access'}
+              {mutation.isPending ? 'Submitting…' : 'Request early access'}
             </button>
 
             <p className="text-center text-xs text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>

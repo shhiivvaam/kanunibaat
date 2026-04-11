@@ -14,6 +14,11 @@
     "lint": "pnpm --dir ../.. exec eslint -c apps/mobile/eslint.config.cjs apps/mobile/app apps/mobile/components apps/mobile/constants"
   },
   "dependencies": {
+    "@kb/api-client": "workspace:*",
+    "@kb/trpc": "workspace:*",
+    "@tanstack/react-query": "^5.66.0",
+    "@trpc/client": "^11.16.0",
+    "@trpc/react-query": "^11.16.0",
     "@expo/vector-icons": "^15.0.3",
     "@react-navigation/native": "^7.1.8",
     "expo": "~54.0.33",

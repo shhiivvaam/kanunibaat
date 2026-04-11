@@ -21,7 +21,9 @@ export function attachPublicHttpMiddlewares(
       logger: opts.logger,
       autoLogging: {
         ignore: (req) =>
-          req.url === '/' || req.url === '/health' || req.url?.startsWith('/health') === true,
+          req.url === '/' ||
+          req.url === '/health' ||
+          req.url?.startsWith('/health') === true,
       },
     }),
   );

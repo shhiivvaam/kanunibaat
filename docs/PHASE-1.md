@@ -12,8 +12,8 @@
 | Pricing (Naagrik + Vakil tiers) | Done | [pricing-page.tsx](../apps/web/src/features/marketing/pages/pricing-page.tsx), home preview aligned |
 | About | Done | `/about` |
 | Blog (MDX) | Done | `/blog`, `/blog/[slug]` — [content/blog/](../apps/web/content/blog/) |
-| User app waitlist | Done | `/waitlist` — [waitlist-user-page.tsx](../apps/web/src/features/marketing/pages/waitlist-user-page.tsx), [waitlist.ts actions](../apps/web/src/features/marketing/actions/waitlist.ts) |
-| Lawyer waitlist | Done | `/waitlist/lawyer` — [waitlist-lawyer-page.tsx](../apps/web/src/features/marketing/pages/waitlist-lawyer-page.tsx) |
+| User app waitlist | Done | `/waitlist` — [waitlist-user-page.tsx](../apps/web/src/features/marketing/pages/waitlist-user-page.tsx) → tRPC `waitlist.submitUser` on [apps/api](../apps/api) |
+| Lawyer waitlist | Done | `/waitlist/lawyer` — [waitlist-lawyer-page.tsx](../apps/web/src/features/marketing/pages/waitlist-lawyer-page.tsx) → tRPC `waitlist.submitLawyer` on API |
 | Privacy, Terms, Privacy Charter | Done | `/privacy`, `/terms`, `/privacy-charter` |
 | SEO (metadata, sitemap, robots, default OG) | Done | [layout.tsx](../apps/web/src/app/layout.tsx) `metadataBase`, [sitemap.ts](../apps/web/src/app/sitemap.ts), [robots.ts](../apps/web/src/app/robots.ts), [opengraph-image.tsx](../apps/web/src/app/opengraph-image.tsx) |
 | Nav + footer links | Done | [navbar.tsx](../apps/web/src/features/marketing/navbar.tsx), [footer.tsx](../apps/web/src/features/marketing/footer.tsx) |
@@ -21,13 +21,15 @@
 
 ## Waitlist email (Resend)
 
-Configure in `.env` (see [.env.example](../.env.example)):
+Configure on the **API** host (same keys in root `.env` for local dev — see [.env.example](../.env.example)):
 
 - `RESEND_API_KEY`
 - `FROM_EMAIL` (verified sender in Resend)
 - Optional: `WAITLIST_NOTIFY_EMAIL` (defaults to `FROM_EMAIL`)
 
-Without Resend in **production**, submissions return an error. In **development**, submissions succeed and details are logged to the server console.
+Without Resend in **production** (`NODE_ENV=production` on the API), submissions fail with a clear error. In **development**, the API accepts submissions without sending mail (same behaviour as before).
+
+**Web** must call a reachable API: set `NEXT_PUBLIC_API_URL` (and CORS `CORS_ORIGIN` on the API) for non-local deploys.
 
 ## Out of scope (later phases)
 

@@ -27,8 +27,8 @@ pnpm dev
 ```
 
 - **Web:** http://localhost:3000 — Next.js App Router (`apps/web`)
-- **API:** http://localhost:4000 — NestJS + tRPC on `/trpc` (`apps/api`, default `PORT=4000`)
-- **Mobile:** Expo (`apps/mobile`)
+- **API:** http://localhost:4000 — NestJS + tRPC on `/trpc` (`apps/api`, default `PORT=4000`). Waitlist forms call this API; start it alongside the web app for local testing.
+- **Mobile:** Expo (`apps/mobile`) — set `EXPO_PUBLIC_API_URL` to your API base URL (see `.env.example`).
 
 `pnpm install` runs **`prepare`**, which builds all `packages/*` so workspace imports resolve.
 
@@ -50,7 +50,7 @@ pnpm dev
 | `@kb/database` | Drizzle + Postgres schema (incl. Better Auth tables) |
 | `@kb/trpc` | Shared tRPC `AppRouter` |
 | `@kb/api-client` | tRPC React client (`trpc` + React Query) |
-| `@kb/types`, `@kb/utils`, `@kb/ui` | Shared types, utilities, UI primitives |
+| `@kb/types`, `@kb/utils`, `@kb/ui`, `@kb/waitlist` | Shared types, utilities, UI primitives, waitlist email logic |
 
 ## Deployment (overview)
 
