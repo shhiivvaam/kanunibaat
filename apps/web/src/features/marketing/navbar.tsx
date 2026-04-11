@@ -5,12 +5,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
-import type { AuthTab } from '@/features/marketing/open-auth-context';
-
-type NavbarProps = {
-  onOpenAuth: (tab?: AuthTab) => void;
-};
-
 const services = [
   { name: 'Legal Q&A', href: '/legal-qa', desc: 'Ask any legal question' },
   { name: 'Document Review', href: '/document-review', desc: 'Upload & understand contracts' },
@@ -18,16 +12,11 @@ const services = [
   { name: 'Know Your Rights', href: '/know-your-rights', desc: 'Understand your legal rights' },
 ];
 
-export function Navbar({ onOpenAuth }: NavbarProps) {
+export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
   const pathname = usePathname();
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  const handleMobileAuthOpen = (tab: AuthTab) => {
-    setMobileOpen(false);
-    onOpenAuth(tab);
-  };
 
   useEffect(() => {
     let cancelled = false;
@@ -73,7 +62,31 @@ export function Navbar({ onOpenAuth }: NavbarProps) {
             </span>
           </Link>
 
-          <div className="hidden items-center gap-8 lg:flex">
+          <div className="hidden items-center gap-6 lg:flex xl:gap-8">
+            <Link
+              href="/features"
+              className="text-sm transition-colors"
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontWeight: 500,
+                color: isActive('/features') ? '#C2410C' : '#78716C',
+                textDecoration: isActive('/features') ? 'underline' : 'none',
+              }}
+            >
+              Features
+            </Link>
+            <Link
+              href="/for-lawyers"
+              className="text-sm transition-colors"
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontWeight: 500,
+                color: isActive('/for-lawyers') ? '#C2410C' : '#78716C',
+                textDecoration: isActive('/for-lawyers') ? 'underline' : 'none',
+              }}
+            >
+              For Lawyers
+            </Link>
             <Link
               href="/#how-it-works"
               className="text-sm text-[#78716C] transition-colors hover:text-[#C2410C]"
@@ -146,25 +159,35 @@ export function Navbar({ onOpenAuth }: NavbarProps) {
             >
               About
             </Link>
+            <Link
+              href="/blog"
+              className="text-sm transition-colors"
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontWeight: 500,
+                color: pathname.startsWith('/blog') ? '#C2410C' : '#78716C',
+                textDecoration: pathname.startsWith('/blog') ? 'underline' : 'none',
+              }}
+            >
+              Blog
+            </Link>
           </div>
 
           <div className="hidden items-center gap-3 lg:flex">
-            <button
-              type="button"
-              onClick={() => onOpenAuth('login')}
-              className="h-11 rounded-[16px] border border-[#1C1917] px-5 text-sm text-[#1C1917] transition-all duration-150 hover:bg-[#1C1917] hover:text-white active:scale-[0.97]"
+            <Link
+              href="/waitlist/lawyer"
+              className="h-11 rounded-[16px] border border-[#1C1917] px-5 text-sm leading-[44px] text-[#1C1917] transition-all duration-150 hover:bg-[#1C1917] hover:text-white active:scale-[0.97]"
               style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
             >
-              Log In
-            </button>
-            <button
-              type="button"
-              onClick={() => onOpenAuth('signup')}
-              className="h-11 rounded-[16px] bg-[#C2410C] px-5 text-sm text-white transition-all duration-150 hover:bg-[#9a3409] active:scale-[0.97]"
+              For lawyers
+            </Link>
+            <Link
+              href="/waitlist"
+              className="h-11 rounded-[16px] bg-[#C2410C] px-5 text-sm leading-[44px] text-white transition-all duration-150 hover:bg-[#9a3409] active:scale-[0.97]"
               style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}
             >
-              Sign Up Free
-            </button>
+              Join waitlist
+            </Link>
           </div>
 
           <button
@@ -185,6 +208,20 @@ export function Navbar({ onOpenAuth }: NavbarProps) {
           style={{ top: '64px', animation: 'fadeIn 200ms ease-out' }}
         >
           <div className="space-y-2 p-6">
+            <Link
+              href="/features"
+              className="block rounded-xl px-4 py-3 text-base text-[#1C1917] hover:bg-[#FFF7ED]"
+              style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
+            >
+              Features
+            </Link>
+            <Link
+              href="/for-lawyers"
+              className="block rounded-xl px-4 py-3 text-base text-[#1C1917] hover:bg-[#FFF7ED]"
+              style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
+            >
+              For Lawyers
+            </Link>
             <Link
               href="/#how-it-works"
               className="block rounded-xl px-4 py-3 text-base text-[#1C1917] hover:bg-[#FFF7ED]"
@@ -227,24 +264,31 @@ export function Navbar({ onOpenAuth }: NavbarProps) {
             >
               About
             </Link>
+            <Link
+              href="/blog"
+              className="block rounded-xl px-4 py-3 text-base text-[#1C1917] hover:bg-[#FFF7ED]"
+              style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
+            >
+              Blog
+            </Link>
 
             <div className="mt-4 space-y-3 border-t border-[#E7E5E4] pt-4">
-              <button
-                type="button"
-                onClick={() => handleMobileAuthOpen('login')}
-                className="h-12 w-full rounded-[16px] border border-[#1C1917] text-base text-[#1C1917]"
+              <Link
+                href="/waitlist/lawyer"
+                onClick={() => setMobileOpen(false)}
+                className="flex h-12 w-full items-center justify-center rounded-[16px] border border-[#1C1917] text-base text-[#1C1917]"
                 style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
               >
-                Log In
-              </button>
-              <button
-                type="button"
-                onClick={() => handleMobileAuthOpen('signup')}
-                className="h-12 w-full rounded-[16px] bg-[#C2410C] text-base text-white"
+                Lawyer waitlist
+              </Link>
+              <Link
+                href="/waitlist"
+                onClick={() => setMobileOpen(false)}
+                className="flex h-12 w-full items-center justify-center rounded-[16px] bg-[#C2410C] text-base text-white"
                 style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}
               >
-                Sign Up Free
-              </button>
+                Join app waitlist
+              </Link>
             </div>
           </div>
         </div>

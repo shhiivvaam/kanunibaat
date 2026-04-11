@@ -34,3 +34,4 @@ See the repo root `.env.example`. Copy to `.env` locally; never commit secrets.
 ## Docs index
 
 - [Phase 0 checklist](./PHASE-0.md) — foundation tasks and how they map to this repo.
+- [Phase 1 checklist](./PHASE-1.md) — public website, waitlists, blog, SEO.

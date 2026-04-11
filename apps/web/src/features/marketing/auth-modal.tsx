@@ -1,6 +1,7 @@
 'use client';
 
-import { Eye, EyeOff, X } from 'lucide-react';
+import { X } from 'lucide-react';
+import Link from 'next/link';
 import { useState } from 'react';
 
 import type { AuthTab } from '@/features/marketing/open-auth-context';
@@ -13,17 +14,12 @@ type AuthModalProps = {
 
 export function AuthModal({ isOpen, onClose, defaultTab = 'login' }: AuthModalProps) {
   const [tab, setTab] = useState<AuthTab>(defaultTab);
-  const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
 
   if (!isOpen) {
     return null;
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onClose();
-  };
+  const isLawyer = tab === 'signup';
 
   return (
     <div
@@ -70,6 +66,11 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'login' }: AuthModalPr
             </button>
           </div>
 
+          <p className="mb-4 text-sm text-[#57534E]" style={{ fontFamily: 'var(--font-body)', lineHeight: 1.6 }}>
+            Full sign-in with phone OTP and verified accounts is coming in the next release. For now, join a waitlist and
+            we will notify you as soon as your access is ready.
+          </p>
+
           <div className="flex rounded-[12px] border border-[#E7E5E4] bg-[#FAFAF9] p-1">
             {(['login', 'signup'] as const).map((t) => (
               <button
@@ -82,143 +83,52 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'login' }: AuthModalPr
                   fontWeight: tab === t ? 600 : 400,
                   background: tab === t ? '#C2410C' : 'transparent',
                   color: tab === t ? 'white' : '#78716C',
-                  transform: tab === t ? 'scale(1)' : 'scale(0.98)',
                 }}
               >
-                {t === 'login' ? 'Log In' : 'Sign Up'}
+                {t === 'login' ? 'I need legal help' : 'I am a lawyer'}
               </button>
             ))}
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 px-8 py-6">
-          {tab === 'signup' && (
-            <div>
-              <label
-                className="mb-1.5 block text-sm text-[#1C1917]"
-                style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}
-              >
-                Full Name
-              </label>
-              <input
-                type="text"
-                placeholder="Rahul Sharma"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="h-12 w-full rounded-[12px] border border-[#E7E5E4] bg-white px-4 text-[#1C1917] outline-none transition-all placeholder:text-[#78716C]"
-                style={{ fontFamily: 'var(--font-body)' }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#C2410C';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = '#E7E5E4';
-                }}
-              />
-            </div>
-          )}
-
-          <div>
-            <label
-              className="mb-1.5 block text-sm text-[#1C1917]"
-              style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}
-            >
-              Email Address
-            </label>
-            <input
-              type="email"
-              placeholder="you@example.com"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="h-12 w-full rounded-[12px] border border-[#E7E5E4] bg-white px-4 text-[#1C1917] outline-none transition-all placeholder:text-[#78716C]"
-              style={{ fontFamily: 'var(--font-body)' }}
-              onFocus={(e) => {
-                e.target.style.borderColor = '#C2410C';
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = '#E7E5E4';
-              }}
-            />
-          </div>
-
-          <div>
-            <label
-              className="mb-1.5 block text-sm text-[#1C1917]"
-              style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}
-            >
-              Password
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                placeholder="At least 8 characters"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="h-12 w-full rounded-[12px] border border-[#E7E5E4] bg-white px-4 pr-12 text-[#1C1917] outline-none transition-all placeholder:text-[#78716C]"
-                style={{ fontFamily: 'var(--font-body)' }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#C2410C';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = '#E7E5E4';
-                }}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#78716C] transition-colors hover:text-[#1C1917]"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-          </div>
-
-          {tab === 'login' && (
-            <div className="text-right">
-              <button
-                type="button"
-                className="text-sm text-[#C2410C] hover:underline"
+        <div className="space-y-4 px-8 py-6">
+          {isLawyer ? (
+            <>
+              <p className="text-sm text-[#57534E]" style={{ fontFamily: 'var(--font-body)', lineHeight: 1.65 }}>
+                Get early access to the advocate workspace — verification, discovery, and practice tools.
+              </p>
+              <Link
+                href="/waitlist/lawyer"
+                onClick={onClose}
+                className="flex h-12 w-full items-center justify-center rounded-[16px] bg-[#1C1917] text-sm font-semibold text-white transition-colors hover:bg-[#292524]"
                 style={{ fontFamily: 'var(--font-body)' }}
               >
-                Forgot password?
-              </button>
-            </div>
+                Join lawyer waitlist
+              </Link>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-[#57534E]" style={{ fontFamily: 'var(--font-body)', lineHeight: 1.65 }}>
+                Be first in line for the mobile app — notice scanner, emergency guide, and lawyer connect.
+              </p>
+              <Link
+                href="/waitlist"
+                onClick={onClose}
+                className="flex h-12 w-full items-center justify-center rounded-[16px] bg-[#C2410C] text-sm font-semibold text-white transition-colors hover:bg-[#9a3409]"
+                style={{ fontFamily: 'var(--font-body)' }}
+              >
+                Join app waitlist
+              </Link>
+            </>
           )}
-
-          <button
-            type="submit"
-            className="mt-2 h-12 w-full rounded-[16px] bg-[#C2410C] text-white transition-all duration-100 hover:bg-[#9a3409] active:scale-[0.97]"
-            style={{ fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: '15px' }}
-          >
-            {tab === 'login' ? 'Log In' : 'Create Account'}
-          </button>
-
-          {tab === 'signup' && (
-            <p className="mt-2 text-center text-xs text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
-              By signing up, you agree to our{' '}
-              <a href="#" className="text-[#C2410C] hover:underline">
-                Terms of Service
-              </a>{' '}
-              and{' '}
-              <a href="#" className="text-[#C2410C] hover:underline">
-                Privacy Policy
-              </a>
-              .
-            </p>
-          )}
-        </form>
-
-        <div className="px-8 pb-8 text-center">
-          <p className="text-sm text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
-            {tab === 'login' ? "Don't have an account? " : 'Already have an account? '}
-            <button
-              type="button"
-              onClick={() => setTab(tab === 'login' ? 'signup' : 'login')}
-              className="text-[#C2410C] hover:underline"
-              style={{ fontWeight: 600 }}
-            >
-              {tab === 'login' ? 'Sign up free' : 'Log in'}
-            </button>
+          <p className="text-center text-xs text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
+            <Link href="/terms" className="text-[#C2410C] hover:underline" onClick={onClose}>
+              Terms of Service
+            </Link>
+            {' · '}
+            <Link href="/privacy" className="text-[#C2410C] hover:underline" onClick={onClose}>
+              Privacy Policy
+            </Link>
           </p>
         </div>
       </div>

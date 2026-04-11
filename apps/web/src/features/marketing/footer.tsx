@@ -79,10 +79,12 @@ export function Footer() {
             </h4>
             <ul className="space-y-3">
               {[
+                { label: 'Features', href: '/features' },
+                { label: 'For Lawyers', href: '/for-lawyers' },
                 { label: 'How It Works', href: '/#how-it-works' },
                 { label: 'Pricing', href: '/pricing' },
                 { label: 'About Us', href: '/about' },
-                { label: 'Blog & Updates', href: '#' },
+                { label: 'Blog & Updates', href: '/blog' },
                 { label: 'Careers', href: '#' },
               ].map((item) => (
                 <li key={item.label}>
@@ -177,17 +179,35 @@ export function Footer() {
           <p className="text-xs text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
             © 2026 KanooniBaat. All rights reserved.
           </p>
-          <div className="flex items-center gap-4">
-            {['Privacy Policy', 'Terms of Service', 'Cookie Policy'].map((item) => (
-              <a
-                key={item}
-                href="#"
-                className="text-xs text-[#78716C] transition-colors hover:text-[#C2410C]"
-                style={{ fontFamily: 'var(--font-body)' }}
-              >
-                {item}
-              </a>
-            ))}
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+            <Link
+              href="/privacy"
+              className="text-xs text-[#78716C] transition-colors hover:text-[#C2410C]"
+              style={{ fontFamily: 'var(--font-body)' }}
+            >
+              Privacy Policy
+            </Link>
+            <Link
+              href="/terms"
+              className="text-xs text-[#78716C] transition-colors hover:text-[#C2410C]"
+              style={{ fontFamily: 'var(--font-body)' }}
+            >
+              Terms of Service
+            </Link>
+            <Link
+              href="/privacy-charter"
+              className="text-xs text-[#78716C] transition-colors hover:text-[#C2410C]"
+              style={{ fontFamily: 'var(--font-body)' }}
+            >
+              Privacy Charter
+            </Link>
+            <Link
+              href="/privacy#cookies"
+              className="text-xs text-[#78716C] transition-colors hover:text-[#C2410C]"
+              style={{ fontFamily: 'var(--font-body)' }}
+            >
+              Cookie Policy
+            </Link>
           </div>
         </div>
       </div>

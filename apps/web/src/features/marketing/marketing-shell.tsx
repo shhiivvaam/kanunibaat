@@ -22,7 +22,7 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
   return (
     <OpenAuthContextProvider value={openAuth}>
       <div className="flex min-h-screen flex-col bg-[#FAFAF9]">
-        <Navbar onOpenAuth={openAuth} />
+        <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />
         <AuthModal

@@ -8,6 +8,7 @@ Monorepo for **KanuniBaat** — legal infrastructure for India (web, API, mobile
 |-----|---------|
 | [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) | Monorepo layout, auth, API boundaries |
 | [docs/PHASE-0.md](./docs/PHASE-0.md) | Phase 0 foundation checklist and deployment notes |
+| [docs/PHASE-1.md](./docs/PHASE-1.md) | Phase 1 marketing site, waitlists, legal pages, SEO |
 
 ## Prerequisites
 
