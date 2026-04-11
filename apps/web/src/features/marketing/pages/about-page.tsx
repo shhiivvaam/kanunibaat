@@ -10,8 +10,6 @@ const team = [
     name: 'Anika Sharma',
     role: 'Co-founder & CEO',
     city: 'Delhi',
-    initial: 'A',
-    color: '#C2410C',
     bio: 'Former public interest lawyer at Delhi High Court. Spent 8 years in legal aid for marginalised communities.',
     avatar: 'https://images.unsplash.com/photo-1659353219808-39d96fb9dc91?w=200&h=200&fit=crop&auto=format',
   },
@@ -19,8 +17,6 @@ const team = [
     name: 'Rahul Desai',
     role: 'Co-founder & CTO',
     city: 'Bengaluru',
-    initial: 'R',
-    color: '#1D4ED8',
     bio: 'Previously built fintech products at Razorpay. Passionate about using AI to solve access-to-justice problems.',
     avatar: 'https://images.unsplash.com/photo-1649433658557-54cf58577c68?w=200&h=200&fit=crop&auto=format',
   },
@@ -28,8 +24,6 @@ const team = [
     name: 'Meera Iyer',
     role: 'Head of Legal',
     city: 'Chennai',
-    initial: 'M',
-    color: '#15803D',
     bio: 'Advocate with specialisation in constitutional law. Ensures every answer on KanooniBaat is accurate and actionable.',
     avatar: 'https://images.unsplash.com/photo-1607990283143-e81e7a2c9349?w=200&h=200&fit=crop&auto=format',
   },
@@ -37,8 +31,6 @@ const team = [
     name: 'Dev Kapoor',
     role: 'Product Design',
     city: 'Mumbai',
-    initial: 'D',
-    color: '#7C3AED',
     bio: 'Designed civic tech products across 5 countries. Believes great design is the bridge between law and people.',
     avatar: 'https://images.unsplash.com/photo-1764084051438-369ad6a09334?w=200&h=200&fit=crop&auto=format',
   },
@@ -149,8 +141,11 @@ export function AboutPage() {
                 <h3 className="mb-0.5 text-[#1C1917]" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '17px' }}>
                   {member.name}
                 </h3>
-                <p className="mb-3 text-xs text-[#C2410C]" style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}>
+                <p className="mb-0.5 text-xs text-[#C2410C]" style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}>
                   {member.role}
+                </p>
+                <p className="mb-3 text-xs text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
+                  {member.city}
                 </p>
                 <p className="text-sm leading-relaxed text-[#78716C]" style={{ fontFamily: 'var(--font-body)', lineHeight: 1.6 }}>
                   {member.bio}
