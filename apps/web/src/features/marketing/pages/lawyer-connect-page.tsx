@@ -117,9 +117,13 @@ export function LawyerConnectPage() {
   const [activeChips, setActiveChips] = useState<string[]>([]);
 
   const addChip = (key: string, value: string) => {
-    if (value === 'All' || value === 'all') return;
+    const chipsWithoutKey = activeChips.filter((c) => !c.startsWith(`${key}:`));
+    if (value === 'All' || value === 'all') {
+      setActiveChips(chipsWithoutKey);
+      return;
+    }
     const chip = `${key}:${value}`;
-    if (!activeChips.includes(chip)) setActiveChips([...activeChips, chip]);
+    setActiveChips([...chipsWithoutKey, chip]);
   };
 
   const removeChip = (chip: string) => {
