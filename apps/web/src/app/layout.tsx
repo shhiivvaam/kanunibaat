@@ -1,12 +1,17 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Fraunces, Geist_Mono, Plus_Jakarta_Sans } from 'next/font/google';
 
 import { Providers } from '@/components/providers';
 import './globals.css';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
+const fontDisplay = Fraunces({
+  variable: '--font-kb-display',
   subsets: ['latin'],
+});
+
+const fontBody = Plus_Jakarta_Sans({
+  variable: '--font-kb-body',
+  subsets: ['latin', 'latin-ext'],
 });
 
 const geistMono = Geist_Mono({
@@ -15,9 +20,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'KanuniBaat',
+  title: 'KanooniBaat',
   description:
-    "India's legal infrastructure layer — find verified lawyers, scan notices, and understand your rights.",
+    'Legal help in plain language for India — ask questions, review documents, and connect with verified lawyers.',
 };
 
 export default function RootLayout({
@@ -28,7 +33,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${fontDisplay.variable} ${fontBody.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
         <Providers>{children}</Providers>
