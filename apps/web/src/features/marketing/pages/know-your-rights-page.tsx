@@ -4,6 +4,7 @@ import { ArrowRight } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import { useOpenAuth } from '@/features/marketing/open-auth-context';
+import { renderSafeInlineText } from '@/features/marketing/utils/render-safe-inline-text';
 
 const sections = [
   {
@@ -231,8 +232,9 @@ export function KnowYourRightsPage() {
                           <p
                             className="leading-relaxed text-[#1C1917]"
                             style={{ fontFamily: 'var(--font-body)', fontSize: '15px', lineHeight: 1.7 }}
-                            dangerouslySetInnerHTML={{ __html: right.law }}
-                          />
+                          >
+                            {renderSafeInlineText(right.law, `${sec.id}-${right.headline}`)}
+                          </p>
                         </div>
 
                         <div className="rounded-[12px] border border-[#FED7AA] bg-[#FFF7ED] p-4">

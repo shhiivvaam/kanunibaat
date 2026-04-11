@@ -4,6 +4,7 @@ import { ArrowRight, Search, Send, ThumbsDown, ThumbsUp, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react';
 
 import { useOpenAuth } from '@/features/marketing/open-auth-context';
+import { renderSafeInlineText } from '@/features/marketing/utils/render-safe-inline-text';
 
 const categories = [
   { id: 'consumer', label: 'Consumer Rights', icon: '🛒' },
@@ -90,7 +91,7 @@ export function LegalQAPage() {
             style={{ fontFamily: 'var(--font-body)', fontSize: '15px', lineHeight: 1.7 }}
           >
             <span className="mt-1 shrink-0 text-[#C2410C]">•</span>
-            <span dangerouslySetInnerHTML={{ __html: line.replace('• ', '') }} />
+            <span>{renderSafeInlineText(line.replace('• ', ''), `answer-bullet-${i}`)}</span>
           </li>
         );
       }
@@ -100,8 +101,9 @@ export function LegalQAPage() {
           key={i}
           className="text-[#1C1917]"
           style={{ fontFamily: 'var(--font-body)', fontSize: '15px', lineHeight: 1.7 }}
-          dangerouslySetInnerHTML={{ __html: line }}
-        />
+        >
+          {renderSafeInlineText(line, `answer-line-${i}`)}
+        </p>
       );
     });
   };
