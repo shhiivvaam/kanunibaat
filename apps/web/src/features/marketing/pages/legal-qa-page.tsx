@@ -1,7 +1,7 @@
 'use client';
 
 import { ArrowRight, Search, Send, ThumbsDown, ThumbsUp, X } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 
 import { useOpenAuth } from '@/features/marketing/open-auth-context';
 import { renderSafeInlineText } from '@/features/marketing/utils/render-safe-inline-text';
@@ -82,30 +82,55 @@ export function LegalQAPage() {
   };
 
   const formatAnswer = (text: string) => {
-    return text.split('\n').map((line, i) => {
+    const lines = text.split('\n');
+    const formattedLines: ReactNode[] = [];
+    const bulletBuffer: Array<{ content: string; index: number }> = [];
+
+    const flushBulletBuffer = (keySeed: number) => {
+      if (bulletBuffer.length === 0) return;
+      formattedLines.push(
+        <ul key={`answer-list-${keySeed}`} className="m-0 list-none space-y-1 p-0">
+          {bulletBuffer.map(({ content, index }) => (
+            <li
+              key={`answer-bullet-${index}`}
+              className="flex items-start gap-2 text-[#1C1917]"
+              style={{ fontFamily: 'var(--font-body)', fontSize: '15px', lineHeight: 1.7 }}
+            >
+              <span className="mt-1 shrink-0 text-[#C2410C]">•</span>
+              <span>{renderSafeInlineText(content, `answer-bullet-${index}`)}</span>
+            </li>
+          ))}
+        </ul>,
+      );
+      bulletBuffer.length = 0;
+    };
+
+    lines.forEach((line, index) => {
       if (line.startsWith('• ')) {
-        return (
-          <li
-            key={i}
-            className="flex items-start gap-2 text-[#1C1917]"
-            style={{ fontFamily: 'var(--font-body)', fontSize: '15px', lineHeight: 1.7 }}
-          >
-            <span className="mt-1 shrink-0 text-[#C2410C]">•</span>
-            <span>{renderSafeInlineText(line.replace('• ', ''), `answer-bullet-${i}`)}</span>
-          </li>
-        );
+        bulletBuffer.push({ content: line.replace('• ', ''), index });
+        return;
       }
-      if (line === '') return <br key={i} />;
-      return (
+
+      flushBulletBuffer(index);
+
+      if (line === '') {
+        formattedLines.push(<br key={`answer-break-${index}`} />);
+        return;
+      }
+
+      formattedLines.push(
         <p
-          key={i}
+          key={`answer-line-${index}`}
           className="text-[#1C1917]"
           style={{ fontFamily: 'var(--font-body)', fontSize: '15px', lineHeight: 1.7 }}
         >
-          {renderSafeInlineText(line, `answer-line-${i}`)}
-        </p>
+          {renderSafeInlineText(line, `answer-line-${index}`)}
+        </p>,
       );
     });
+
+    flushBulletBuffer(lines.length);
+    return formattedLines;
   };
 
   return (
