@@ -30,3 +30,15 @@ h5,
 h6 {
   font-family: var(--font-display);
 }
+
+/* Shared marketing accordion / reveal (single definition — avoid duplicate @keyframes names across pages). */
+@keyframes kb-marketing-panel-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

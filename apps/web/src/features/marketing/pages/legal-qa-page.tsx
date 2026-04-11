@@ -1,7 +1,7 @@
 'use client';
 
 import { ArrowRight, Search, Send, ThumbsDown, ThumbsUp, X } from 'lucide-react';
-import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useOpenAuth } from '@/features/marketing/open-auth-context';
 import { renderSafeInlineText } from '@/features/marketing/utils/render-safe-inline-text';
@@ -13,16 +13,19 @@ const categories = [
   { id: 'employment', label: 'Employment', icon: '💼' },
   { id: 'criminal', label: 'Criminal', icon: '⚖️' },
   { id: 'startup', label: 'Startup / Business', icon: '🚀' },
-];
+] as const;
 
-const popularQuestions = [
-  'Can my landlord evict me without notice?',
-  'What are my rights if arrested?',
-  'How to file a consumer complaint?',
-  'Is verbal rental agreement valid?',
-  'What is minimum notice period?',
-  'Can employer deduct salary?',
-  'How to register a startup?',
+type LegalCategoryId = (typeof categories)[number]['id'];
+
+const popularQuestions: readonly { categoryId: LegalCategoryId; text: string }[] = [
+  { categoryId: 'consumer', text: 'How to file a consumer complaint?' },
+  { categoryId: 'family', text: 'How is child custody decided in divorce?' },
+  { categoryId: 'property', text: 'Can my landlord evict me without notice?' },
+  { categoryId: 'property', text: 'Is verbal rental agreement valid?' },
+  { categoryId: 'property', text: 'What is minimum notice period?' },
+  { categoryId: 'employment', text: 'Can employer deduct salary?' },
+  { categoryId: 'criminal', text: 'What are my rights if arrested?' },
+  { categoryId: 'startup', text: 'How to register a startup?' },
 ];
 
 const mockAnswers: Record<string, { answer: string; law: string; date: string }> = {
@@ -36,6 +39,11 @@ const mockAnswers: Record<string, { answer: string; law: string; date: string }>
     law: 'Constitution of India, Art. 22 · CrPC Sections 41, 50, 56, 57',
     date: 'February 2025',
   },
+  'How is child custody decided in divorce?': {
+    answer: `In India, child custody is decided based on the <strong>welfare of the child</strong> (paramount consideration), not merely parental preference.\n\n• Courts consider the child's age, health, education, and emotional ties\n• <strong>Hindu Marriage Act, 1955</strong> and <strong>Guardians and Wards Act, 1890</strong> govern most cases; personal laws apply for other communities\n• Mothers often get custody of infants and young children, but this is not automatic — the court examines facts\n• The other parent typically gets <strong>visitation rights</strong>\n• Older children's wishes may be considered where appropriate\n\nMediation and mutual consent arrangements are encouraged before contested litigation.`,
+    law: 'Hindu Marriage Act, 1955 · Guardians and Wards Act, 1890',
+    date: 'March 2025',
+  },
   default: {
     answer: `Based on your question, here's what Indian law says:\n\nUnder the relevant provisions of Indian law, you have specific rights and remedies available to you. The applicable legislation depends on your specific situation and the state you're in.\n\n<strong>General steps to take:</strong>\n\n• Document all communications and evidence\n• Send a formal written notice to the other party\n• Approach the relevant authority or forum (consumer court, labour court, etc.)\n• Consult a local lawyer for case-specific advice\n\nFor a personalized analysis of your specific situation, consider booking a consultation with one of our verified lawyers.`,
     law: 'Based on Indian law · Multiple Acts applicable',
@@ -45,7 +53,7 @@ const mockAnswers: Record<string, { answer: string; law: string; date: string }>
 
 export function LegalQAPage() {
   const openAuth = useOpenAuth();
-  const [activeCategory, setActiveCategory] = useState('consumer');
+  const [activeCategory, setActiveCategory] = useState<LegalCategoryId>('consumer');
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState<null | (typeof mockAnswers)['default']>(null);
   const [loading, setLoading] = useState(false);
@@ -53,6 +61,23 @@ export function LegalQAPage() {
   const [helpfulVote, setHelpfulVote] = useState<'up' | 'down' | null>(null);
 
   const askTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const popularQuestionsForCategory = useMemo(
+    () => popularQuestions.filter((entry) => entry.categoryId === activeCategory),
+    [activeCategory],
+  );
+
+  const selectCategory = (id: LegalCategoryId) => {
+    if (id === activeCategory) return;
+    setActiveCategory(id);
+    setAnswer(null);
+    setHelpfulVote(null);
+    setLoading(false);
+    if (askTimeoutRef.current !== null) {
+      clearTimeout(askTimeoutRef.current);
+      askTimeoutRef.current = null;
+    }
+  };
 
   useEffect(() => {
     return () => {
@@ -74,7 +99,7 @@ export function LegalQAPage() {
     setAnswer(null);
     askTimeoutRef.current = setTimeout(() => {
       askTimeoutRef.current = null;
-      setAnswer(mockAnswers[query] || mockAnswers.default);
+      setAnswer(mockAnswers[query] ?? mockAnswers.default);
       setLoading(false);
       setHelpfulVote(null);
     }, 1500);
@@ -161,7 +186,7 @@ export function LegalQAPage() {
                 <button
                   key={cat.id}
                   type="button"
-                  onClick={() => setActiveCategory(cat.id)}
+                  onClick={() => selectCategory(cat.id)}
                   className="w-full px-5 py-3.5 text-left text-sm transition-all"
                   style={{
                     fontFamily: 'var(--font-body)',
@@ -249,15 +274,15 @@ export function LegalQAPage() {
                   Popular questions:
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {popularQuestions.map((q) => (
+                  {popularQuestionsForCategory.map((entry) => (
                     <button
-                      key={q}
+                      key={entry.text}
                       type="button"
-                      onClick={() => handleAsk(q)}
+                      onClick={() => handleAsk(entry.text)}
                       className="rounded-full bg-[#FED7AA] px-3 py-1 text-xs text-[#C2410C] transition-all hover:bg-[#C2410C] hover:text-white"
                       style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
                     >
-                      {q}
+                      {entry.text}
                     </button>
                   ))}
                 </div>

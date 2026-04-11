@@ -1,10 +1,10 @@
-import { type ReactNode } from 'react';
+import { Fragment, type ReactNode } from 'react';
 
 /**
  * Renders inline text with a tiny allow-list for emphasis tags.
  * Everything else is rendered as escaped text.
  */
-export const renderSafeInlineText = (text: string, keyPrefix: string): ReactNode[] => {
+export const renderSafeInlineText = (text: string, keyPrefix: string): ReactNode => {
   const allowedInlineEmphasisTags = /<(strong|b)>([\s\S]*?)<\/\1>/gi;
   const nodes: ReactNode[] = [];
   let currentIndex = 0;
@@ -29,5 +29,5 @@ export const renderSafeInlineText = (text: string, keyPrefix: string): ReactNode
     nodes.push(text.slice(currentIndex));
   }
 
-  return nodes;
+  return <Fragment>{nodes}</Fragment>;
 };

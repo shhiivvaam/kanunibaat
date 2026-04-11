@@ -288,7 +288,7 @@ export function PricingPage() {
                   />
                 </button>
                 {openFaq === i && (
-                  <div className="px-6 pb-5" style={{ animation: 'slideDown 250ms ease-out' }}>
+                  <div className="px-6 pb-5" style={{ animation: 'kb-marketing-panel-reveal 250ms ease-out' }}>
                     <p className="leading-relaxed text-[#78716C]" style={{ fontFamily: 'var(--font-body)', fontSize: '15px', lineHeight: 1.7 }}>
                       {faq.a}
                     </p>
@@ -317,12 +317,6 @@ export function PricingPage() {
         </div>
       </div>
 
-      <style>{`
-        @keyframes slideDown {
-          from { opacity: 0; transform: translateY(-6px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
     </div>
   );
 }

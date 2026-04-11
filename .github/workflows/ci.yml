@@ -13,6 +13,7 @@ permissions:
 
 env:
   CI: true
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   NODE_OPTIONS: --max-old-space-size=6144
   DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/ci
   BETTER_AUTH_SECRET: ci-ci-ci-ci-ci-ci-ci-ci-ci-ci-ci-ci-ci-ci
