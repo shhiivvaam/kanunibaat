@@ -30,6 +30,7 @@ This repository implements the **KanuniBaat** platform as a **pnpm + Turborepo**
 - **Health**: `GET {API_URL}/health`
 - **Waitlist**: tRPC procedures `waitlist.submitUser` and `waitlist.submitLawyer` (shared `@kb/waitlist` logic; Resend env vars on the API process).
 - **Profile / RBAC (Phase 2):** `profile.me`, `profile.update`, `profile.createLawyerDraft`; admin stubs `admin.pendingLawyers`, `admin.listUsers` (guarded; no admin UI in this repo yet).
+- **Phase 3 (next):** Lawyer onboarding, verification workflow, public profiles, and discovery (Meilisearch). See [PHASE-3.md](./PHASE-3.md).
 
 ## Environment
 
@@ -40,4 +41,5 @@ See the repo root `.env.example`. Copy to `.env` locally; never commit secrets.
 - [Phase 0 checklist](./PHASE-0.md) — foundation tasks and how they map to this repo.
 - [Phase 1 checklist](./PHASE-1.md) — public website, waitlists, blog, SEO.
 - [Phase 2 checklist](./PHASE-2.md) — auth, core API, OTP, mobile Bearer, ADR for subdomains.
+- [Phase 3 checklist](./PHASE-3.md) — lawyer verification, marketplace, search, availability.
 - [Mobile auth & deep links](./MOBILE-AUTH-DEEPLINKS.md) — Expo token storage and deep-link strategy.
