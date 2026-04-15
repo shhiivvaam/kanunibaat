@@ -8,6 +8,17 @@ import 'react-native-reanimated';
 
 import { TrpcProvider } from '@/components/TrpcProvider';
 import { useColorScheme } from '@/components/useColorScheme';
+import * as Sentry from '@sentry/react-native';
+
+const mobileDsn = process.env.EXPO_PUBLIC_SENTRY_DSN;
+if (mobileDsn) {
+  Sentry.init({
+    dsn: mobileDsn,
+    enableLogs: true,
+    // Keep PII off by default; enable explicitly if you really need it.
+    sendDefaultPii: false,
+  });
+}
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -22,7 +33,7 @@ export const unstable_settings = {
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+export default Sentry.wrap(function RootLayout() {
   const [loaded, error] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
@@ -44,7 +55,7 @@ export default function RootLayout() {
   }
 
   return <RootLayoutNav />;
-}
+});
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();

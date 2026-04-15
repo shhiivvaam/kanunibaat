@@ -44,7 +44,8 @@ async function bootstrap() {
   attachOpenApiDocs(app);
 
   const meili = parseMeiliConfigFromEnv(process.env);
-  const meiliIndexName = apiEnv.MEILISEARCH_INDEX_LAWYERS?.trim() || DEFAULT_LAWYERS_INDEX;
+  const meiliIndexName =
+    apiEnv.MEILISEARCH_INDEX_LAWYERS?.trim() || DEFAULT_LAWYERS_INDEX;
 
   const createTrpcContext = createTrpcContextFactory({
     db,
