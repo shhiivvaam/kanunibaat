@@ -35,7 +35,10 @@ export function attachPublicHttpMiddlewares(
     '/trpc',
     rateLimit({
       windowMs: 60_000,
-      max: 120,
+      max: (req) => {
+        const u = req.url ?? '';
+        return typeof u === 'string' && u.includes('emergencyGuide.personalize') ? 25 : 120;
+      },
       standardHeaders: true,
       legacyHeaders: false,
     }),

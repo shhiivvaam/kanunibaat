@@ -21,6 +21,7 @@ import {
 } from './profile-service';
 import { adminRouter } from './routers/admin';
 import { consultationsRouter } from './routers/consultations';
+import { emergencyGuideRouter } from './routers/emergency-guide';
 import { lawyerRouter } from './routers/lawyer';
 import { marketplaceRouter } from './routers/marketplace';
 import { noticesRouter } from './routers/notices';
@@ -46,6 +47,7 @@ export const appRouter = router({
   marketplace: marketplaceRouter,
   notices: noticesRouter,
   consultations: consultationsRouter,
+  emergencyGuide: emergencyGuideRouter,
 
   waitlist: router({
     submitUser: publicProcedure.input(userWaitlistInputSchema).mutation(async ({ ctx, input }) => {

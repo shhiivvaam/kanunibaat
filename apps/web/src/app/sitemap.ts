@@ -1,3 +1,4 @@
+import { EMERGENCY_SCENARIOS } from '@kb/emergency-guide';
 import type { MetadataRoute } from 'next';
 
 import { getAllSlugs } from '@/lib/blog';
@@ -13,6 +14,8 @@ const STATIC_PATHS = [
   '/blog',
   '/legal-qa',
   '/document-review',
+  '/notice-scanner',
+  '/kya-karein',
   '/lawyer-connect',
   '/know-your-rights',
   '/privacy',
@@ -41,5 +44,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.65,
   }));
 
-  return [...staticEntries, ...blogEntries];
+  const emergencyGuideEntries: MetadataRoute.Sitemap = EMERGENCY_SCENARIOS.map((s) => ({
+    url: `${base}/kya-karein/${s.slug}`,
+    lastModified: lastMod,
+    changeFrequency: 'monthly',
+    priority: 0.72,
+  }));
+
+  return [...staticEntries, ...blogEntries, ...emergencyGuideEntries];
 }

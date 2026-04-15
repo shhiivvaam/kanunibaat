@@ -68,6 +68,13 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <TabBarIcon name="comments" color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="guide"
+        options={{
+          title: 'Kya Karein?',
+          tabBarIcon: ({ color }) => <TabBarIcon name="life-ring" color={color} />,
+        }}
+      />
     </Tabs>
   );
 }

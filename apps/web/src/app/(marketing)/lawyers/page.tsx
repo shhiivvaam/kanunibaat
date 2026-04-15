@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 
 import { LawyersDirectory } from '@/features/lawyers/lawyers-directory';
 
@@ -26,7 +27,9 @@ export default function LawyersPage() {
           falls back to our database so the directory stays available.
         </p>
       </header>
-      <LawyersDirectory />
+      <Suspense fallback={<p className="text-sm text-[#78716C]">Loading directory…</p>}>
+        <LawyersDirectory />
+      </Suspense>
     </div>
   );
 }

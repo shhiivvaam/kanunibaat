@@ -1,13 +1,21 @@
 'use client';
 
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import { trpc } from '@kb/api-client';
 
 export function LawyersDirectory() {
-  const [q, setQ] = useState('');
-  const [debounced, setDebounced] = useState('');
+  const searchParams = useSearchParams();
+  const urlQ = searchParams.get('q') ?? '';
+  const [q, setQ] = useState(urlQ);
+  const [debounced, setDebounced] = useState(urlQ.trim());
+
+  useEffect(() => {
+    setQ(urlQ);
+    setDebounced(urlQ.trim());
+  }, [urlQ]);
   const query = trpc.marketplace.searchLawyers.useQuery(
     { query: debounced, limit: 24 },
     { staleTime: 30_000 },

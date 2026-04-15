@@ -8,16 +8,8 @@
     "rootDir": "src",
     "declaration": true,
     "declarationMap": true,
-    "emitDeclarationOnly": false,
     "sourceMap": true
   },
   "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist"],
-  "references": [
-    { "path": "../database" },
-    { "path": "../emergency-guide" },
-    { "path": "../waitlist" },
-    { "path": "../search" },
-    { "path": "../storage" }
-  ]
+  "exclude": ["node_modules", "dist"]
 }
