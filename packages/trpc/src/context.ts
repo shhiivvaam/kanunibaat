@@ -23,6 +23,11 @@ export interface TrpcContext {
   userAgent: string | null;
   googleVisionApiKey: string | null;
   openaiApiKey: string | null;
+  razorpayKeyId: string | null;
+  razorpayKeySecret: string | null;
+  livekitUrl: string | null;
+  livekitApiKey: string | null;
+  livekitApiSecret: string | null;
 }
 
 export interface TrpcContextDeps {
@@ -33,6 +38,11 @@ export interface TrpcContextDeps {
   s3Documents: S3DocumentsConfig | null;
   googleVisionApiKey: string | null;
   openaiApiKey: string | null;
+  razorpayKeyId: string | null;
+  razorpayKeySecret: string | null;
+  livekitUrl: string | null;
+  livekitApiKey: string | null;
+  livekitApiSecret: string | null;
 }
 
 async function loadRoles(
@@ -74,6 +84,11 @@ export function createTrpcContextFactory(deps: TrpcContextDeps) {
       userAgent,
       googleVisionApiKey: deps.googleVisionApiKey,
       openaiApiKey: deps.openaiApiKey,
+      razorpayKeyId: deps.razorpayKeyId,
+      razorpayKeySecret: deps.razorpayKeySecret,
+      livekitUrl: deps.livekitUrl,
+      livekitApiKey: deps.livekitApiKey,
+      livekitApiSecret: deps.livekitApiSecret,
     };
   };
 }

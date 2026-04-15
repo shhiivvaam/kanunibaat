@@ -1,7 +1,7 @@
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 
-import { lawyerProfile, userProfile } from '@kb/database/schema';
+import { lawyerAvailability, lawyerProfile, userProfile } from '@kb/database/schema';
 import { searchLawyersWithFallback } from '@kb/search';
 
 import { publicProcedure, router } from '../init';
@@ -68,4 +68,27 @@ export const marketplaceRouter = router({
       },
     };
   }),
+
+  availabilityByLawyerUserId: publicProcedure
+    .input(z.object({ lawyerUserId: z.string().min(1) }))
+    .query(async ({ ctx, input }) => {
+      const [lp] = await ctx.db
+        .select({ status: lawyerProfile.verificationStatus })
+        .from(lawyerProfile)
+        .where(and(eq(lawyerProfile.userId, input.lawyerUserId), eq(lawyerProfile.verificationStatus, 'verified')))
+        .limit(1);
+      if (!lp) return { availability: [] as const };
+
+      const rows = await ctx.db
+        .select({
+          id: lawyerAvailability.id,
+          dayOfWeek: lawyerAvailability.dayOfWeek,
+          startMinute: lawyerAvailability.startMinute,
+          endMinute: lawyerAvailability.endMinute,
+          timezone: lawyerAvailability.timezone,
+        })
+        .from(lawyerAvailability)
+        .where(eq(lawyerAvailability.userId, input.lawyerUserId));
+      return { availability: rows };
+    }),
 });

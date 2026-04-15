@@ -22,6 +22,13 @@
       "when": 1776285011145,
       "tag": "0002_phase4_notice_scanner",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1776288000000,
+      "tag": "0003_phase5_consultations_payments",
+      "breakpoints": true
     }
   ]
 }

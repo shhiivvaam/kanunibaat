@@ -55,6 +55,11 @@ async function bootstrap() {
     s3Documents: parseS3DocumentsConfigFromEnv(process.env),
     googleVisionApiKey: apiEnv.GOOGLE_CLOUD_VISION_API_KEY?.trim() || null,
     openaiApiKey: apiEnv.OPENAI_API_KEY?.trim() || null,
+    razorpayKeyId: apiEnv.RAZORPAY_KEY_ID?.trim() || null,
+    razorpayKeySecret: apiEnv.RAZORPAY_KEY_SECRET?.trim() || null,
+    livekitUrl: apiEnv.LIVEKIT_URL?.trim() || null,
+    livekitApiKey: apiEnv.LIVEKIT_API_KEY?.trim() || null,
+    livekitApiSecret: apiEnv.LIVEKIT_API_SECRET?.trim() || null,
   });
 
   attachPublicHttpMiddlewares(app, { logger, createTrpcContext });

@@ -18,6 +18,9 @@ export default async function AppShellLayout({ children }: { children: React.Rea
             KanuniBaat
           </Link>
           <nav className="flex gap-4 text-sm" style={{ fontFamily: 'var(--font-body)' }}>
+            <Link href="/app/consultations" className="text-[#57534E] hover:text-[#C2410C]">
+              Consultations
+            </Link>
             <Link href="/" className="text-[#57534E] hover:text-[#C2410C]">
               Marketing site
             </Link>

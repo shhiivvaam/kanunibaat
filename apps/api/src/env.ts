@@ -24,6 +24,12 @@ const envSchema = z.object({
   GOOGLE_CLOUD_VISION_API_KEY: z.string().optional(),
   OPENAI_API_KEY: z.string().optional(),
   ANTHROPIC_API_KEY: z.string().optional(),
+  RAZORPAY_KEY_ID: z.string().optional(),
+  RAZORPAY_KEY_SECRET: z.string().optional(),
+  RAZORPAY_WEBHOOK_SECRET: z.string().optional(),
+  LIVEKIT_URL: z.string().optional(),
+  LIVEKIT_API_KEY: z.string().optional(),
+  LIVEKIT_API_SECRET: z.string().optional(),
 });
 
 export type ApiEnv = z.infer<typeof envSchema>;

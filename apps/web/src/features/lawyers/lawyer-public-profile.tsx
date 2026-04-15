@@ -62,6 +62,24 @@ export function LawyerPublicProfile({ slug }: { slug: string }) {
             </div>
           ) : null}
         </dl>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Link
+            href={`/app/consultations/book?lawyerUserId=${encodeURIComponent(law.userId)}&slug=${encodeURIComponent(
+              law.slug,
+            )}`}
+            className="inline-flex items-center justify-center rounded-xl bg-[#C2410C] px-4 py-2 text-sm font-semibold text-white hover:bg-[#9A3412]"
+            style={{ fontFamily: 'var(--font-body)' }}
+          >
+            Book consultation
+          </Link>
+          <Link
+            href="/app"
+            className="inline-flex items-center justify-center rounded-xl border border-[#E7E5E4] bg-white px-4 py-2 text-sm font-semibold text-[#44403C] hover:bg-[#FAFAF9]"
+            style={{ fontFamily: 'var(--font-body)' }}
+          >
+            Go to dashboard
+          </Link>
+        </div>
       </div>
       <div className="space-y-6 px-8 py-10">
         {law.bio ? (

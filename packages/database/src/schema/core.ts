@@ -129,6 +129,74 @@ export const noticeScan = pgTable('notice_scan', {
   updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
 });
 
+export const consultationModeEnum = pgEnum('consultation_mode', ['chat', 'audio', 'video']);
+
+export const consultationStatusEnum = pgEnum('consultation_status', [
+  'pending_payment',
+  'scheduled',
+  'in_progress',
+  'completed',
+  'cancelled',
+  'disputed',
+]);
+
+export const paymentStatusEnum = pgEnum('payment_status', [
+  'created',
+  'paid',
+  'failed',
+  'refunded',
+  'released',
+]);
+
+export const consultation = pgTable('consultation', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  lawyerUserId: text('lawyer_user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  mode: consultationModeEnum('mode').notNull(),
+  status: consultationStatusEnum('status').notNull().default('pending_payment'),
+  scheduledAt: timestamp('scheduled_at', { withTimezone: true, mode: 'date' }),
+  issueSummary: text('issue_summary').notNull().default(''),
+  amountInr: integer('amount_inr').notNull(),
+  currency: text('currency').notNull().default('INR'),
+  startedAt: timestamp('started_at', { withTimezone: true, mode: 'date' }),
+  endedAt: timestamp('ended_at', { withTimezone: true, mode: 'date' }),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+});
+
+export const payment = pgTable('payment', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  consultationId: uuid('consultation_id')
+    .notNull()
+    .references(() => consultation.id, { onDelete: 'cascade' }),
+  status: paymentStatusEnum('status').notNull().default('created'),
+  amountInr: integer('amount_inr').notNull(),
+  currency: text('currency').notNull().default('INR'),
+  razorpayOrderId: text('razorpay_order_id').unique(),
+  razorpayPaymentId: text('razorpay_payment_id').unique(),
+  razorpaySignature: text('razorpay_signature'),
+  paidAt: timestamp('paid_at', { withTimezone: true, mode: 'date' }),
+  releasedAt: timestamp('released_at', { withTimezone: true, mode: 'date' }),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+});
+
+export const consultationMessage = pgTable('consultation_message', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  consultationId: uuid('consultation_id')
+    .notNull()
+    .references(() => consultation.id, { onDelete: 'cascade' }),
+  senderUserId: text('sender_user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  body: text('body').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+});
+
 export const userProfileRelations = relations(userProfile, ({ one }) => ({
   user: one(user, { fields: [userProfile.userId], references: [user.id] }),
 }));
@@ -161,4 +229,20 @@ export const lawyerAvailabilityRelations = relations(lawyerAvailability, ({ one 
 
 export const noticeScanRelations = relations(noticeScan, ({ one }) => ({
   user: one(user, { fields: [noticeScan.userId], references: [user.id] }),
+}));
+
+export const consultationRelations = relations(consultation, ({ one, many }) => ({
+  user: one(user, { fields: [consultation.userId], references: [user.id] }),
+  lawyer: one(user, { fields: [consultation.lawyerUserId], references: [user.id] }),
+  payments: many(payment),
+  messages: many(consultationMessage),
+}));
+
+export const paymentRelations = relations(payment, ({ one }) => ({
+  consultation: one(consultation, { fields: [payment.consultationId], references: [consultation.id] }),
+}));
+
+export const consultationMessageRelations = relations(consultationMessage, ({ one }) => ({
+  consultation: one(consultation, { fields: [consultationMessage.consultationId], references: [consultation.id] }),
+  sender: one(user, { fields: [consultationMessage.senderUserId], references: [user.id] }),
 }));

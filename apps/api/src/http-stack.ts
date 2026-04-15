@@ -1,5 +1,6 @@
 import type { INestApplication } from '@nestjs/common';
 import type { Application, RequestHandler } from 'express';
+import express from 'express';
 import rateLimit from 'express-rate-limit';
 import type { AnyRouter } from '@trpc/server';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
@@ -7,6 +8,8 @@ import type { Logger } from 'pino';
 import pinoHttp from 'pino-http';
 
 import { appRouter, createTrpcContextFactory } from '@kb/trpc';
+
+import { createRazorpayWebhookHandler } from './razorpay-webhook';
 
 export type TrpcContextCreator = ReturnType<typeof createTrpcContextFactory>;
 
@@ -43,4 +46,13 @@ export function attachPublicHttpMiddlewares(
     createContext: opts.createTrpcContext,
   });
   httpServer.use('/trpc', trpcMiddleware);
+
+  const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET?.trim();
+  if (webhookSecret) {
+    httpServer.post(
+      '/webhooks/razorpay',
+      express.raw({ type: 'application/json' }),
+      createRazorpayWebhookHandler({ webhookSecret }),
+    );
+  }
 }

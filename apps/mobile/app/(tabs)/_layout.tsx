@@ -61,6 +61,13 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <TabBarIcon name="briefcase" color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="consultations"
+        options={{
+          title: 'Consultations',
+          tabBarIcon: ({ color }) => <TabBarIcon name="comments" color={color} />,
+        }}
+      />
     </Tabs>
   );
 }

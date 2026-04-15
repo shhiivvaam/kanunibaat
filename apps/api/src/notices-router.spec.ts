@@ -20,6 +20,11 @@ describe('Phase 4 notices router', () => {
     userAgent: 'jest',
     googleVisionApiKey: null,
     openaiApiKey: null,
+    razorpayKeyId: null,
+    razorpayKeySecret: null,
+    livekitUrl: null,
+    livekitApiKey: null,
+    livekitApiSecret: null,
   };
 
   it('requestUpload fails clearly when storage is not configured', async () => {
