@@ -5,14 +5,20 @@ import { z } from 'zod';
 
 import { consultation, consultationMessage, lawyerAvailability, lawyerProfile, payment } from '@kb/database/schema';
 
+import type { TrpcContext } from '../context';
 import { protectedProcedure, router } from '../init';
+
+type TrpcDb = TrpcContext['db'];
+type LawyerAvailabilityRow = typeof lawyerAvailability.$inferSelect;
 
 const DEFAULT_CONSULTATION_AMOUNT_INR = 499;
 const MAX_MESSAGE_BODY_CHARS = 4000;
 
 function requireConfiguredRazorpay(ctx: { razorpayKeyId: string | null; razorpayKeySecret: string | null }) {
-  const id = ctx.razorpayKeyId?.trim() || null;
-  const secret = ctx.razorpayKeySecret?.trim() || null;
+  const idRaw = ctx.razorpayKeyId?.trim();
+  const secretRaw = ctx.razorpayKeySecret?.trim();
+  const id = idRaw && idRaw.length > 0 ? idRaw : null;
+  const secret = secretRaw && secretRaw.length > 0 ? secretRaw : null;
   if (!id || !secret) {
     throw new TRPCError({
       code: 'PRECONDITION_FAILED',
@@ -55,25 +61,27 @@ function timePartsForZone(date: Date, timeZone: string): { dayOfWeek: number; mi
   return { dayOfWeek, minuteOfDay: hh * 60 + mm };
 }
 
-async function assertLawyerIsVerified(db: any, lawyerUserId: string) {
+async function assertLawyerIsVerified(db: TrpcDb, lawyerUserId: string) {
   const [lp] = await db
     .select({ status: lawyerProfile.verificationStatus })
     .from(lawyerProfile)
     .where(eq(lawyerProfile.userId, lawyerUserId))
     .limit(1);
-  if (!lp || lp.status !== 'verified') {
+  if (lp?.status !== 'verified') {
     throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Lawyer is not verified.' });
   }
 }
 
-async function assertSlotIsAvailable(db: any, lawyerUserId: string, scheduledAt: Date, timeZone: string) {
+async function assertSlotIsAvailable(db: TrpcDb, lawyerUserId: string, scheduledAt: Date, timeZone: string) {
   const { dayOfWeek, minuteOfDay } = timePartsForZone(scheduledAt, timeZone);
-  const rows = await db
+  const rows: LawyerAvailabilityRow[] = await db
     .select()
     .from(lawyerAvailability)
     .where(eq(lawyerAvailability.userId, lawyerUserId))
     .orderBy(asc(lawyerAvailability.startMinute));
-  const ok = rows.some((r: any) => r.dayOfWeek === dayOfWeek && minuteOfDay >= r.startMinute && minuteOfDay < r.endMinute);
+  const ok = rows.some(
+    (r) => r.dayOfWeek === dayOfWeek && minuteOfDay >= r.startMinute && minuteOfDay < r.endMinute,
+  );
   if (!ok) {
     throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Selected slot is not available.' });
   }
@@ -340,7 +348,7 @@ export const consultationsRouter = router({
           .where(eq(consultation.id, c.id));
 
         const [p] = await tx.select().from(payment).where(eq(payment.consultationId, c.id)).limit(1);
-        if (p && p.status === 'paid') {
+        if (p?.status === 'paid') {
           await tx
             .update(payment)
             .set({ status: 'released', releasedAt: new Date(), updatedAt: new Date() })
