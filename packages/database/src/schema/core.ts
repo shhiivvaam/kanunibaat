@@ -96,6 +96,37 @@ export const lawyerAvailability = pgTable('lawyer_availability', {
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
 });
 
+export const noticeScanStatusEnum = pgEnum('notice_scan_status', [
+  'uploaded',
+  'processing',
+  'completed',
+  'failed',
+]);
+
+export const noticeScan = pgTable('notice_scan', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id').references(() => user.id, { onDelete: 'set null' }),
+  storageKey: text('storage_key').notNull(),
+  fileName: text('file_name').notNull(),
+  contentType: text('content_type').notNull(),
+  byteSize: integer('byte_size').notNull(),
+  uploadedAt: timestamp('uploaded_at', { withTimezone: true, mode: 'date' }),
+  status: noticeScanStatusEnum('status').notNull().default('uploaded'),
+  ocrText: text('ocr_text'),
+  noticeType: text('notice_type'),
+  issuingAuthority: text('issuing_authority'),
+  isLikelyGenuine: integer('is_likely_genuine'), // 1=true, 0=false, null=unknown
+  deadlineDate: timestamp('deadline_date', { withTimezone: true, mode: 'date' }),
+  amountInr: integer('amount_inr'),
+  aiSummary: text('ai_summary'),
+  recommendedActions: jsonb('recommended_actions').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+  recommendedLawyerType: text('recommended_lawyer_type'),
+  locale: text('locale').notNull().default('en'),
+  failureReason: text('failure_reason'),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+});
+
 export const userProfileRelations = relations(userProfile, ({ one }) => ({
   user: one(user, { fields: [userProfile.userId], references: [user.id] }),
 }));
@@ -124,4 +155,8 @@ export const lawyerAvailabilityRelations = relations(lawyerAvailability, ({ one 
     fields: [lawyerAvailability.userId],
     references: [lawyerProfile.userId],
   }),
+}));
+
+export const noticeScanRelations = relations(noticeScan, ({ one }) => ({
+  user: one(user, { fields: [noticeScan.userId], references: [user.id] }),
 }));

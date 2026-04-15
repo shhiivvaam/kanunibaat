@@ -15,6 +15,13 @@
       "when": 1776000000000,
       "tag": "0001_phase3_marketplace",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1776285011145,
+      "tag": "0002_phase4_notice_scanner",
+      "breakpoints": true
     }
   ]
 }
