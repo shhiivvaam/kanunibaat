@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 const services = [
   { name: 'Legal Q&A', href: '/legal-qa', desc: 'Ask any legal question' },
   { name: 'Document Review', href: '/document-review', desc: 'Upload & understand contracts' },
+  { name: 'Notice Scanner', href: '/notice-scanner', desc: 'Scan notices in plain language' },
   { name: 'Lawyer Connect', href: '/lawyer-connect', desc: 'Find verified lawyers' },
   { name: 'Know Your Rights', href: '/know-your-rights', desc: 'Understand your legal rights' },
 ];

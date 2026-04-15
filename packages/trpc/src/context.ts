@@ -19,6 +19,10 @@ export interface TrpcContext {
   meili: MeiliConnection | null;
   meiliIndexName: string;
   s3Documents: S3DocumentsConfig | null;
+  requestIp: string | null;
+  userAgent: string | null;
+  googleVisionApiKey: string | null;
+  openaiApiKey: string | null;
 }
 
 export interface TrpcContextDeps {
@@ -27,6 +31,8 @@ export interface TrpcContextDeps {
   meili: MeiliConnection | null;
   meiliIndexName: string;
   s3Documents: S3DocumentsConfig | null;
+  googleVisionApiKey: string | null;
+  openaiApiKey: string | null;
 }
 
 async function loadRoles(
@@ -48,6 +54,14 @@ export function createTrpcContextFactory(deps: TrpcContextDeps) {
       authUserId = await resolveUserIdFromSessionToken(deps.db, token);
     }
     const roles = authUserId ? await loadRoles(deps.db, authUserId) : [];
+    const forwarded = opts.req.headers['x-forwarded-for'];
+    const requestIp =
+      typeof forwarded === 'string'
+        ? forwarded.split(',')[0]?.trim() ?? null
+        : Array.isArray(forwarded)
+          ? forwarded[0]?.trim() ?? null
+          : (opts.req.socket?.remoteAddress ?? null);
+    const userAgent = typeof opts.req.headers['user-agent'] === 'string' ? opts.req.headers['user-agent'] : null;
     return {
       db: deps.db,
       authUserId,
@@ -56,6 +70,10 @@ export function createTrpcContextFactory(deps: TrpcContextDeps) {
       meili: deps.meili,
       meiliIndexName: deps.meiliIndexName,
       s3Documents: deps.s3Documents,
+      requestIp,
+      userAgent,
+      googleVisionApiKey: deps.googleVisionApiKey,
+      openaiApiKey: deps.openaiApiKey,
     };
   };
 }

@@ -106,6 +106,8 @@ export const noticeScanStatusEnum = pgEnum('notice_scan_status', [
 export const noticeScan = pgTable('notice_scan', {
   id: uuid('id').primaryKey().defaultRandom(),
   userId: text('user_id').references(() => user.id, { onDelete: 'set null' }),
+  accessToken: uuid('access_token').notNull().defaultRandom().unique(),
+  anonKey: text('anon_key'),
   storageKey: text('storage_key').notNull(),
   fileName: text('file_name').notNull(),
   contentType: text('content_type').notNull(),

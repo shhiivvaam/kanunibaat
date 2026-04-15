@@ -22,6 +22,7 @@ import {
 import { adminRouter } from './routers/admin';
 import { lawyerRouter } from './routers/lawyer';
 import { marketplaceRouter } from './routers/marketplace';
+import { noticesRouter } from './routers/notices';
 
 const updateProfileInputSchema = z.object({
   displayName: z.string().min(1).max(120).optional(),
@@ -42,6 +43,7 @@ export const appRouter = router({
   })),
 
   marketplace: marketplaceRouter,
+  notices: noticesRouter,
 
   waitlist: router({
     submitUser: publicProcedure.input(userWaitlistInputSchema).mutation(async ({ ctx, input }) => {

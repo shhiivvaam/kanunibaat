@@ -53,6 +53,8 @@ async function bootstrap() {
     meili,
     meiliIndexName,
     s3Documents: parseS3DocumentsConfigFromEnv(process.env),
+    googleVisionApiKey: apiEnv.GOOGLE_CLOUD_VISION_API_KEY?.trim() || null,
+    openaiApiKey: apiEnv.OPENAI_API_KEY?.trim() || null,
   });
 
   attachPublicHttpMiddlewares(app, { logger, createTrpcContext });

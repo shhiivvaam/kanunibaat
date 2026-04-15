@@ -2,6 +2,8 @@ CREATE TYPE "public"."notice_scan_status" AS ENUM('uploaded', 'processing', 'com
 CREATE TABLE "notice_scan" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" text,
+	"access_token" uuid DEFAULT gen_random_uuid() NOT NULL,
+	"anon_key" text,
 	"storage_key" text NOT NULL,
 	"file_name" text NOT NULL,
 	"content_type" text NOT NULL,
@@ -24,6 +26,8 @@ CREATE TABLE "notice_scan" (
 );
 --> statement-breakpoint
 ALTER TABLE "notice_scan" ADD CONSTRAINT "notice_scan_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "notice_scan" ADD CONSTRAINT "notice_scan_access_token_unique" UNIQUE("access_token");--> statement-breakpoint
 CREATE INDEX "notice_scan_user_id_idx" ON "notice_scan" ("user_id");--> statement-breakpoint
 CREATE INDEX "notice_scan_status_idx" ON "notice_scan" ("status");--> statement-breakpoint
+CREATE INDEX "notice_scan_anon_key_idx" ON "notice_scan" ("anon_key");--> statement-breakpoint
 CREATE INDEX "notice_scan_created_at_idx" ON "notice_scan" ("created_at");
