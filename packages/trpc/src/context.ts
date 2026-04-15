@@ -1,9 +1,10 @@
 import type { CreateExpressContextOptions } from '@trpc/server/adapters/express';
 import { eq } from 'drizzle-orm';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-
 import type * as DbSchema from '@kb/database/schema';
 import { userRole } from '@kb/database/schema';
+import type { MeiliConnection } from '@kb/search';
+import type { S3DocumentsConfig } from '@kb/storage';
 import type { WaitlistEnv } from '@kb/waitlist';
 
 import { extractSessionTokenFromRequest, resolveUserIdFromSessionToken } from './session-resolve';
@@ -15,11 +16,17 @@ export interface TrpcContext {
   authUserId: string | null;
   roles: readonly KbRole[];
   waitlistEnv: WaitlistEnv;
+  meili: MeiliConnection | null;
+  meiliIndexName: string;
+  s3Documents: S3DocumentsConfig | null;
 }
 
 export interface TrpcContextDeps {
   db: PostgresJsDatabase<typeof DbSchema>;
   waitlistEnv: WaitlistEnv;
+  meili: MeiliConnection | null;
+  meiliIndexName: string;
+  s3Documents: S3DocumentsConfig | null;
 }
 
 async function loadRoles(
@@ -46,6 +53,9 @@ export function createTrpcContextFactory(deps: TrpcContextDeps) {
       authUserId,
       roles,
       waitlistEnv: deps.waitlistEnv,
+      meili: deps.meili,
+      meiliIndexName: deps.meiliIndexName,
+      s3Documents: deps.s3Documents,
     };
   };
 }

@@ -24,6 +24,8 @@
   },
   "dependencies": {
     "@kb/database": "workspace:*",
+    "@kb/search": "workspace:*",
+    "@kb/storage": "workspace:*",
     "@kb/trpc": "workspace:*",
     "@kb/waitlist": "workspace:*",
     "@nestjs/common": "^11.0.1",

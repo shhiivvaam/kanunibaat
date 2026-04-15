@@ -1,9 +1,9 @@
 import { TRPCError } from '@trpc/server';
-import { initTRPC } from '@trpc/server';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 
 import { lawyerProfile, user, userProfile } from '@kb/database/schema';
+import { syncLawyerMeiliFromDb } from '@kb/search';
 import {
   lawyerWaitlistInputSchema,
   submitLawyerWaitlist,
@@ -11,43 +11,17 @@ import {
   userWaitlistInputSchema,
 } from '@kb/waitlist';
 
-import type { TrpcContext } from './context';
+import { protectedProcedure, publicProcedure, router } from './init';
+import { allocateLawyerSlug } from './lawyer-slug';
 import {
   ensureDefaultUserRole,
+  ensureLawyerRole,
   ensureUserProfileRow,
   loadProfileBundle,
 } from './profile-service';
-
-const t = initTRPC.context<TrpcContext>().create();
-
-export const router = t.router;
-export const publicProcedure = t.procedure;
-
-const requireAuth = t.middleware(({ ctx, next }) => {
-  if (!ctx.authUserId) {
-    throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Not signed in.' });
-  }
-  return next({
-    ctx: {
-      ...ctx,
-      authUserId: ctx.authUserId,
-    },
-  });
-});
-
-export const protectedProcedure = publicProcedure.use(requireAuth);
-
-export function roleProcedure(role: 'admin' | 'lawyer') {
-  return protectedProcedure.use(({ ctx, next }) => {
-    if (!ctx.roles.includes(role)) {
-      throw new TRPCError({ code: 'FORBIDDEN', message: `Requires role: ${role}` });
-    }
-    return next({ ctx });
-  });
-}
-
-const adminProcedure = roleProcedure('admin');
-const lawyerProcedure = roleProcedure('lawyer');
+import { adminRouter } from './routers/admin';
+import { lawyerRouter } from './routers/lawyer';
+import { marketplaceRouter } from './routers/marketplace';
 
 const updateProfileInputSchema = z.object({
   displayName: z.string().min(1).max(120).optional(),
@@ -66,6 +40,8 @@ export const appRouter = router({
     service: 'kanunibaat-api',
     ts: new Date().toISOString(),
   })),
+
+  marketplace: marketplaceRouter,
 
   waitlist: router({
     submitUser: publicProcedure.input(userWaitlistInputSchema).mutation(async ({ ctx, input }) => {
@@ -134,6 +110,15 @@ export const appRouter = router({
       .input(createLawyerDraftInputSchema)
       .mutation(async ({ ctx, input }) => {
         const userId = ctx.authUserId;
+        const [u] = await ctx.db.select().from(user).where(eq(user.id, userId)).limit(1);
+        if (!u) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'User not found.' });
+        }
+        await ensureDefaultUserRole(ctx.db, userId);
+        await ensureUserProfileRow(ctx.db, userId, u.name);
+        await ensureLawyerRole(ctx.db, userId);
+
+        const [p] = await ctx.db.select().from(userProfile).where(eq(userProfile.userId, userId)).limit(1);
         const [existing] = await ctx.db
           .select()
           .from(lawyerProfile)
@@ -141,18 +126,25 @@ export const appRouter = router({
           .limit(1);
 
         if (existing) {
+          const preserveStatus =
+            existing.verificationStatus === 'verified' || existing.verificationStatus === 'pending';
           await ctx.db
             .update(lawyerProfile)
             .set({
               barState: input.barState ?? existing.barState,
               enrollmentNumber: input.enrollmentNumber ?? existing.enrollmentNumber,
-              verificationStatus: 'draft',
+              verificationStatus: preserveStatus ? existing.verificationStatus : 'draft',
               updatedAt: new Date(),
             })
             .where(eq(lawyerProfile.userId, userId));
+          if (preserveStatus && existing.verificationStatus === 'verified') {
+            await syncLawyerMeiliFromDb(ctx.db, ctx.meili, ctx.meiliIndexName, userId);
+          }
         } else {
+          const slug = await allocateLawyerSlug(ctx.db, p?.displayName ?? u.name, userId);
           await ctx.db.insert(lawyerProfile).values({
             userId,
+            slug,
             barState: input.barState ?? null,
             enrollmentNumber: input.enrollmentNumber ?? null,
             verificationStatus: 'draft',
@@ -167,28 +159,9 @@ export const appRouter = router({
       }),
   }),
 
-  admin: router({
-    pendingLawyers: adminProcedure.query(async ({ ctx }) => {
-      const rows = await ctx.db
-        .select()
-        .from(lawyerProfile)
-        .where(eq(lawyerProfile.verificationStatus, 'pending'));
-      return { lawyers: rows };
-    }),
+  admin: adminRouter,
 
-    listUsers: adminProcedure.query(async ({ ctx }) => {
-      const rows = await ctx.db.select({ id: user.id, email: user.email, name: user.name }).from(user).limit(50);
-      return { users: rows };
-    }),
-  }),
-
-  lawyer: router({
-    /** Placeholder for future `lawyer.*` subdomain app; proves RBAC wiring. */
-    portalStub: lawyerProcedure.query(() => ({
-      ok: true as const,
-      message: 'Lawyer API surface reserved for a future lawyer host.',
-    })),
-  }),
+  lawyer: lawyerRouter,
 });
 
 export type AppRouter = typeof appRouter;

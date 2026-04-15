@@ -25,9 +25,17 @@ export interface ProfileBundle {
   roles: KbRole[];
   lawyer: {
     userId: string;
+    slug: string;
     barState: string | null;
     enrollmentNumber: string | null;
+    headline: string;
+    bio: string;
+    city: string | null;
+    practiceAreas: string[];
+    languages: string[];
+    yearsExperience: number | null;
     verificationStatus: (typeof lawyerProfile.$inferSelect)['verificationStatus'];
+    rejectionReason: string | null;
   } | null;
 }
 
@@ -42,6 +50,13 @@ export async function ensureDefaultUserRole(
     .limit(1);
   if (existing.length > 0) return;
   await db.insert(userRole).values({ userId, role: 'user' });
+}
+
+export async function ensureLawyerRole(
+  db: PostgresJsDatabase<typeof DbSchema>,
+  userId: string,
+): Promise<void> {
+  await db.insert(userRole).values({ userId, role: 'lawyer' }).onConflictDoNothing();
 }
 
 export async function ensureUserProfileRow(
@@ -91,9 +106,17 @@ export async function loadProfileBundle(
     lawyer: law
       ? {
         userId: law.userId,
+        slug: law.slug,
         barState: law.barState,
         enrollmentNumber: law.enrollmentNumber,
+        headline: law.headline,
+        bio: law.bio,
+        city: law.city,
+        practiceAreas: Array.isArray(law.practiceAreas) ? law.practiceAreas : [],
+        languages: Array.isArray(law.languages) ? law.languages : [],
+        yearsExperience: law.yearsExperience ?? null,
         verificationStatus: law.verificationStatus,
+        rejectionReason: law.rejectionReason ?? null,
       }
       : null,
   };

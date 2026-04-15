@@ -13,10 +13,5 @@
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"],
-  "references": [
-    { "path": "../database" },
-    { "path": "../waitlist" },
-    { "path": "../search" },
-    { "path": "../storage" }
-  ]
+  "references": [{ "path": "../database" }]
 }

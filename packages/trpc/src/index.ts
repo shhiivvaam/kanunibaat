@@ -1,11 +1,6 @@
 export type { AppRouter } from './router';
-export {
-  appRouter,
-  publicProcedure,
-  protectedProcedure,
-  roleProcedure,
-  router,
-} from './router';
+export { appRouter } from './router';
+export { publicProcedure, protectedProcedure, roleProcedure, router } from './init';
 export {
   createTrpcContextFactory,
   type KbRole,

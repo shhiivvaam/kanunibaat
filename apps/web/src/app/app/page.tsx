@@ -78,6 +78,32 @@ export default function AppHomePage() {
         )}
       </section>
 
+      <section className="rounded-2xl border border-[#E7E5E4] bg-white p-6 shadow-sm">
+        <h2 className="text-sm font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-body)' }}>
+          Lawyer & admin
+        </h2>
+        <ul className="mt-3 space-y-2 text-sm" style={{ fontFamily: 'var(--font-body)' }}>
+          <li>
+            <Link href="/app/lawyer/onboarding" className="font-medium text-[#C2410C] hover:underline">
+              Lawyer onboarding
+            </Link>
+            <span className="text-[#78716C]"> — verification, documents, public profile</span>
+          </li>
+          {profile?.roles.includes('admin') ? (
+            <li>
+              <Link href="/app/admin" className="font-medium text-[#C2410C] hover:underline">
+                Admin verification queue
+              </Link>
+            </li>
+          ) : null}
+          <li>
+            <Link href="/lawyers" className="font-medium text-[#C2410C] hover:underline">
+              Public lawyer directory
+            </Link>
+          </li>
+        </ul>
+      </section>
+
       <p className="text-center text-xs text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
         <Link href="/waitlist" className="text-[#C2410C] hover:underline">
           Waitlist

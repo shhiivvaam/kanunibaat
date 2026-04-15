@@ -88,6 +88,18 @@ export function Navbar() {
               For Lawyers
             </Link>
             <Link
+              href="/lawyers"
+              className="text-sm transition-colors"
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontWeight: 500,
+                color: isActive('/lawyers') ? '#C2410C' : '#78716C',
+                textDecoration: isActive('/lawyers') ? 'underline' : 'none',
+              }}
+            >
+              Find lawyers
+            </Link>
+            <Link
               href="/#how-it-works"
               className="text-sm text-[#78716C] transition-colors hover:text-[#C2410C]"
               style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
@@ -221,6 +233,13 @@ export function Navbar() {
               style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
             >
               For Lawyers
+            </Link>
+            <Link
+              href="/lawyers"
+              className="block rounded-xl px-4 py-3 text-base text-[#1C1917] hover:bg-[#FFF7ED]"
+              style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
+            >
+              Find lawyers
             </Link>
             <Link
               href="/#how-it-works"

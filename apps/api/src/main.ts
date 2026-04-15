@@ -3,6 +3,8 @@ import * as Sentry from '@sentry/node';
 import pino from 'pino';
 
 import { db } from '@kb/database';
+import { DEFAULT_LAWYERS_INDEX, parseMeiliConfigFromEnv } from '@kb/search';
+import { parseS3DocumentsConfigFromEnv } from '@kb/storage';
 import { createTrpcContextFactory } from '@kb/trpc';
 
 import { AppModule } from './app.module';
@@ -41,9 +43,15 @@ async function bootstrap() {
 
   attachOpenApiDocs(app);
 
+  const meili = parseMeiliConfigFromEnv(process.env);
+  const meiliIndexName = apiEnv.MEILISEARCH_INDEX_LAWYERS?.trim() || DEFAULT_LAWYERS_INDEX;
+
   const createTrpcContext = createTrpcContextFactory({
     db,
     waitlistEnv: buildWaitlistEnv(apiEnv),
+    meili,
+    meiliIndexName,
+    s3Documents: parseS3DocumentsConfigFromEnv(process.env),
   });
 
   attachPublicHttpMiddlewares(app, { logger, createTrpcContext });

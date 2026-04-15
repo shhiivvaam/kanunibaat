@@ -14,6 +14,13 @@ const envSchema = z.object({
   RESEND_API_KEY: z.string().optional(),
   FROM_EMAIL: z.string().optional(),
   WAITLIST_NOTIFY_EMAIL: z.string().optional(),
+  MEILISEARCH_URL: z.string().optional(),
+  MEILISEARCH_MASTER_KEY: z.string().optional(),
+  MEILISEARCH_INDEX_LAWYERS: z.string().optional(),
+  AWS_ACCESS_KEY_ID: z.string().optional(),
+  AWS_SECRET_ACCESS_KEY: z.string().optional(),
+  AWS_REGION: z.string().optional(),
+  AWS_S3_BUCKET: z.string().optional(),
 });
 
 export type ApiEnv = z.infer<typeof envSchema>;

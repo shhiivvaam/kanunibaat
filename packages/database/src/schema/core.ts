@@ -1,8 +1,17 @@
 /**
- * Core domain tables (Phase 2). Better Auth `user` remains the identity anchor (`user.id`).
+ * Core domain tables (Phase 2–3). Better Auth `user` remains the identity anchor (`user.id`).
  */
-import { relations } from 'drizzle-orm';
-import { pgEnum, pgTable, primaryKey, text, timestamp } from 'drizzle-orm/pg-core';
+import { relations, sql } from 'drizzle-orm';
+import {
+  integer,
+  jsonb,
+  pgEnum,
+  pgTable,
+  primaryKey,
+  text,
+  timestamp,
+  uuid,
+} from 'drizzle-orm/pg-core';
 
 import { user } from './auth';
 
@@ -13,6 +22,11 @@ export const lawyerVerificationStatusEnum = pgEnum('lawyer_verification_status',
   'pending',
   'verified',
   'rejected',
+]);
+
+export const lawyerDocumentKindEnum = pgEnum('lawyer_document_kind', [
+  'enrollment_certificate',
+  'government_id',
 ]);
 
 export const userProfile = pgTable('user_profile', {
@@ -41,11 +55,45 @@ export const lawyerProfile = pgTable('lawyer_profile', {
   userId: text('user_id')
     .primaryKey()
     .references(() => user.id, { onDelete: 'cascade' }),
+  slug: text('slug').notNull().unique(),
   barState: text('bar_state'),
   enrollmentNumber: text('enrollment_number'),
+  headline: text('headline').notNull().default(''),
+  bio: text('bio').notNull().default(''),
+  city: text('city'),
+  practiceAreas: jsonb('practice_areas').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+  languages: jsonb('languages').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+  yearsExperience: integer('years_experience'),
   verificationStatus: lawyerVerificationStatusEnum('verification_status').notNull().default('draft'),
+  rejectionReason: text('rejection_reason'),
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+});
+
+export const lawyerDocument = pgTable('lawyer_document', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  kind: lawyerDocumentKindEnum('kind').notNull(),
+  storageKey: text('storage_key').notNull(),
+  fileName: text('file_name').notNull(),
+  contentType: text('content_type').notNull(),
+  byteSize: integer('byte_size').notNull(),
+  uploadedAt: timestamp('uploaded_at', { withTimezone: true, mode: 'date' }),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+});
+
+export const lawyerAvailability = pgTable('lawyer_availability', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  dayOfWeek: integer('day_of_week').notNull(),
+  startMinute: integer('start_minute').notNull(),
+  endMinute: integer('end_minute').notNull(),
+  timezone: text('timezone').notNull().default('Asia/Kolkata'),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
 });
 
 export const userProfileRelations = relations(userProfile, ({ one }) => ({
@@ -56,6 +104,24 @@ export const userRoleRelations = relations(userRole, ({ one }) => ({
   user: one(user, { fields: [userRole.userId], references: [user.id] }),
 }));
 
-export const lawyerProfileRelations = relations(lawyerProfile, ({ one }) => ({
+export const lawyerProfileRelations = relations(lawyerProfile, ({ one, many }) => ({
   user: one(user, { fields: [lawyerProfile.userId], references: [user.id] }),
+  documents: many(lawyerDocument),
+  availability: many(lawyerAvailability),
+}));
+
+export const lawyerDocumentRelations = relations(lawyerDocument, ({ one }) => ({
+  user: one(user, { fields: [lawyerDocument.userId], references: [user.id] }),
+  lawyerProfile: one(lawyerProfile, {
+    fields: [lawyerDocument.userId],
+    references: [lawyerProfile.userId],
+  }),
+}));
+
+export const lawyerAvailabilityRelations = relations(lawyerAvailability, ({ one }) => ({
+  user: one(user, { fields: [lawyerAvailability.userId], references: [user.id] }),
+  lawyerProfile: one(lawyerProfile, {
+    fields: [lawyerAvailability.userId],
+    references: [lawyerProfile.userId],
+  }),
 }));
