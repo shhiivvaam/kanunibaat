@@ -12,6 +12,7 @@ import { appRouter, createTrpcContextFactory } from '@kb/trpc';
 import { createCaseTrackerPollHandler } from './case-tracker-poll';
 import { createNotificationsDispatchHandler } from './notifications-dispatch';
 import { createRazorpayWebhookHandler } from './razorpay-webhook';
+import { createRazorpaySubscriptionsWebhookHandler } from './razorpay-subscriptions-webhook';
 
 export type TrpcContextCreator = ReturnType<typeof createTrpcContextFactory>;
 
@@ -58,6 +59,8 @@ export function attachPublicHttpMiddlewares(
         if (u.includes('practice.billing.invoice.pdfBase64')) return 30;
         if (u.includes('practice.billing.invoice.createPaymentOrder'))
           return 20;
+        if (u.includes('billing.subscription.createOrUpdate')) return 20;
+        if (u.includes('billing.subscription.cancel')) return 20;
         return 120;
       },
       standardHeaders: true,
@@ -77,6 +80,11 @@ export function attachPublicHttpMiddlewares(
       '/webhooks/razorpay',
       express.raw({ type: 'application/json' }),
       createRazorpayWebhookHandler({ webhookSecret }),
+    );
+    httpServer.post(
+      '/webhooks/razorpay/subscriptions',
+      express.raw({ type: 'application/json' }),
+      createRazorpaySubscriptionsWebhookHandler({ webhookSecret }),
     );
   }
 

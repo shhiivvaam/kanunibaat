@@ -123,7 +123,7 @@ describe('Phase 7 vault router', () => {
     });
   });
 
-  it('document.summarize fails when OpenAI is not configured', async () => {
+  it('document.summarize is FORBIDDEN without paid AI entitlement', async () => {
     const caller = appRouter.createCaller({
       ...baseCtx,
       authUserId: 'user-1',
@@ -135,7 +135,7 @@ describe('Phase 7 vault router', () => {
         locale: 'en',
       }),
     ).rejects.toMatchObject<Partial<TRPCError>>({
-      code: 'PRECONDITION_FAILED',
+      code: 'FORBIDDEN',
     });
   });
 });

@@ -78,6 +78,13 @@
       "when": 1776302000000,
       "tag": "0010_phase12_content_qna",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1776304000000,
+      "tag": "0011_phase13_subscriptions",
+      "breakpoints": true
     }
   ]
 }

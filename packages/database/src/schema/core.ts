@@ -508,6 +508,79 @@ export const caseTracker = pgTable(
 export const kbQaQuestionStatusEnum = pgEnum('kb_qa_question_status', ['open', 'answered', 'closed', 'hidden']);
 export const kbQaVoteValueEnum = pgEnum('kb_qa_vote_value', ['up', 'down']);
 
+export const kbPlanPeriodEnum = pgEnum('kb_plan_period', ['month']);
+export const kbSubscriptionStatusEnum = pgEnum('kb_subscription_status', [
+  'active',
+  'past_due',
+  'cancelled',
+  'pending',
+  'paused',
+]);
+export const kbBillingProviderEnum = pgEnum('kb_billing_provider', ['razorpay']);
+
+export const kbPlan = pgTable('kb_plan', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  key: text('key').notNull().unique(),
+  name: text('name').notNull(),
+  priceInr: integer('price_inr').notNull().default(0),
+  period: kbPlanPeriodEnum('period').notNull().default('month'),
+  razorpayPlanId: text('razorpay_plan_id'),
+  limitsJson: jsonb('limits_json').$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+});
+
+export const kbSubscription = pgTable('kb_subscription', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  planId: uuid('plan_id')
+    .notNull()
+    .references(() => kbPlan.id, { onDelete: 'restrict' }),
+  status: kbSubscriptionStatusEnum('status').notNull().default('pending'),
+  razorpaySubscriptionId: text('razorpay_subscription_id').unique(),
+  currentPeriodStartAt: timestamp('current_period_start_at', { withTimezone: true, mode: 'date' }),
+  currentPeriodEndAt: timestamp('current_period_end_at', { withTimezone: true, mode: 'date' }),
+  cancelAtPeriodEnd: boolean('cancel_at_period_end').notNull().default(false),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+});
+
+export const kbUsageMeter = pgTable(
+  'kb_usage_meter',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    meterKey: text('meter_key').notNull(),
+    periodStartAt: timestamp('period_start_at', { withTimezone: true, mode: 'date' }).notNull(),
+    count: integer('count').notNull().default(0),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('kb_usage_meter_user_meter_period_uidx').on(t.userId, t.meterKey, t.periodStartAt)],
+);
+
+export const kbBillingEvent = pgTable(
+  'kb_billing_event',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    provider: kbBillingProviderEnum('provider').notNull().default('razorpay'),
+    providerEventId: text('provider_event_id').notNull(),
+    type: text('type').notNull(),
+    userId: text('user_id').references(() => user.id, { onDelete: 'set null' }),
+    subscriptionId: text('subscription_id'),
+    amountInr: integer('amount_inr'),
+    currency: text('currency'),
+    occurredAt: timestamp('occurred_at', { withTimezone: true, mode: 'date' }),
+    payloadJson: jsonb('payload_json').$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
+    receivedAt: timestamp('received_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('kb_billing_event_provider_event_uidx').on(t.provider, t.providerEventId)],
+);
+
 export const contentArticle = pgTable('content_article', {
   id: uuid('id').primaryKey().defaultRandom(),
   slug: text('slug').notNull().unique(),
@@ -868,4 +941,17 @@ export const qaAnswerRelations = relations(qaAnswer, ({ one }) => ({
 export const qaVoteRelations = relations(qaVote, ({ one }) => ({
   question: one(qaQuestion, { fields: [qaVote.questionId], references: [qaQuestion.id] }),
   voter: one(user, { fields: [qaVote.voterUserId], references: [user.id] }),
+}));
+
+export const kbPlanRelations = relations(kbPlan, ({ many }) => ({
+  subscriptions: many(kbSubscription),
+}));
+
+export const kbSubscriptionRelations = relations(kbSubscription, ({ one }) => ({
+  user: one(user, { fields: [kbSubscription.userId], references: [user.id] }),
+  plan: one(kbPlan, { fields: [kbSubscription.planId], references: [kbPlan.id] }),
+}));
+
+export const kbUsageMeterRelations = relations(kbUsageMeter, ({ one }) => ({
+  user: one(user, { fields: [kbUsageMeter.userId], references: [user.id] }),
 }));

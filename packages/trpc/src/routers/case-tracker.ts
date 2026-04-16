@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { caseTracker } from '@kb/database/schema';
 
 import { fetchCourtSnapshotViaBridge, normalizeAndValidateCnr } from '../cases/njdg-lookup';
+import { computeEntitlementsForUser } from '../billing/entitlements';
 import { protectedProcedure, publicProcedure, router } from '../init';
 
 export const caseTrackerRouter = router({
@@ -26,6 +27,10 @@ export const caseTrackerRouter = router({
   }),
 
   track: protectedProcedure.input(z.object({ cnr: z.string().min(1).max(40) })).mutation(async ({ ctx, input }) => {
+    const ent = await computeEntitlementsForUser({ db: ctx.db, userId: ctx.authUserId, now: new Date() });
+    if (!ent.limits.caseTrackerEnabled) {
+      throw new TRPCError({ code: 'FORBIDDEN', message: 'Case tracker requires a paid plan.' });
+    }
     const cnr = normalizeAndValidateCnr(input.cnr);
     const now = new Date();
     await ctx.db

@@ -17,10 +17,9 @@ import {
 } from '@kb/storage';
 
 import { protectedProcedure, publicProcedure, router } from '../init';
+import { computeEntitlementsForUser } from '../billing/entitlements';
 import { summarizeVaultPlaintextWithOpenAI } from '../vault/openai-summarize';
 
-const FREE_VAULT_DOCUMENTS = 5;
-const FREE_VAULT_TOTAL_BYTES = 50 * 1024 * 1024;
 const EXPIRING_SOON_DAYS = 30;
 
 const vaultCategorySchema = z.enum([
@@ -180,23 +179,27 @@ export const vaultRouter = router({
         if (input.folderId) {
           await assertFolderOwned(ctx.db, userId, input.folderId);
         }
+        const now = new Date();
+        const ent = await computeEntitlementsForUser({ db: ctx.db, userId, now });
         const usage = await loadVaultUsage(ctx.db, userId);
-        if (usage.completeCount >= FREE_VAULT_DOCUMENTS) {
+        const docsMax = ent.limits.vaultDocsMax;
+        const bytesMax = ent.limits.vaultStorageBytesMax;
+        if (docsMax != null && usage.completeCount >= docsMax) {
           throw new TRPCError({
             code: 'TOO_MANY_REQUESTS',
-            message: `Free tier limit reached (${FREE_VAULT_DOCUMENTS} documents).`,
+            message: `Vault document limit reached (${docsMax}). Upgrade for more.`,
           });
         }
-        if (usage.totalBytes + input.byteSize > FREE_VAULT_TOTAL_BYTES) {
+        if (bytesMax != null && usage.totalBytes + input.byteSize > bytesMax) {
           throw new TRPCError({
             code: 'TOO_MANY_REQUESTS',
-            message: `Free tier storage limit reached (${FREE_VAULT_TOTAL_BYTES} bytes).`,
+            message: 'Vault storage limit reached. Upgrade for more storage.',
           });
         }
 
         const documentId = randomUUID();
         const storageKey = vaultDocumentObjectKey(userId, documentId);
-        const now = new Date();
+        // `now` already declared above
 
         await ctx.db.insert(vaultDocument).values({
           id: documentId,
@@ -249,17 +252,20 @@ export const vaultRouter = router({
           });
         }
 
+        const ent = await computeEntitlementsForUser({ db: ctx.db, userId, now: new Date() });
+        const docsMax = ent.limits.vaultDocsMax;
+        const bytesMax = ent.limits.vaultStorageBytesMax;
         const usage = await loadVaultUsage(ctx.db, userId);
-        if (usage.completeCount >= FREE_VAULT_DOCUMENTS) {
+        if (docsMax != null && usage.completeCount >= docsMax) {
           throw new TRPCError({
             code: 'TOO_MANY_REQUESTS',
-            message: `Free tier limit reached (${FREE_VAULT_DOCUMENTS} documents).`,
+            message: `Vault document limit reached (${docsMax}). Upgrade for more.`,
           });
         }
-        if (usage.totalBytes + input.byteSize > FREE_VAULT_TOTAL_BYTES) {
+        if (bytesMax != null && usage.totalBytes + input.byteSize > bytesMax) {
           throw new TRPCError({
             code: 'TOO_MANY_REQUESTS',
-            message: `Free tier storage limit reached (${FREE_VAULT_TOTAL_BYTES} bytes).`,
+            message: 'Vault storage limit reached. Upgrade for more storage.',
           });
         }
 
@@ -286,6 +292,7 @@ export const vaultRouter = router({
         .where(eq(vaultDocument.userId, userId))
         .orderBy(desc(vaultDocument.createdAt));
 
+      const ent = await computeEntitlementsForUser({ db: ctx.db, userId, now });
       const usage = await loadVaultUsage(ctx.db, userId);
 
       return {
@@ -296,8 +303,8 @@ export const vaultRouter = router({
         usage: {
           completeCount: usage.completeCount,
           totalBytes: usage.totalBytes,
-          maxDocuments: FREE_VAULT_DOCUMENTS,
-          maxTotalBytes: FREE_VAULT_TOTAL_BYTES,
+          maxDocuments: ent.limits.vaultDocsMax,
+          maxTotalBytes: ent.limits.vaultStorageBytesMax,
         },
       };
     }),
@@ -392,6 +399,10 @@ export const vaultRouter = router({
         }),
       )
       .mutation(async ({ ctx, input }) => {
+        const ent = await computeEntitlementsForUser({ db: ctx.db, userId: ctx.authUserId, now: new Date() });
+        if (!ent.limits.aiEnabled) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'AI insights require a paid plan.' });
+        }
         if (!ctx.openaiApiKey) {
           throw new TRPCError({
             code: 'PRECONDITION_FAILED',

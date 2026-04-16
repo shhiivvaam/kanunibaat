@@ -15,7 +15,11 @@ export function VaultList() {
   }
 
   const { documents, usage } = q.data;
-  const usagePct = Math.min(100, Math.round((usage.totalBytes / usage.maxTotalBytes) * 100));
+  const maxBytes = usage.maxTotalBytes ?? usage.totalBytes;
+  const usagePct =
+    usage.maxTotalBytes == null
+      ? 0
+      : Math.min(100, Math.round((usage.totalBytes / maxBytes) * 100));
 
   const expiringBanner = documents.some((d) => d.expiringSoon);
 
@@ -27,7 +31,7 @@ export function VaultList() {
         </h1>
         <p className="mt-2 text-sm text-[#57534E]">
           Client-encrypted storage for sensitive documents. Free tier: {usage.maxDocuments} documents,{' '}
-          {Math.round(usage.maxTotalBytes / (1024 * 1024))} MB total.
+          {usage.maxTotalBytes == null ? 'unlimited' : `${Math.round(usage.maxTotalBytes / (1024 * 1024))} MB`} total.
         </p>
       </div>
 
@@ -42,7 +46,7 @@ export function VaultList() {
           <span className="font-medium text-[#44403C]">Storage used</span>
           <span className="text-[#78716C]">
             {usage.completeCount} / {usage.maxDocuments} docs · {Math.round(usage.totalBytes / 1024)} KB /{' '}
-            {Math.round(usage.maxTotalBytes / (1024 * 1024))} MB
+            {usage.maxTotalBytes == null ? 'unlimited' : `${Math.round(usage.maxTotalBytes / (1024 * 1024))} MB`}
           </span>
         </div>
         <div className="mt-2 h-2 overflow-hidden rounded-full bg-[#E7E5E4]">

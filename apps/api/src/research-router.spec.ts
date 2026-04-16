@@ -43,7 +43,7 @@ describe('Phase 9 research router', () => {
     });
   });
 
-  it('research.judgments.summarize is PRECONDITION_FAILED when OpenAI is not configured', async () => {
+  it('research.judgments.summarize is FORBIDDEN without paid AI entitlement', async () => {
     const row = {
       id: '44c0ffee-bbab-4144-8ddd-001122334401',
       title: 'Test',
@@ -76,7 +76,7 @@ describe('Phase 9 research router', () => {
         id: '44c0ffee-bbab-4144-8ddd-001122334401',
       }),
     ).rejects.toMatchObject<Partial<TRPCError>>({
-      code: 'PRECONDITION_FAILED',
+      code: 'FORBIDDEN',
     });
   });
 

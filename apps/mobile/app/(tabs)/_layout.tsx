@@ -76,6 +76,13 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="billing"
+        options={{
+          title: 'Billing',
+          tabBarIcon: ({ color }) => <TabBarIcon name="credit-card" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="rights"
         options={{
           title: 'Rights',

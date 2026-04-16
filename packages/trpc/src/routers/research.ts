@@ -9,6 +9,7 @@ import { suggestCitationChainWithOpenAI } from '../research/openai-citation-chai
 import { fillDraftTemplateWithOpenAI } from '../research/openai-draft-template';
 import { expandResearchQueryWithOpenAI } from '../research/openai-expand-query';
 import { summarizeJudgmentWithOpenAI } from '../research/openai-judgment-summary';
+import { computeEntitlementsForUser } from '../billing/entitlements';
 import { lawyerProcedure, router } from '../init';
 
 const draftTemplateKeySchema = z.enum(['legal_notice_reply', 'bail_application_outline', 'written_statement_outline']);
@@ -28,8 +29,12 @@ export const researchRouter = router({
         }),
       )
       .query(async ({ ctx, input }) => {
+        const ent = await computeEntitlementsForUser({ db: ctx.db, userId: ctx.authUserId, now: new Date() });
         let q = input.query.trim();
         if (input.expandQuery) {
+          if (!ent.limits.aiEnabled) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: 'AI insights require a paid plan.' });
+          }
           const key = ctx.openaiApiKey?.trim();
           if (!key) {
             throw new TRPCError({
@@ -60,6 +65,10 @@ export const researchRouter = router({
     }),
 
     summarize: lawyerProcedure.input(z.object({ id: z.string().uuid() })).mutation(async ({ ctx, input }) => {
+      const ent = await computeEntitlementsForUser({ db: ctx.db, userId: ctx.authUserId, now: new Date() });
+      if (!ent.limits.aiEnabled) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'AI insights require a paid plan.' });
+      }
       const key = ctx.openaiApiKey?.trim();
       if (!key) {
         throw new TRPCError({
@@ -91,6 +100,10 @@ export const researchRouter = router({
         }),
       )
       .mutation(async ({ ctx, input }) => {
+        const ent = await computeEntitlementsForUser({ db: ctx.db, userId: ctx.authUserId, now: new Date() });
+        if (!ent.limits.aiEnabled) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'AI insights require a paid plan.' });
+        }
         const key = ctx.openaiApiKey?.trim();
         if (!key) {
           throw new TRPCError({
@@ -206,6 +219,10 @@ export const researchRouter = router({
         }),
       )
       .mutation(async ({ ctx, input }) => {
+        const ent = await computeEntitlementsForUser({ db: ctx.db, userId: ctx.authUserId, now: new Date() });
+        if (!ent.limits.aiEnabled) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'AI insights require a paid plan.' });
+        }
         const key = ctx.openaiApiKey?.trim();
         if (!key) {
           throw new TRPCError({

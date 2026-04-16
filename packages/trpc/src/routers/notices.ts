@@ -8,15 +8,11 @@ import { noticeScan } from '@kb/database/schema';
 import { fetchObjectBytes, noticeScanObjectKey, presignPutNoticeObject, StorageNotConfiguredError } from '@kb/storage';
 
 import { publicProcedure, router } from '../init';
+import { computeEntitlementsForUser, incrementUsageMeter, monthStartUtc } from '../billing/entitlements';
 import { ocrWithGoogleVision } from '../notices/google-vision';
 import { analyzeNoticeWithOpenAI } from '../notices/openai-analyze';
 
-const FREE_SCANS_PER_MONTH = 2;
 const MAX_SCAN_BYTES = 10 * 1024 * 1024;
-
-function monthStart(d: Date): Date {
-  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1, 0, 0, 0));
-}
 
 function computeAnonKey(ip: string | null, ua: string | null): string | null {
   if (!ip && !ua) return null;
@@ -59,25 +55,22 @@ export const noticesRouter = router({
     const userId = ctx.authUserId;
     const anonKey = userId ? null : computeAnonKey(ctx.requestIp, ctx.userAgent);
 
-    // Enforce free tier limits (2/month) for authenticated and anonymous (best-effort).
-    const start = monthStart(now);
+    // Enforce plan limits for authenticated users, and free tier for anonymous (best-effort).
+    const start = monthStartUtc(now);
     if (userId) {
-      const rows = await ctx.db
-        .select({ id: noticeScan.id })
-        .from(noticeScan)
-        .where(and(eq(noticeScan.userId, userId), gte(noticeScan.createdAt, start)))
-        .limit(FREE_SCANS_PER_MONTH + 1);
-      if (rows.length >= FREE_SCANS_PER_MONTH) {
-        throw new TRPCError({ code: 'TOO_MANY_REQUESTS', message: 'Free tier limit reached (2 scans/month).' });
+      const ent = await computeEntitlementsForUser({ db: ctx.db, userId, now });
+      const limit = ent.limits.noticeScansPerMonth;
+      if (limit != null && ent.usage.noticeScansThisPeriod >= limit) {
+        throw new TRPCError({ code: 'TOO_MANY_REQUESTS', message: `Monthly limit reached (${limit} scans). Upgrade for unlimited.` });
       }
     } else if (anonKey) {
       const rows = await ctx.db
         .select({ id: noticeScan.id })
         .from(noticeScan)
         .where(and(eq(noticeScan.anonKey, anonKey), gte(noticeScan.createdAt, start)))
-        .limit(FREE_SCANS_PER_MONTH + 1);
-      if (rows.length >= FREE_SCANS_PER_MONTH) {
-        throw new TRPCError({ code: 'TOO_MANY_REQUESTS', message: 'Free tier limit reached (2 scans/month).' });
+        .limit(3);
+      if (rows.length >= 2) {
+        throw new TRPCError({ code: 'TOO_MANY_REQUESTS', message: 'Free tier limit reached (2 scans/month). Sign in and upgrade for more.' });
       }
     }
 
@@ -103,6 +96,10 @@ export const noticesRouter = router({
       createdAt: now,
       updatedAt: now,
     });
+
+    if (userId) {
+      await incrementUsageMeter({ db: ctx.db, userId, meterKey: 'notice_scans', periodStartAt: start });
+    }
 
     const { url } = await presignPutNoticeObject(ctx.s3Documents, {
       key,

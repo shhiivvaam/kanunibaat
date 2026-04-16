@@ -20,6 +20,7 @@ import {
   loadProfileBundle,
 } from './profile-service';
 import { adminRouter } from './routers/admin';
+import { billingRouter } from './routers/billing';
 import { caseTrackerRouter } from './routers/case-tracker';
 import { casesRouter } from './routers/cases';
 import { consultationsRouter } from './routers/consultations';
@@ -64,6 +65,7 @@ export const appRouter = router({
   caseTracker: caseTrackerRouter,
   content: contentRouter,
   qa: qaRouter,
+  billing: billingRouter,
 
   waitlist: router({
     submitUser: publicProcedure.input(userWaitlistInputSchema).mutation(async ({ ctx, input }) => {

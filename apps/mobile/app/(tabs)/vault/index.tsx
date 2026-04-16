@@ -21,8 +21,10 @@ export default function VaultListScreen() {
           <View style={styles.usage}>
             <Text style={styles.usageText}>
               {q.data.usage.completeCount} / {q.data.usage.maxDocuments} docs ·{' '}
-              {Math.round(q.data.usage.totalBytes / 1024)} KB / {Math.round(q.data.usage.maxTotalBytes / (1024 * 1024))}{' '}
-              MB
+              {Math.round(q.data.usage.totalBytes / 1024)} KB /{' '}
+              {q.data.usage.maxTotalBytes == null
+                ? 'unlimited'
+                : `${Math.round(q.data.usage.maxTotalBytes / (1024 * 1024))} MB`}
             </Text>
           </View>
           <Pressable style={styles.primaryBtn} onPress={() => router.push('/(tabs)/vault/upload' as never)}>
