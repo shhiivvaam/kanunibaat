@@ -10,6 +10,7 @@ import 'react-native-reanimated';
 
 import { TrpcProvider } from '@/components/TrpcProvider';
 import { useColorScheme } from '@/components/useColorScheme';
+import { PushNotificationsClient } from '@/components/PushNotificationsClient';
 import * as Sentry from '@sentry/react-native';
 
 const mobileDsn = process.env.EXPO_PUBLIC_SENTRY_DSN;
@@ -65,6 +66,7 @@ function RootLayoutNav() {
   return (
     <TrpcProvider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <PushNotificationsClient />
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal' }} />

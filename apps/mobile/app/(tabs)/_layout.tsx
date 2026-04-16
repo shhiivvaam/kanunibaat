@@ -69,6 +69,13 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="case-tracker"
+        options={{
+          title: 'Case Tracker',
+          tabBarIcon: ({ color }) => <TabBarIcon name="search" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="guide"
         options={{
           title: 'Kya Karein?',

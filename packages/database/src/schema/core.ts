@@ -443,6 +443,68 @@ export const lawyerInvoicePaymentStatusEnum = pgEnum('lawyer_invoice_payment_sta
   'failed',
 ]);
 
+export const kbPushPlatformEnum = pgEnum('kb_push_platform', ['expo', 'webpush']);
+
+export const kbNotificationKindEnum = pgEnum('kb_notification_kind', [
+  'hearing_reminder',
+  'consultation_reminder',
+  'consultation_message',
+  'case_update',
+]);
+
+export const kbNotificationJobStatusEnum = pgEnum('kb_notification_job_status', ['pending', 'sent', 'failed']);
+
+export const pushDestination = pgTable('push_destination', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id').references(() => user.id, { onDelete: 'cascade' }),
+  platform: kbPushPlatformEnum('platform').notNull(),
+  expoPushToken: text('expo_push_token').unique(),
+  webpushEndpoint: text('webpush_endpoint').unique(),
+  webpushP256dh: text('webpush_p256dh'),
+  webpushAuth: text('webpush_auth'),
+  deviceLabel: text('device_label'),
+  enabled: boolean('enabled').notNull().default(true),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+});
+
+export const notificationJob = pgTable(
+  'notification_job',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    kind: kbNotificationKindEnum('kind').notNull(),
+    dedupeKey: text('dedupe_key').notNull().unique(),
+    scheduledAt: timestamp('scheduled_at', { withTimezone: true, mode: 'date' }).notNull(),
+    sentAt: timestamp('sent_at', { withTimezone: true, mode: 'date' }),
+    status: kbNotificationJobStatusEnum('status').notNull().default('pending'),
+    payloadJson: jsonb('payload_json').$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('notification_job_dedupe_key_uidx').on(t.dedupeKey)],
+);
+
+export const caseTracker = pgTable(
+  'case_tracker',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    cnr: text('cnr').notNull(),
+    enabled: boolean('enabled').notNull().default(true),
+    lastSnapshotHash: text('last_snapshot_hash'),
+    lastSnapshotJson: jsonb('last_snapshot_json').$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
+    nextCheckAt: timestamp('next_check_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('case_tracker_user_cnr_uidx').on(t.userId, t.cnr)],
+);
+
 export const lawyerInvoice = pgTable(
   'lawyer_invoice',
   {
@@ -709,4 +771,16 @@ export const lawyerTimeEntryRelations = relations(lawyerTimeEntry, ({ one }) => 
 
 export const lawyerInvoicePaymentRelations = relations(lawyerInvoicePayment, ({ one }) => ({
   invoice: one(lawyerInvoice, { fields: [lawyerInvoicePayment.invoiceId], references: [lawyerInvoice.id] }),
+}));
+
+export const pushDestinationRelations = relations(pushDestination, ({ one }) => ({
+  user: one(user, { fields: [pushDestination.userId], references: [user.id] }),
+}));
+
+export const notificationJobRelations = relations(notificationJob, ({ one }) => ({
+  user: one(user, { fields: [notificationJob.userId], references: [user.id] }),
+}));
+
+export const caseTrackerRelations = relations(caseTracker, ({ one }) => ({
+  user: one(user, { fields: [caseTracker.userId], references: [user.id] }),
 }));

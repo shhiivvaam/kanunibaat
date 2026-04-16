@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 import { AppShellNav } from '@/components/app-shell-nav';
+import { PushNotificationsClient } from '@/components/push-notifications-client';
 import { auth } from '@/lib/auth';
 
 export default async function AppShellLayout({ children }: { children: React.ReactNode }) {
@@ -18,6 +19,7 @@ export default async function AppShellLayout({ children }: { children: React.Rea
           <Link href="/app" className="text-sm font-semibold text-[#C2410C]" style={{ fontFamily: 'var(--font-display)' }}>
             KanuniBaat
           </Link>
+          <PushNotificationsClient />
           <AppShellNav />
         </div>
       </header>

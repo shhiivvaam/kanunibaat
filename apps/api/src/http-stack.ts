@@ -9,6 +9,8 @@ import pinoHttp from 'pino-http';
 
 import { appRouter, createTrpcContextFactory } from '@kb/trpc';
 
+import { createCaseTrackerPollHandler } from './case-tracker-poll';
+import { createNotificationsDispatchHandler } from './notifications-dispatch';
 import { createRazorpayWebhookHandler } from './razorpay-webhook';
 
 export type TrpcContextCreator = ReturnType<typeof createTrpcContextFactory>;
@@ -75,6 +77,22 @@ export function attachPublicHttpMiddlewares(
       '/webhooks/razorpay',
       express.raw({ type: 'application/json' }),
       createRazorpayWebhookHandler({ webhookSecret }),
+    );
+  }
+
+  const internalCronSecret = process.env.INTERNAL_CRON_SECRET?.trim();
+  if (internalCronSecret) {
+    httpServer.post(
+      '/internal/notifications/dispatch',
+      express.json({ limit: '1mb' }),
+      createNotificationsDispatchHandler({
+        internalSecret: internalCronSecret,
+      }),
+    );
+    httpServer.post(
+      '/internal/case-tracker/poll',
+      express.json({ limit: '1mb' }),
+      createCaseTrackerPollHandler({ internalSecret: internalCronSecret }),
     );
   }
 }

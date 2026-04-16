@@ -57,6 +57,20 @@
       "when": 1776296000000,
       "tag": "0007_phase10_practice_billing",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1776298000000,
+      "tag": "0008_phase11_notifications",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1776300000000,
+      "tag": "0009_phase11_case_tracker",
+      "breakpoints": true
     }
   ]
 }

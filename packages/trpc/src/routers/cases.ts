@@ -13,6 +13,7 @@ import {
   lawyerCaseHearing,
   lawyerCaseTask,
   lawyerClient,
+  notificationJob,
 } from '@kb/database/schema';
 import {
   caseDocumentObjectKey,
@@ -23,7 +24,56 @@ import {
 } from '@kb/storage';
 
 import { fetchCourtSnapshotViaBridge, normalizeAndValidateCnr } from '../cases/njdg-lookup';
+import { makeDedupeKey } from '../notifications/payload';
+import { computeReminderTimes, HEARING_REMINDER_OFFSETS_MS } from '../notifications/schedule';
 import { lawyerProcedure, router } from '../init';
+
+async function upsertReminderJobsForHearing(opts: {
+  db: PostgresJsDatabase<typeof DbSchema>;
+  userId: string;
+  hearingId: string;
+  hearingAt: Date;
+  caseId: string;
+}): Promise<void> {
+  const now = new Date();
+  const times = computeReminderTimes({ at: opts.hearingAt, now, offsetsMs: HEARING_REMINDER_OFFSETS_MS });
+  for (const t of times) {
+    const offsetMs = opts.hearingAt.getTime() - t.getTime();
+    const dedupeKey = makeDedupeKey(['hearing', opts.hearingId, offsetMs]);
+    await opts.db
+      .insert(notificationJob)
+      .values({
+        userId: opts.userId,
+        kind: 'hearing_reminder',
+        dedupeKey,
+        scheduledAt: t,
+        payloadJson: {
+          title: 'Hearing reminder',
+          body: 'Upcoming hearing scheduled.',
+          url: `/app/practice/cases/${opts.caseId}`,
+          mobilePath: `/practice/${opts.caseId}`,
+          data: { caseId: opts.caseId, hearingId: opts.hearingId, hearingAt: opts.hearingAt.toISOString() },
+        },
+        updatedAt: now,
+      })
+      .onConflictDoUpdate({
+        target: notificationJob.dedupeKey,
+        set: {
+          scheduledAt: t,
+          status: 'pending',
+          sentAt: null,
+          payloadJson: {
+            title: 'Hearing reminder',
+            body: 'Upcoming hearing scheduled.',
+            url: `/app/practice/cases/${opts.caseId}`,
+            mobilePath: `/practice/${opts.caseId}`,
+            data: { caseId: opts.caseId, hearingId: opts.hearingId, hearingAt: opts.hearingAt.toISOString() },
+          },
+          updatedAt: now,
+        },
+      });
+  }
+}
 
 const courtTypeSchema = z.enum(['district', 'high_court', 'supreme_court', 'tribunal', 'other']);
 const caseStatusSchema = z.enum([
@@ -356,6 +406,15 @@ export const casesRouter = router({
             actionItems: input.actionItems ?? [],
           })
           .returning();
+        if (created) {
+          await upsertReminderJobsForHearing({
+            db: ctx.db,
+            userId: ctx.authUserId,
+            hearingId: created.id,
+            hearingAt: created.hearingAt,
+            caseId: input.caseId,
+          });
+        }
         return { hearing: created ?? null };
       }),
 
@@ -392,6 +451,15 @@ export const casesRouter = router({
           .set(patch)
           .where(eq(lawyerCaseHearing.id, input.id))
           .returning();
+        if (updated?.hearingAt) {
+          await upsertReminderJobsForHearing({
+            db: ctx.db,
+            userId: ctx.authUserId,
+            hearingId: updated.id,
+            hearingAt: updated.hearingAt,
+            caseId: input.caseId,
+          });
+        }
         return { hearing: updated ?? null };
       }),
 

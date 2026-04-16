@@ -2,7 +2,14 @@ import { TRPCError } from '@trpc/server';
 import { and, asc, desc, eq, or } from 'drizzle-orm';
 import { z } from 'zod';
 
-import { consultation, consultationMessage, lawyerAvailability, lawyerProfile, payment } from '@kb/database/schema';
+import {
+  consultation,
+  consultationMessage,
+  lawyerAvailability,
+  lawyerProfile,
+  notificationJob,
+  payment,
+} from '@kb/database/schema';
 
 import type { TrpcContext } from '../context';
 import {
@@ -11,6 +18,8 @@ import {
   requireConfiguredRazorpay,
 } from '../integrations/razorpay';
 import { protectedProcedure, router } from '../init';
+import { makeDedupeKey } from '../notifications/payload';
+import { computeReminderTimes, HEARING_REMINDER_OFFSETS_MS } from '../notifications/schedule';
 
 type TrpcDb = TrpcContext['db'];
 type LawyerAvailabilityRow = typeof lawyerAvailability.$inferSelect;
@@ -221,6 +230,46 @@ export const consultationsRouter = router({
           .update(consultation)
           .set({ status: 'scheduled', updatedAt: new Date() })
           .where(eq(consultation.id, c.id));
+
+        if (c.scheduledAt) {
+          const reminderTimes = computeReminderTimes({ at: c.scheduledAt, offsetsMs: HEARING_REMINDER_OFFSETS_MS });
+          for (const t of reminderTimes) {
+            const offsetMs = c.scheduledAt.getTime() - t.getTime();
+            const dedupeKey = makeDedupeKey(['consultation', c.id, offsetMs, 'reminder']);
+            await tx
+              .insert(notificationJob)
+              .values({
+                userId: c.userId,
+                kind: 'consultation_reminder',
+                dedupeKey,
+                scheduledAt: t,
+                payloadJson: {
+                  title: 'Consultation reminder',
+                  body: 'Your consultation is coming up soon.',
+                  url: `/app/consultations/${c.id}`,
+                  mobilePath: `/consultations/${c.id}`,
+                  data: { consultationId: c.id, scheduledAt: c.scheduledAt.toISOString() },
+                },
+                updatedAt: new Date(),
+              })
+              .onConflictDoUpdate({
+                target: notificationJob.dedupeKey,
+                set: {
+                  scheduledAt: t,
+                  status: 'pending',
+                  sentAt: null,
+                  payloadJson: {
+                    title: 'Consultation reminder',
+                    body: 'Your consultation is coming up soon.',
+                    url: `/app/consultations/${c.id}`,
+                    mobilePath: `/consultations/${c.id}`,
+                    data: { consultationId: c.id, scheduledAt: c.scheduledAt.toISOString() },
+                  },
+                  updatedAt: new Date(),
+                },
+              });
+          }
+        }
       });
 
       return { ok: true as const };
@@ -308,7 +357,7 @@ export const consultationsRouter = router({
       .mutation(async ({ ctx, input }) => {
         const userId = ctx.authUserId;
         const [c] = await ctx.db
-          .select({ id: consultation.id })
+          .select({ id: consultation.id, userId: consultation.userId, lawyerUserId: consultation.lawyerUserId })
           .from(consultation)
           .where(
             and(
@@ -324,6 +373,29 @@ export const consultationsRouter = router({
           .values({ consultationId: input.consultationId, senderUserId: userId, body: input.body })
           .returning();
         if (!m) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Failed to send message.' });
+
+        const recipientUserId = userId === c.userId ? c.lawyerUserId : c.userId;
+        if (recipientUserId) {
+          const now = new Date();
+          const dedupeKey = makeDedupeKey(['consultation_message', m.id, recipientUserId]);
+          await ctx.db
+            .insert(notificationJob)
+            .values({
+              userId: recipientUserId,
+              kind: 'consultation_message',
+              dedupeKey,
+              scheduledAt: now,
+              payloadJson: {
+                title: 'New message',
+                body: 'You have a new consultation message.',
+                url: `/app/consultations/${input.consultationId}`,
+                mobilePath: `/consultations/${input.consultationId}`,
+                data: { consultationId: input.consultationId, messageId: m.id },
+              },
+              updatedAt: now,
+            })
+            .onConflictDoNothing({ target: notificationJob.dedupeKey });
+        }
         return m;
       }),
 
