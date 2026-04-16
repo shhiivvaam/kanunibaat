@@ -73,6 +73,24 @@ export function PracticeDashboard() {
         >
           All cases
         </Link>
+        <Link
+          href="/app/practice/analytics"
+          className="rounded-xl border border-[#D6D3D1] bg-white px-4 py-2 text-sm font-semibold text-[#44403C] hover:bg-[#FAFAF9]"
+        >
+          Analytics
+        </Link>
+        <Link
+          href="/app/practice/invoices"
+          className="rounded-xl border border-[#D6D3D1] bg-white px-4 py-2 text-sm font-semibold text-[#44403C] hover:bg-[#FAFAF9]"
+        >
+          Invoices
+        </Link>
+        <Link
+          href="/app/practice/billing-settings"
+          className="rounded-xl border border-[#D6D3D1] bg-white px-4 py-2 text-sm font-semibold text-[#44403C] hover:bg-[#FAFAF9]"
+        >
+          GST & firm
+        </Link>
       </div>
 
       <section className="rounded-xl border border-[#E7E5E4] bg-white p-4 shadow-sm">

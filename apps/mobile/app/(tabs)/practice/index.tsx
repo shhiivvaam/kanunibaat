@@ -66,6 +66,15 @@ export default function PracticeDashboardScreen() {
       <Link href={'/(tabs)/practice/cases' as never} style={styles.btnPrimary}>
         <Text style={styles.btnPrimaryText}>All cases</Text>
       </Link>
+      <Link href={'/(tabs)/practice/analytics' as never} style={styles.btnSecondary}>
+        <Text style={styles.btnSecondaryText}>Analytics</Text>
+      </Link>
+      <Link href={'/(tabs)/practice/invoices' as never} style={styles.btnSecondary}>
+        <Text style={styles.btnSecondaryText}>Invoices</Text>
+      </Link>
+      <Link href={'/(tabs)/practice/billing-settings' as never} style={styles.btnSecondary}>
+        <Text style={styles.btnSecondaryText}>GST & firm</Text>
+      </Link>
 
       <Text style={styles.sectionTitle}>Upcoming (7 days)</Text>
       {calendar.isError ? (

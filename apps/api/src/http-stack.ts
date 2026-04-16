@@ -49,6 +49,8 @@ export function attachPublicHttpMiddlewares(
           return 20;
         }
         if (u.includes('research.judgments.search')) return 40;
+        if (u.includes('practice.billing.invoice.pdfBase64')) return 30;
+        if (u.includes('practice.billing.invoice.createPaymentOrder')) return 20;
         return 120;
       },
       standardHeaders: true,

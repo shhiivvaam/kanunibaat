@@ -22,6 +22,16 @@ export function AppShellNav() {
         </Link>
       ) : null}
       {isLawyer ? (
+        <Link href="/app/practice/analytics" className="text-[#57534E] hover:text-[#C2410C]">
+          Analytics
+        </Link>
+      ) : null}
+      {isLawyer ? (
+        <Link href="/app/practice/invoices" className="text-[#57534E] hover:text-[#C2410C]">
+          Invoices
+        </Link>
+      ) : null}
+      {isLawyer ? (
         <Link href="/app/research" className="text-[#57534E] hover:text-[#C2410C]">
           Research
         </Link>

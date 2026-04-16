@@ -35,6 +35,7 @@ const caseStatusSchema = z.enum([
   'closed',
   'appealed',
 ]);
+const caseOutcomeSchema = z.enum(['unknown', 'won', 'lost', 'settled', 'withdrawn']);
 const taskPrioritySchema = z.enum(['low', 'normal', 'high']);
 const taskStatusSchema = z.enum(['open', 'done']);
 
@@ -93,6 +94,7 @@ export const casesRouter = router({
           email: z.string().email().max(200).optional().nullable(),
           platformUserId: z.string().min(1).max(128).optional().nullable(),
           notes: z.string().max(8000).optional().default(''),
+          referralSource: z.string().max(200).optional().nullable(),
         }),
       )
       .mutation(async ({ ctx, input }) => {
@@ -106,6 +108,7 @@ export const casesRouter = router({
             email: input.email ?? null,
             platformUserId: input.platformUserId ?? null,
             notes: input.notes ?? '',
+            referralSource: input.referralSource ?? null,
             updatedAt: now,
           })
           .returning();
@@ -121,6 +124,7 @@ export const casesRouter = router({
           email: z.string().email().max(200).nullable().optional(),
           platformUserId: z.string().min(1).max(128).nullable().optional(),
           notes: z.string().max(8000).optional(),
+          referralSource: z.string().max(200).nullable().optional(),
         }),
       )
       .mutation(async ({ ctx, input }) => {
@@ -131,6 +135,7 @@ export const casesRouter = router({
         if (input.email !== undefined) patch.email = input.email;
         if (input.platformUserId !== undefined) patch.platformUserId = input.platformUserId;
         if (input.notes !== undefined) patch.notes = input.notes;
+        if (input.referralSource !== undefined) patch.referralSource = input.referralSource;
         const [updated] = await ctx.db
           .update(lawyerClient)
           .set(patch)
@@ -265,6 +270,7 @@ export const casesRouter = router({
           nextHearingAt: z.coerce.date().nullable().optional(),
           feeAgreedInr: z.number().int().nonnegative().nullable().optional(),
           outcome: z.string().max(8000).nullable().optional(),
+          caseOutcome: caseOutcomeSchema.optional(),
           closedAt: z.coerce.date().nullable().optional(),
         }),
       )
@@ -290,6 +296,7 @@ export const casesRouter = router({
           'nextHearingAt',
           'feeAgreedInr',
           'outcome',
+          'caseOutcome',
           'closedAt',
         ] as const;
         for (const k of fields) {

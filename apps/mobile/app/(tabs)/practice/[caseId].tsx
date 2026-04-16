@@ -24,6 +24,8 @@ const STATUSES = [
   'appealed',
 ] as const;
 
+const CASE_OUTCOMES = ['unknown', 'won', 'lost', 'settled', 'withdrawn'] as const;
+
 export default function PracticeCaseDetailScreen() {
   const { caseId } = useLocalSearchParams<{ caseId: string }>();
   const id = typeof caseId === 'string' ? caseId : '';
@@ -33,6 +35,20 @@ export default function PracticeCaseDetailScreen() {
   const hearings = trpc.cases.hearing.list.useQuery({ caseId: id }, { enabled: Boolean(id) });
   const tasks = trpc.cases.task.list.useQuery({ caseId: id }, { enabled: Boolean(id) });
   const documents = trpc.cases.document.list.useQuery({ caseId: id }, { enabled: Boolean(id) });
+  const timeList = trpc.practice.billing.timeEntry.list.useQuery({ caseId: id }, { enabled: Boolean(id) });
+  const timeActive = trpc.practice.billing.timeEntry.active.useQuery(undefined, { enabled: Boolean(id) });
+  const timeStart = trpc.practice.billing.timeEntry.start.useMutation({
+    onSuccess: async () => {
+      await utils.practice.billing.timeEntry.list.invalidate({ caseId: id });
+      await utils.practice.billing.timeEntry.active.invalidate();
+    },
+  });
+  const timeStop = trpc.practice.billing.timeEntry.stop.useMutation({
+    onSuccess: async () => {
+      await utils.practice.billing.timeEntry.list.invalidate({ caseId: id });
+      await utils.practice.billing.timeEntry.active.invalidate();
+    },
+  });
 
   const updateCase = trpc.cases.case.update.useMutation({
     onSuccess: async () => {
@@ -45,6 +61,8 @@ export default function PracticeCaseDetailScreen() {
   const [statusIdx, setStatusIdx] = useState(0);
   const [cnrInput, setCnrInput] = useState('');
   const [description, setDescription] = useState('');
+  const [outcomeIdx, setOutcomeIdx] = useState(0);
+  const [tick, setTick] = useState(0);
   const metaHydrated = useRef(false);
 
   useEffect(() => {
@@ -60,7 +78,15 @@ export default function PracticeCaseDetailScreen() {
     setStatusIdx(si >= 0 ? si : 0);
     setCnrInput(row.cnrNumber ?? '');
     setDescription(row.description ?? '');
+    const oi = CASE_OUTCOMES.indexOf(row.caseOutcome as (typeof CASE_OUTCOMES)[number]);
+    setOutcomeIdx(oi >= 0 ? oi : 0);
   }, [c.data?.case]);
+
+  useEffect(() => {
+    if (!timeActive.data?.entry) return;
+    const tmr = setInterval(() => setTick((t) => t + 1), 1000);
+    return () => clearInterval(tmr);
+  }, [timeActive.data?.entry?.id]);
 
   const hearingCreate = trpc.cases.hearing.create.useMutation({
     onSuccess: async () => {
@@ -187,6 +213,17 @@ export default function PracticeCaseDetailScreen() {
       <TextInput style={styles.input} value={cnrInput} onChangeText={setCnrInput} />
       <Text style={[styles.label, { marginTop: 10 }]}>Description</Text>
       <TextInput style={[styles.input, { minHeight: 72 }]} value={description} onChangeText={setDescription} multiline />
+      <Text style={[styles.label, { marginTop: 10 }]}>Outcome (for analytics)</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipsScroll}>
+        {CASE_OUTCOMES.map((s, i) => (
+          <Pressable key={s} style={[styles.chip, outcomeIdx === i && styles.chipOn]} onPress={() => setOutcomeIdx(i)}>
+            <Text style={[styles.chipText, outcomeIdx === i && styles.chipTextOn]}>{s}</Text>
+          </Pressable>
+        ))}
+      </ScrollView>
+      <Link href={`/(tabs)/practice/invoices?caseId=${encodeURIComponent(id)}` as never} style={[styles.btnSecondary, { marginTop: 12 }]}>
+        <Text style={styles.btnSecondaryText}>New invoice for this case</Text>
+      </Link>
       <Pressable
         style={styles.btn}
         disabled={updateCase.isPending}
@@ -197,12 +234,58 @@ export default function PracticeCaseDetailScreen() {
             status: STATUSES[statusIdx],
             cnrNumber: cnrInput.trim() || null,
             description: description.trim(),
+            caseOutcome: CASE_OUTCOMES[outcomeIdx],
           })
         }
       >
         <Text style={styles.btnText}>Save</Text>
       </Pressable>
       {updateCase.error ? <Text style={styles.error}>{updateCase.error.message}</Text> : null}
+
+      <Text style={styles.section}>Billable time</Text>
+      {timeActive.data?.entry && timeActive.data.entry.caseId === id ? (
+        <View style={{ marginTop: 8, padding: 12, borderRadius: 12, backgroundColor: '#fffbeb' }}>
+          <Text style={styles.muted}>
+            Running…{' '}
+            {(() => {
+              void tick;
+              const secs = Math.floor(
+                (Date.now() - new Date(timeActive.data!.entry!.startedAt).getTime()) / 1000,
+              );
+              return `${Math.floor(secs / 3600)}h ${Math.floor((secs % 3600) / 60)}m`;
+            })()}
+          </Text>
+          <Pressable
+            style={[styles.btn, { marginTop: 8 }]}
+            disabled={timeStop.isPending}
+            onPress={() => void timeStop.mutateAsync({ id: timeActive.data.entry!.id })}
+          >
+            <Text style={styles.btnText}>Stop</Text>
+          </Pressable>
+        </View>
+      ) : timeActive.data?.entry ? (
+        <Pressable
+          style={[styles.btnSecondary, { marginTop: 8 }]}
+          disabled={timeStop.isPending}
+          onPress={() => void timeStop.mutateAsync({ id: timeActive.data.entry!.id })}
+        >
+          <Text style={styles.btnSecondaryText}>Stop timer on another case</Text>
+        </Pressable>
+      ) : (
+        <Pressable
+          style={[styles.btn, { marginTop: 8, backgroundColor: '#15803d' }]}
+          disabled={timeStart.isPending}
+          onPress={() => void timeStart.mutateAsync({ caseId: id })}
+        >
+          <Text style={styles.btnText}>Start timer</Text>
+        </Pressable>
+      )}
+      {(timeList.data ?? []).slice(0, 8).map((e) => (
+        <Text key={e.id} style={styles.row}>
+          {new Date(e.startedAt).toLocaleString()}
+          {e.durationSeconds != null ? ` · ${(e.durationSeconds / 3600).toFixed(2)}h` : ''}
+        </Text>
+      ))}
 
       <Text style={styles.section}>Court lookup (CNR)</Text>
       <TextInput style={styles.input} value={lookupInput} onChangeText={setLookupInput} placeholder="CNR" />

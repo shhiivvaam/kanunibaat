@@ -26,6 +26,7 @@ import { emergencyGuideRouter } from './routers/emergency-guide';
 import { lawyerRouter } from './routers/lawyer';
 import { marketplaceRouter } from './routers/marketplace';
 import { noticesRouter } from './routers/notices';
+import { practiceRouter } from './routers/practice';
 import { researchRouter } from './routers/research';
 import { vaultRouter } from './routers/vault';
 
@@ -53,6 +54,7 @@ export const appRouter = router({
   emergencyGuide: emergencyGuideRouter,
   vault: vaultRouter,
   cases: casesRouter,
+  practice: practiceRouter,
   research: researchRouter,
 
   waitlist: router({

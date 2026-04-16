@@ -5,6 +5,8 @@ import { relations, sql } from 'drizzle-orm';
 import type { AnyPgColumn } from 'drizzle-orm/pg-core';
 import {
   boolean,
+  date,
+  doublePrecision,
   integer,
   jsonb,
   pgEnum,
@@ -12,6 +14,7 @@ import {
   primaryKey,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
 
@@ -298,9 +301,18 @@ export const lawyerClient = pgTable('lawyer_client', {
   phone: text('phone'),
   email: text('email'),
   notes: text('notes').notNull().default(''),
+  referralSource: text('referral_source'),
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
 });
+
+export const lawyerCaseOutcomeEnum = pgEnum('lawyer_case_outcome', [
+  'unknown',
+  'won',
+  'lost',
+  'settled',
+  'withdrawn',
+]);
 
 export const lawyerCase = pgTable('lawyer_case', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -322,6 +334,7 @@ export const lawyerCase = pgTable('lawyer_case', {
   nextHearingAt: timestamp('next_hearing_at', { withTimezone: true, mode: 'date' }),
   feeAgreedInr: integer('fee_agreed_inr'),
   outcome: text('outcome'),
+  caseOutcome: lawyerCaseOutcomeEnum('case_outcome').notNull().default('unknown'),
   closedAt: timestamp('closed_at', { withTimezone: true, mode: 'date' }),
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
@@ -370,6 +383,147 @@ export const lawyerCaseDocument = pgTable('lawyer_case_document', {
   visibleToClient: boolean('visible_to_client').notNull().default(false),
   uploadStatus: lawyerCaseDocumentUploadStatusEnum('upload_status').notNull().default('pending'),
   uploadedAt: timestamp('uploaded_at', { withTimezone: true, mode: 'date' }),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+});
+
+/** Phase 10: GST / firm details for invoices (one row per lawyer user). */
+export const lawyerFirmProfile = pgTable('lawyer_firm_profile', {
+  userId: text('user_id')
+    .primaryKey()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  legalName: text('legal_name').notNull().default(''),
+  addressLine1: text('address_line1').notNull().default(''),
+  addressLine2: text('address_line2').notNull().default(''),
+  city: text('city').notNull().default(''),
+  stateCode: text('state_code').notNull().default(''),
+  pincode: text('pincode').notNull().default(''),
+  gstin: text('gstin'),
+  pan: text('pan'),
+  defaultHsnSac: text('default_hsn_sac').notNull().default('998212'),
+  invoicePrefix: text('invoice_prefix').notNull().default('INV'),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+});
+
+export const lawyerInvoiceCounter = pgTable(
+  'lawyer_invoice_counter',
+  {
+    lawyerUserId: text('lawyer_user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    fyStartYear: integer('fy_start_year').notNull(),
+    lastSequence: integer('last_sequence').notNull().default(0),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.lawyerUserId, t.fyStartYear] })],
+);
+
+export const lawyerInvoiceStatusEnum = pgEnum('lawyer_invoice_status', [
+  'draft',
+  'sent',
+  'partially_paid',
+  'paid',
+  'void',
+]);
+
+export const lawyerInvoiceSupplyTypeEnum = pgEnum('lawyer_invoice_supply_type', ['intrastate', 'interstate']);
+
+export const lawyerInvoiceLineKindEnum = pgEnum('lawyer_invoice_line_kind', [
+  'consultation',
+  'hearing',
+  'drafting',
+  'time',
+  'misc',
+]);
+
+export const lawyerInvoicePaymentStatusEnum = pgEnum('lawyer_invoice_payment_status', [
+  'created',
+  'paid',
+  'failed',
+]);
+
+export const lawyerInvoice = pgTable(
+  'lawyer_invoice',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    lawyerUserId: text('lawyer_user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    caseId: uuid('case_id').references(() => lawyerCase.id, { onDelete: 'set null' }),
+    consultationId: uuid('consultation_id').references(() => consultation.id, { onDelete: 'set null' }),
+    invoiceNumber: text('invoice_number').notNull(),
+    status: lawyerInvoiceStatusEnum('status').notNull().default('draft'),
+    supplyType: lawyerInvoiceSupplyTypeEnum('supply_type').notNull().default('intrastate'),
+    clientName: text('client_name').notNull().default(''),
+    clientEmail: text('client_email'),
+    clientGstin: text('client_gstin'),
+    clientAddress: text('client_address').notNull().default(''),
+    placeOfSupply: text('place_of_supply').notNull().default(''),
+    taxableInr: integer('taxable_inr').notNull().default(0),
+    cgstInr: integer('cgst_inr').notNull().default(0),
+    sgstInr: integer('sgst_inr').notNull().default(0),
+    igstInr: integer('igst_inr').notNull().default(0),
+    totalInr: integer('total_inr').notNull().default(0),
+    currency: text('currency').notNull().default('INR'),
+    issueDate: date('issue_date', { mode: 'date' }).notNull(),
+    dueDate: date('due_date', { mode: 'date' }),
+    notes: text('notes').notNull().default(''),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('lawyer_invoice_number_uidx').on(t.lawyerUserId, t.invoiceNumber)],
+);
+
+export const lawyerInvoiceLine = pgTable('lawyer_invoice_line', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  invoiceId: uuid('invoice_id')
+    .notNull()
+    .references(() => lawyerInvoice.id, { onDelete: 'cascade' }),
+  kind: lawyerInvoiceLineKindEnum('kind').notNull().default('misc'),
+  description: text('description').notNull(),
+  quantity: doublePrecision('quantity').notNull().default(1),
+  unitRateInr: integer('unit_rate_inr').notNull(),
+  taxRatePercent: integer('tax_rate_percent').notNull().default(18),
+  taxableInr: integer('taxable_inr').notNull(),
+  hsnSac: text('hsn_sac'),
+  sortOrder: integer('sort_order').notNull().default(0),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+});
+
+export const lawyerTimeEntry = pgTable(
+  'lawyer_time_entry',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    lawyerUserId: text('lawyer_user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    caseId: uuid('case_id')
+      .notNull()
+      .references(() => lawyerCase.id, { onDelete: 'cascade' }),
+    taskId: uuid('task_id').references(() => lawyerCaseTask.id, { onDelete: 'set null' }),
+    startedAt: timestamp('started_at', { withTimezone: true, mode: 'date' }).notNull(),
+    endedAt: timestamp('ended_at', { withTimezone: true, mode: 'date' }),
+    durationSeconds: integer('duration_seconds'),
+    notes: text('notes').notNull().default(''),
+    billedInvoiceId: uuid('billed_invoice_id').references(() => lawyerInvoice.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  },
+);
+
+export const lawyerInvoicePayment = pgTable('lawyer_invoice_payment', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  invoiceId: uuid('invoice_id')
+    .notNull()
+    .references(() => lawyerInvoice.id, { onDelete: 'cascade' }),
+  amountInr: integer('amount_inr').notNull(),
+  currency: text('currency').notNull().default('INR'),
+  status: lawyerInvoicePaymentStatusEnum('status').notNull().default('created'),
+  razorpayOrderId: text('razorpay_order_id').unique(),
+  razorpayPaymentId: text('razorpay_payment_id'),
+  razorpaySignature: text('razorpay_signature'),
+  paidAt: timestamp('paid_at', { withTimezone: true, mode: 'date' }),
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
 });
@@ -454,6 +608,7 @@ export const consultationRelations = relations(consultation, ({ one, many }) => 
   lawyer: one(user, { fields: [consultation.lawyerUserId], references: [user.id] }),
   payments: many(payment),
   messages: many(consultationMessage),
+  invoices: many(lawyerInvoice),
 }));
 
 export const paymentRelations = relations(payment, ({ one }) => ({
@@ -506,18 +661,52 @@ export const lawyerCaseRelations = relations(lawyerCase, ({ one, many }) => ({
   hearings: many(lawyerCaseHearing),
   tasks: many(lawyerCaseTask),
   documents: many(lawyerCaseDocument),
+  invoices: many(lawyerInvoice),
+  timeEntries: many(lawyerTimeEntry),
 }));
 
 export const lawyerCaseHearingRelations = relations(lawyerCaseHearing, ({ one }) => ({
   case: one(lawyerCase, { fields: [lawyerCaseHearing.caseId], references: [lawyerCase.id] }),
 }));
 
-export const lawyerCaseTaskRelations = relations(lawyerCaseTask, ({ one }) => ({
+export const lawyerCaseTaskRelations = relations(lawyerCaseTask, ({ one, many }) => ({
   case: one(lawyerCase, { fields: [lawyerCaseTask.caseId], references: [lawyerCase.id] }),
   assignee: one(user, { fields: [lawyerCaseTask.assigneeUserId], references: [user.id] }),
+  timeEntries: many(lawyerTimeEntry),
 }));
 
 export const lawyerCaseDocumentRelations = relations(lawyerCaseDocument, ({ one }) => ({
   case: one(lawyerCase, { fields: [lawyerCaseDocument.caseId], references: [lawyerCase.id] }),
   uploadedBy: one(user, { fields: [lawyerCaseDocument.uploadedByUserId], references: [user.id] }),
+}));
+
+export const lawyerFirmProfileRelations = relations(lawyerFirmProfile, ({ one }) => ({
+  user: one(user, { fields: [lawyerFirmProfile.userId], references: [user.id] }),
+}));
+
+export const lawyerInvoiceCounterRelations = relations(lawyerInvoiceCounter, ({ one }) => ({
+  lawyer: one(user, { fields: [lawyerInvoiceCounter.lawyerUserId], references: [user.id] }),
+}));
+
+export const lawyerInvoiceRelations = relations(lawyerInvoice, ({ one, many }) => ({
+  lawyer: one(user, { fields: [lawyerInvoice.lawyerUserId], references: [user.id] }),
+  case: one(lawyerCase, { fields: [lawyerInvoice.caseId], references: [lawyerCase.id] }),
+  consultation: one(consultation, { fields: [lawyerInvoice.consultationId], references: [consultation.id] }),
+  lines: many(lawyerInvoiceLine),
+  payments: many(lawyerInvoicePayment),
+}));
+
+export const lawyerInvoiceLineRelations = relations(lawyerInvoiceLine, ({ one }) => ({
+  invoice: one(lawyerInvoice, { fields: [lawyerInvoiceLine.invoiceId], references: [lawyerInvoice.id] }),
+}));
+
+export const lawyerTimeEntryRelations = relations(lawyerTimeEntry, ({ one }) => ({
+  lawyer: one(user, { fields: [lawyerTimeEntry.lawyerUserId], references: [user.id] }),
+  case: one(lawyerCase, { fields: [lawyerTimeEntry.caseId], references: [lawyerCase.id] }),
+  task: one(lawyerCaseTask, { fields: [lawyerTimeEntry.taskId], references: [lawyerCaseTask.id] }),
+  billedInvoice: one(lawyerInvoice, { fields: [lawyerTimeEntry.billedInvoiceId], references: [lawyerInvoice.id] }),
+}));
+
+export const lawyerInvoicePaymentRelations = relations(lawyerInvoicePayment, ({ one }) => ({
+  invoice: one(lawyerInvoice, { fields: [lawyerInvoicePayment.invoiceId], references: [lawyerInvoice.id] }),
 }));

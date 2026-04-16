@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import type { RequestHandler } from 'express';
-import { eq } from 'drizzle-orm';
+import { and, eq, sum } from 'drizzle-orm';
 
 import { db, schema } from '@kb/database';
 
@@ -88,23 +88,70 @@ export function createRazorpayWebhookHandler(opts: {
           .where(eq(schema.payment.razorpayOrderId, orderId))
           .limit(1);
         const row = rows[0];
-        if (!row) return;
-        if (row.status === 'paid' || row.status === 'released') return;
+        if (row) {
+          if (row.status === 'paid' || row.status === 'released') return;
 
+          await tx
+            .update(schema.payment)
+            .set({
+              status: 'paid',
+              razorpayPaymentId: paymentId,
+              paidAt: new Date(),
+              updatedAt: new Date(),
+            })
+            .where(eq(schema.payment.id, row.id));
+
+          await tx
+            .update(schema.consultation)
+            .set({ status: 'scheduled', updatedAt: new Date() })
+            .where(eq(schema.consultation.id, row.consultationId));
+          return;
+        }
+
+        const invPayRows = await tx
+          .select()
+          .from(schema.lawyerInvoicePayment)
+          .where(eq(schema.lawyerInvoicePayment.razorpayOrderId, orderId))
+          .limit(1);
+        const invPay = invPayRows[0];
+        if (!invPay) return;
+        if (invPay.status === 'paid') return;
+
+        const paidAt = new Date();
         await tx
-          .update(schema.payment)
+          .update(schema.lawyerInvoicePayment)
           .set({
             status: 'paid',
             razorpayPaymentId: paymentId,
-            paidAt: new Date(),
-            updatedAt: new Date(),
+            paidAt,
+            updatedAt: paidAt,
           })
-          .where(eq(schema.payment.id, row.id));
+          .where(eq(schema.lawyerInvoicePayment.id, invPay.id));
 
+        const [inv] = await tx
+          .select()
+          .from(schema.lawyerInvoice)
+          .where(eq(schema.lawyerInvoice.id, invPay.invoiceId))
+          .limit(1);
+        if (!inv) return;
+
+        const [agg] = await tx
+          .select({ s: sum(schema.lawyerInvoicePayment.amountInr) })
+          .from(schema.lawyerInvoicePayment)
+          .where(
+            and(
+              eq(schema.lawyerInvoicePayment.invoiceId, inv.id),
+              eq(schema.lawyerInvoicePayment.status, 'paid'),
+            ),
+          );
+        const paidSum = Number(agg?.s ?? 0);
+        let status = inv.status;
+        if (paidSum >= inv.totalInr) status = 'paid';
+        else if (paidSum > 0) status = 'partially_paid';
         await tx
-          .update(schema.consultation)
-          .set({ status: 'scheduled', updatedAt: new Date() })
-          .where(eq(schema.consultation.id, row.consultationId));
+          .update(schema.lawyerInvoice)
+          .set({ status, updatedAt: new Date() })
+          .where(eq(schema.lawyerInvoice.id, inv.id));
       });
     }
 
@@ -116,17 +163,37 @@ export function createRazorpayWebhookHandler(opts: {
           .where(eq(schema.payment.razorpayOrderId, orderId))
           .limit(1);
         const row = rows[0];
-        if (!row) return;
-        if (row.status !== 'created') return;
+        if (row) {
+          if (row.status !== 'created') return;
+
+          await tx
+            .update(schema.payment)
+            .set({
+              status: 'failed',
+              razorpayPaymentId: paymentId,
+              updatedAt: new Date(),
+            })
+            .where(eq(schema.payment.id, row.id));
+          return;
+        }
+
+        const invPayRows = await tx
+          .select()
+          .from(schema.lawyerInvoicePayment)
+          .where(eq(schema.lawyerInvoicePayment.razorpayOrderId, orderId))
+          .limit(1);
+        const invPay = invPayRows[0];
+        if (!invPay) return;
+        if (invPay.status !== 'created') return;
 
         await tx
-          .update(schema.payment)
+          .update(schema.lawyerInvoicePayment)
           .set({
             status: 'failed',
             razorpayPaymentId: paymentId,
             updatedAt: new Date(),
           })
-          .where(eq(schema.payment.id, row.id));
+          .where(eq(schema.lawyerInvoicePayment.id, invPay.id));
       });
     }
 
