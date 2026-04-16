@@ -71,6 +71,13 @@
       "when": 1776300000000,
       "tag": "0009_phase11_case_tracker",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1776302000000,
+      "tag": "0010_phase12_content_qna",
+      "breakpoints": true
     }
   ]
 }

@@ -505,6 +505,71 @@ export const caseTracker = pgTable(
   (t) => [uniqueIndex('case_tracker_user_cnr_uidx').on(t.userId, t.cnr)],
 );
 
+export const kbQaQuestionStatusEnum = pgEnum('kb_qa_question_status', ['open', 'answered', 'closed', 'hidden']);
+export const kbQaVoteValueEnum = pgEnum('kb_qa_vote_value', ['up', 'down']);
+
+export const contentArticle = pgTable('content_article', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  slug: text('slug').notNull().unique(),
+  category: text('category').notNull().default(''),
+  lifeSituation: text('life_situation').notNull().default(''),
+  titleJson: jsonb('title_json').$type<Record<string, string>>().notNull().default(sql`'{}'::jsonb`),
+  bodyJson: jsonb('body_json').$type<Record<string, string>>().notNull().default(sql`'{}'::jsonb`),
+  tagsJson: jsonb('tags_json').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+  applicableLawsJson: jsonb('applicable_laws_json').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+  reviewedByUserId: text('reviewed_by_user_id').references(() => user.id, { onDelete: 'set null' }),
+  publishedAt: timestamp('published_at', { withTimezone: true, mode: 'date' }),
+  isPublished: boolean('is_published').notNull().default(false),
+  views: integer('views').notNull().default(0),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+});
+
+export const qaQuestion = pgTable('qa_question', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  askerUserId: text('asker_user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  title: text('title').notNull(),
+  body: text('body').notNull(),
+  category: text('category').notNull().default(''),
+  isAnonymous: boolean('is_anonymous').notNull().default(true),
+  status: kbQaQuestionStatusEnum('status').notNull().default('open'),
+  aiPreviewJson: jsonb('ai_preview_json').$type<Record<string, unknown>>(),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+});
+
+export const qaAnswer = pgTable('qa_answer', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  questionId: uuid('question_id')
+    .notNull()
+    .references(() => qaQuestion.id, { onDelete: 'cascade' }),
+  authorUserId: text('author_user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  body: text('body').notNull(),
+  isBest: boolean('is_best').notNull().default(false),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+});
+
+export const qaVote = pgTable(
+  'qa_vote',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    questionId: uuid('question_id')
+      .notNull()
+      .references(() => qaQuestion.id, { onDelete: 'cascade' }),
+    voterUserId: text('voter_user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    value: kbQaVoteValueEnum('value').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('qa_vote_user_question_uidx').on(t.questionId, t.voterUserId)],
+);
+
 export const lawyerInvoice = pgTable(
   'lawyer_invoice',
   {
@@ -783,4 +848,24 @@ export const notificationJobRelations = relations(notificationJob, ({ one }) => 
 
 export const caseTrackerRelations = relations(caseTracker, ({ one }) => ({
   user: one(user, { fields: [caseTracker.userId], references: [user.id] }),
+}));
+
+export const contentArticleRelations = relations(contentArticle, ({ one }) => ({
+  reviewedBy: one(user, { fields: [contentArticle.reviewedByUserId], references: [user.id] }),
+}));
+
+export const qaQuestionRelations = relations(qaQuestion, ({ one, many }) => ({
+  asker: one(user, { fields: [qaQuestion.askerUserId], references: [user.id] }),
+  answers: many(qaAnswer),
+  votes: many(qaVote),
+}));
+
+export const qaAnswerRelations = relations(qaAnswer, ({ one }) => ({
+  question: one(qaQuestion, { fields: [qaAnswer.questionId], references: [qaQuestion.id] }),
+  author: one(user, { fields: [qaAnswer.authorUserId], references: [user.id] }),
+}));
+
+export const qaVoteRelations = relations(qaVote, ({ one }) => ({
+  question: one(qaQuestion, { fields: [qaVote.questionId], references: [qaQuestion.id] }),
+  voter: one(user, { fields: [qaVote.voterUserId], references: [user.id] }),
 }));

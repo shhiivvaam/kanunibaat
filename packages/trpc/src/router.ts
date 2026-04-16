@@ -23,12 +23,14 @@ import { adminRouter } from './routers/admin';
 import { caseTrackerRouter } from './routers/case-tracker';
 import { casesRouter } from './routers/cases';
 import { consultationsRouter } from './routers/consultations';
+import { contentRouter } from './routers/content';
 import { emergencyGuideRouter } from './routers/emergency-guide';
 import { lawyerRouter } from './routers/lawyer';
 import { marketplaceRouter } from './routers/marketplace';
 import { noticesRouter } from './routers/notices';
 import { notificationsRouter } from './routers/notifications';
 import { practiceRouter } from './routers/practice';
+import { qaRouter } from './routers/qa';
 import { researchRouter } from './routers/research';
 import { vaultRouter } from './routers/vault';
 
@@ -60,6 +62,8 @@ export const appRouter = router({
   research: researchRouter,
   notifications: notificationsRouter,
   caseTracker: caseTrackerRouter,
+  content: contentRouter,
+  qa: qaRouter,
 
   waitlist: router({
     submitUser: publicProcedure.input(userWaitlistInputSchema).mutation(async ({ ctx, input }) => {

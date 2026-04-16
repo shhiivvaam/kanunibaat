@@ -8,6 +8,7 @@ export { appRouter } from './router';
 export { aggregateInvoiceTax, lineTaxAmount } from './practice/gst-totals';
 export { indianFyStartYear } from './practice/fiscal-india';
 export { computeReminderTimes, HEARING_REMINDER_OFFSETS_MS } from './notifications/schedule';
+export { generateQaPreviewWithOpenAI, qaAiPreviewSchema } from './qa/openai-preview';
 export { publicProcedure, protectedProcedure, roleProcedure, router } from './init';
 export {
   createTrpcContextFactory,

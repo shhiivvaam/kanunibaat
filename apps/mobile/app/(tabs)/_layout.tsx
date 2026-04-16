@@ -76,6 +76,20 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="rights"
+        options={{
+          title: 'Rights',
+          tabBarIcon: ({ color }) => <TabBarIcon name="balance-scale" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="legal-qa"
+        options={{
+          title: 'Legal Q&A',
+          tabBarIcon: ({ color }) => <TabBarIcon name="question-circle" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="guide"
         options={{
           title: 'Kya Karein?',
