@@ -2,6 +2,7 @@
  * Core domain tables (Phase 2–3). Better Auth `user` remains the identity anchor (`user.id`).
  */
 import { relations, sql } from 'drizzle-orm';
+import type { AnyPgColumn } from 'drizzle-orm/pg-core';
 import {
   integer,
   jsonb,
@@ -197,6 +198,68 @@ export const consultationMessage = pgTable('consultation_message', {
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
 });
 
+export const vaultDocumentCategoryEnum = pgEnum('vault_document_category', [
+  'property',
+  'family',
+  'financial',
+  'wills',
+  'employment',
+  'court',
+  'identity',
+  'rental',
+  'business',
+  'insurance',
+  'other',
+]);
+
+export const vaultDocumentUploadStatusEnum = pgEnum('vault_document_upload_status', ['pending', 'complete']);
+
+export const vaultFolder = pgTable('vault_folder', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  name: text('name').notNull(),
+  parentFolderId: uuid('parent_folder_id').references((): AnyPgColumn => vaultFolder.id, {
+    onDelete: 'cascade',
+  }),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+});
+
+export const vaultDocument = pgTable('vault_document', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  folderId: uuid('folder_id').references(() => vaultFolder.id, { onDelete: 'set null' }),
+  category: vaultDocumentCategoryEnum('category').notNull().default('other'),
+  displayName: text('display_name').notNull(),
+  tags: jsonb('tags').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+  storageKey: text('storage_key').notNull(),
+  byteSize: integer('byte_size').notNull().default(0),
+  contentType: text('content_type').notNull().default('application/octet-stream'),
+  expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'date' }),
+  uploadStatus: vaultDocumentUploadStatusEnum('upload_status').notNull().default('pending'),
+  /** PBKDF2 salt (base64) for passphrase-derived wrapping key; set when upload completes. */
+  keyWrapSalt: text('key_wrap_salt'),
+  /** AES-GCM wrapped DEK (base64: iv + ciphertext + tag); set when upload completes. */
+  wrappedDek: text('wrapped_dek'),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+});
+
+export const vaultShare = pgTable('vault_share', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  documentId: uuid('document_id')
+    .notNull()
+    .references(() => vaultDocument.id, { onDelete: 'cascade' }),
+  accessToken: uuid('access_token').notNull().unique().defaultRandom(),
+  expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'date' }).notNull(),
+  revokedAt: timestamp('revoked_at', { withTimezone: true, mode: 'date' }),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+});
+
 export const userProfileRelations = relations(userProfile, ({ one }) => ({
   user: one(user, { fields: [userProfile.userId], references: [user.id] }),
 }));
@@ -245,4 +308,25 @@ export const paymentRelations = relations(payment, ({ one }) => ({
 export const consultationMessageRelations = relations(consultationMessage, ({ one }) => ({
   consultation: one(consultation, { fields: [consultationMessage.consultationId], references: [consultation.id] }),
   sender: one(user, { fields: [consultationMessage.senderUserId], references: [user.id] }),
+}));
+
+export const vaultFolderRelations = relations(vaultFolder, ({ one, many }) => ({
+  user: one(user, { fields: [vaultFolder.userId], references: [user.id] }),
+  parent: one(vaultFolder, {
+    fields: [vaultFolder.parentFolderId],
+    references: [vaultFolder.id],
+    relationName: 'vault_folder_parent',
+  }),
+  children: many(vaultFolder, { relationName: 'vault_folder_parent' }),
+  documents: many(vaultDocument),
+}));
+
+export const vaultDocumentRelations = relations(vaultDocument, ({ one, many }) => ({
+  user: one(user, { fields: [vaultDocument.userId], references: [user.id] }),
+  folder: one(vaultFolder, { fields: [vaultDocument.folderId], references: [vaultFolder.id] }),
+  shares: many(vaultShare),
+}));
+
+export const vaultShareRelations = relations(vaultShare, ({ one }) => ({
+  document: one(vaultDocument, { fields: [vaultShare.documentId], references: [vaultDocument.id] }),
 }));

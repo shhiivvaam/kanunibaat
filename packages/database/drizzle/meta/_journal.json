@@ -29,6 +29,13 @@
       "when": 1776288000000,
       "tag": "0003_phase5_consultations_payments",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1776290000000,
+      "tag": "0004_phase7_vault",
+      "breakpoints": true
     }
   ]
 }

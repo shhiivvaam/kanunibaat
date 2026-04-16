@@ -37,7 +37,10 @@ export function attachPublicHttpMiddlewares(
       windowMs: 60_000,
       max: (req) => {
         const u = req.url ?? '';
-        return typeof u === 'string' && u.includes('emergencyGuide.personalize') ? 25 : 120;
+        if (typeof u !== 'string') return 120;
+        if (u.includes('emergencyGuide.personalize')) return 25;
+        if (u.includes('vault.document.summarize') || u.includes('vault.share.get')) return 30;
+        return 120;
       },
       standardHeaders: true,
       legacyHeaders: false,

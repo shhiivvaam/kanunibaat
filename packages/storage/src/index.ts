@@ -1,9 +1,11 @@
-import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import type { Readable } from 'node:stream';
 
 const MAX_DOCUMENT_BYTES = 10 * 1024 * 1024;
 const MAX_NOTICE_BYTES = 10 * 1024 * 1024;
+/** Single vault ciphertext blob cap (free tier total quota is enforced in API). */
+export const MAX_VAULT_OBJECT_BYTES = 10 * 1024 * 1024;
 
 export interface S3DocumentsConfig {
   region: string;
@@ -87,6 +89,65 @@ export function lawyerDocumentObjectKey(userId: string, documentId: string, file
 export function noticeScanObjectKey(scanId: string, fileName: string): string {
   const safe = safeObjectFileName(fileName);
   return `notice-scans/${scanId}/${safe}`;
+}
+
+export function vaultDocumentObjectKey(userId: string, documentId: string): string {
+  return `vault/${userId}/${documentId}/blob`;
+}
+
+function validateVaultPut(contentType: string, contentLength: number): void {
+  const ct = contentType.toLowerCase();
+  if (ct !== 'application/octet-stream') {
+    throw new StorageValidationError('Vault uploads must use application/octet-stream.');
+  }
+  if (contentLength <= 0 || contentLength > MAX_VAULT_OBJECT_BYTES) {
+    throw new StorageValidationError(
+      `Vault file size must be between 1 and ${MAX_VAULT_OBJECT_BYTES} bytes.`,
+    );
+  }
+}
+
+export async function presignPutVaultObject(
+  config: S3DocumentsConfig,
+  input: PresignPutInput,
+): Promise<{ url: string }> {
+  validateVaultPut(input.contentType, input.contentLength);
+  const client = createClient(config);
+  const cmd = new PutObjectCommand({
+    Bucket: config.bucket,
+    Key: input.key,
+    ContentType: input.contentType,
+    ContentLength: input.contentLength,
+  });
+  const url = await getSignedUrl(client, cmd, {
+    expiresIn: input.expiresSeconds ?? 900,
+  });
+  return { url };
+}
+
+export async function presignGetVaultObject(
+  config: S3DocumentsConfig,
+  input: { key: string; expiresSeconds?: number },
+): Promise<{ url: string }> {
+  const client = createClient(config);
+  const cmd = new GetObjectCommand({
+    Bucket: config.bucket,
+    Key: input.key,
+  });
+  const url = await getSignedUrl(client, cmd, {
+    expiresIn: input.expiresSeconds ?? 900,
+  });
+  return { url };
+}
+
+export async function deleteVaultObject(config: S3DocumentsConfig, key: string): Promise<void> {
+  const client = createClient(config);
+  await client.send(
+    new DeleteObjectCommand({
+      Bucket: config.bucket,
+      Key: key,
+    }),
+  );
 }
 
 function safeObjectFileName(fileName: string): string {

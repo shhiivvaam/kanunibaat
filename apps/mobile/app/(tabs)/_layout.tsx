@@ -75,6 +75,13 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <TabBarIcon name="life-ring" color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="vault"
+        options={{
+          title: 'Vault',
+          tabBarIcon: ({ color }) => <TabBarIcon name="lock" color={color} />,
+        }}
+      />
     </Tabs>
   );
 }

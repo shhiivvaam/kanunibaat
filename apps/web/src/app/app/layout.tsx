@@ -21,6 +21,9 @@ export default async function AppShellLayout({ children }: { children: React.Rea
             <Link href="/app/consultations" className="text-[#57534E] hover:text-[#C2410C]">
               Consultations
             </Link>
+            <Link href="/app/vault" className="text-[#57534E] hover:text-[#C2410C]">
+              Vault
+            </Link>
             <Link href="/" className="text-[#57534E] hover:text-[#C2410C]">
               Marketing site
             </Link>
