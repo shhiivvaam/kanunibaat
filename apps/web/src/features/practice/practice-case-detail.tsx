@@ -76,10 +76,11 @@ export function PracticeCaseDetail() {
   }, [c.data?.case]);
 
   useEffect(() => {
-    if (!timeActive.data?.entry) return;
+    const entry = timeActive.data?.entry;
+    if (!entry) return;
     const id = setInterval(() => setTick((t) => t + 1), 1000);
     return () => clearInterval(id);
-  }, [timeActive.data?.entry?.id]);
+  }, [timeActive.data?.entry]);
 
   const hearingCreate = trpc.cases.hearing.create.useMutation({
     onSuccess: async () => {

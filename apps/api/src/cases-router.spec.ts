@@ -36,7 +36,9 @@ describe('Phase 8 cases router', () => {
       authUserId: 'user-1',
       roles: ['user'],
     } as never);
-    await expect(caller.cases.case.list({})).rejects.toMatchObject<Partial<TRPCError>>({
+    await expect(caller.cases.case.list({})).rejects.toMatchObject<
+      Partial<TRPCError>
+    >({
       code: 'FORBIDDEN',
     });
   });
@@ -47,9 +49,9 @@ describe('Phase 8 cases router', () => {
       authUserId: 'lawyer-1',
       roles: ['user', 'lawyer'],
     } as never);
-    await expect(caller.cases.court.lookupByCnr({ cnr: 'ABCD123456789012' })).rejects.toMatchObject<
-      Partial<TRPCError>
-    >({
+    await expect(
+      caller.cases.court.lookupByCnr({ cnr: 'ABCD123456789012' }),
+    ).rejects.toMatchObject<Partial<TRPCError>>({
       code: 'PRECONDITION_FAILED',
     });
   });
@@ -72,7 +74,9 @@ describe('Phase 8 cases router', () => {
         njdgBridgeUrl: 'https://bridge.example.test/lookup',
         njdgBridgeSecret: 'secret',
       } as never);
-      const out = await caller.cases.court.lookupByCnr({ cnr: 'ABCD123456789012' });
+      const out = await caller.cases.court.lookupByCnr({
+        cnr: 'ABCD123456789012',
+      });
       expect(out.cnr).toBe('ABCD123456789012');
       expect(out.snapshot).toEqual({ court: 'Test', stage: 'listed' });
       expect(global.fetch).toHaveBeenCalled();

@@ -1,4 +1,9 @@
+import type { inferRouterOutputs } from '@trpc/server';
+
+import type { AppRouter } from './router';
+
 export type { AppRouter } from './router';
+export type RouterOutputs = inferRouterOutputs<AppRouter>;
 export { appRouter } from './router';
 export { aggregateInvoiceTax, lineTaxAmount } from './practice/gst-totals';
 export { indianFyStartYear } from './practice/fiscal-india';

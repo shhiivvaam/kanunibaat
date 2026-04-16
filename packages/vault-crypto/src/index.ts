@@ -35,7 +35,7 @@ function randomBytes(length: number): Uint8Array {
 
 export function bytesToBase64(bytes: Uint8Array): string {
   let binary = '';
-  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]!);
+  for (const b of bytes) binary += String.fromCharCode(b);
   return globalThis.btoa(binary);
 }
 

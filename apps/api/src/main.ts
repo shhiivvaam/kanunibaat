@@ -3,7 +3,11 @@ import * as Sentry from '@sentry/node';
 import pino from 'pino';
 
 import { db } from '@kb/database';
-import { DEFAULT_JUDGMENTS_INDEX, DEFAULT_LAWYERS_INDEX, parseMeiliConfigFromEnv } from '@kb/search';
+import {
+  DEFAULT_JUDGMENTS_INDEX,
+  DEFAULT_LAWYERS_INDEX,
+  parseMeiliConfigFromEnv,
+} from '@kb/search';
 import { parseS3DocumentsConfigFromEnv } from '@kb/storage';
 import { createTrpcContextFactory } from '@kb/trpc';
 

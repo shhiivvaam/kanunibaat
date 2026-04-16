@@ -36,7 +36,9 @@ describe('Phase 9 research router', () => {
       authUserId: 'user-1',
       roles: ['user'],
     } as never);
-    await expect(caller.research.judgments.search({ query: 'privacy' })).rejects.toMatchObject<Partial<TRPCError>>({
+    await expect(
+      caller.research.judgments.search({ query: 'privacy' }),
+    ).rejects.toMatchObject<Partial<TRPCError>>({
       code: 'FORBIDDEN',
     });
   });
@@ -70,7 +72,9 @@ describe('Phase 9 research router', () => {
       db: db as never,
     } as never);
     await expect(
-      caller.research.judgments.summarize({ id: '44c0ffee-bbab-4144-8ddd-001122334401' }),
+      caller.research.judgments.summarize({
+        id: '44c0ffee-bbab-4144-8ddd-001122334401',
+      }),
     ).rejects.toMatchObject<Partial<TRPCError>>({
       code: 'PRECONDITION_FAILED',
     });

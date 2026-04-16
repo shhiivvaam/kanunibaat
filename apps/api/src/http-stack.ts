@@ -39,7 +39,11 @@ export function attachPublicHttpMiddlewares(
         const u = req.url ?? '';
         if (typeof u !== 'string') return 120;
         if (u.includes('emergencyGuide.personalize')) return 25;
-        if (u.includes('vault.document.summarize') || u.includes('vault.share.get')) return 30;
+        if (
+          u.includes('vault.document.summarize') ||
+          u.includes('vault.share.get')
+        )
+          return 30;
         if (u.includes('cases.court.lookupByCnr')) return 20;
         if (
           u.includes('research.judgments.summarize') ||
@@ -50,7 +54,8 @@ export function attachPublicHttpMiddlewares(
         }
         if (u.includes('research.judgments.search')) return 40;
         if (u.includes('practice.billing.invoice.pdfBase64')) return 30;
-        if (u.includes('practice.billing.invoice.createPaymentOrder')) return 20;
+        if (u.includes('practice.billing.invoice.createPaymentOrder'))
+          return 20;
         return 120;
       },
       standardHeaders: true,

@@ -2,11 +2,14 @@
 
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 
 import { trpc } from '@kb/api-client';
+import type { RouterOutputs } from '@kb/trpc';
 
 import { getRazorpayCtor, loadRazorpayCheckoutScript } from '@/features/consultations/razorpay';
+type ByIdOutput = RouterOutputs['practice']['billing']['invoice']['byId'];
+type InvoiceRow = NonNullable<ByIdOutput['invoice']>;
 
 interface RazorpayHandlerResponse {
   razorpay_payment_id: string;
@@ -14,20 +17,24 @@ interface RazorpayHandlerResponse {
   razorpay_signature: string;
 }
 
-export function PracticeInvoiceDetail() {
-  const params = useParams();
-  const invoiceId = typeof params.invoiceId === 'string' ? params.invoiceId : '';
+function InvoiceDetailBody({
+  invoiceId,
+  invoice,
+  lines,
+  payments,
+}: {
+  invoiceId: string;
+  invoice: InvoiceRow;
+  lines: ByIdOutput['lines'];
+  payments: ByIdOutput['payments'];
+}) {
   const utils = trpc.useUtils();
-
-  const q = trpc.practice.billing.invoice.byId.useQuery({ id: invoiceId }, { enabled: Boolean(invoiceId) });
-  const inv = q.data?.invoice;
-  const lines = q.data?.lines ?? [];
-  const payments = q.data?.payments ?? [];
-
-  const [clientName, setClientName] = useState('');
-  const [clientAddress, setClientAddress] = useState('');
-  const [placeOfSupply, setPlaceOfSupply] = useState('');
-  const [supplyType, setSupplyType] = useState<'intrastate' | 'interstate'>('intrastate');
+  const [clientName, setClientName] = useState(() => invoice.clientName ?? '');
+  const [clientAddress, setClientAddress] = useState(() => invoice.clientAddress ?? '');
+  const [placeOfSupply, setPlaceOfSupply] = useState(() => invoice.placeOfSupply ?? '');
+  const [supplyType, setSupplyType] = useState<'intrastate' | 'interstate'>(
+    () => invoice.supplyType as 'intrastate' | 'interstate',
+  );
   const [lineDesc, setLineDesc] = useState('');
   const [lineRate, setLineRate] = useState('2000');
   const [lineQty, setLineQty] = useState('1');
@@ -74,30 +81,10 @@ export function PracticeInvoiceDetail() {
     },
   });
 
-  useEffect(() => {
-    hydratedForInvoiceId.current = null;
-  }, [invoiceId]);
-
-  useEffect(() => {
-    const row = q.data?.invoice;
-    if (!row || row.id !== invoiceId) return;
-    if (hydratedForInvoiceId.current === invoiceId) return;
-    hydratedForInvoiceId.current = invoiceId;
-    setClientName(row.clientName ?? '');
-    setClientAddress(row.clientAddress ?? '');
-    setPlaceOfSupply(row.placeOfSupply ?? '');
-    setSupplyType(row.supplyType as 'intrastate' | 'interstate');
-  }, [invoiceId, q.data?.invoice]);
-
-  if (!invoiceId) return <p className="text-sm text-red-700">Invalid invoice.</p>;
-  if (q.isPending) return <p className="text-sm text-[#57534E]">Loading…</p>;
-  if (q.isError) return <p className="text-sm text-red-700">{q.error.message}</p>;
-  if (!inv) return null;
-
   async function saveMeta() {
     await updateMeta.mutateAsync({
       id: invoiceId,
-      clientName: clientName.trim() || inv.clientName,
+      clientName: clientName.trim() || invoice.clientName,
       clientAddress,
       placeOfSupply,
       supplyType,
@@ -105,10 +92,9 @@ export function PracticeInvoiceDetail() {
   }
 
   async function onPay() {
-    if (!inv) return;
     setPayBusy(true);
     try {
-      const ord = await createOrder.mutateAsync({ invoiceId: inv.id });
+      const ord = await createOrder.mutateAsync({ invoiceId: invoice.id });
       await loadRazorpayCheckoutScript();
       const Razorpay = getRazorpayCtor();
       const rzp = new Razorpay({
@@ -117,10 +103,10 @@ export function PracticeInvoiceDetail() {
         currency: ord.currency,
         order_id: ord.orderId,
         name: 'KanuniBaat',
-        description: `Invoice ${inv.invoiceNumber}`,
+        description: `Invoice ${invoice.invoiceNumber}`,
         handler: async (response: RazorpayHandlerResponse) => {
           await verify.mutateAsync({
-            invoiceId: inv.id,
+            invoiceId: invoice.id,
             razorpayOrderId: response.razorpay_order_id,
             razorpayPaymentId: response.razorpay_payment_id,
             razorpaySignature: response.razorpay_signature,
@@ -150,12 +136,12 @@ export function PracticeInvoiceDetail() {
   }
 
   function shareWhatsapp() {
-    const text = `Invoice ${inv.invoiceNumber} from KanuniBaat — total ₹${inv.totalInr}.`;
+    const text = `Invoice ${invoice.invoiceNumber} from KanuniBaat — total ₹${invoice.totalInr}.`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
   }
 
-  const canEdit = inv.status === 'draft';
-  const canPay = inv.status === 'sent' || inv.status === 'partially_paid';
+  const canEdit = invoice.status === 'draft';
+  const canPay = invoice.status === 'sent' || invoice.status === 'partially_paid';
 
   return (
     <div className="space-y-8" style={{ fontFamily: 'var(--font-body)' }}>
@@ -164,10 +150,10 @@ export function PracticeInvoiceDetail() {
           ← Invoices
         </Link>
         <h1 className="mt-2 text-xl font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
-          {inv.invoiceNumber}
+          {invoice.invoiceNumber}
         </h1>
         <p className="mt-1 text-xs text-[#78716C]">
-          {inv.status} · Total ₹{inv.totalInr} (taxable ₹{inv.taxableInr})
+          {invoice.status} · Total ₹{invoice.totalInr} (taxable ₹{invoice.taxableInr})
         </p>
       </div>
 
@@ -208,7 +194,7 @@ export function PracticeInvoiceDetail() {
         ) : null}
       </div>
 
-      {inv.caseId && canEdit ? (
+      {invoice.caseId && canEdit ? (
         <section className="rounded-xl border border-[#E7E5E4] bg-white p-4 shadow-sm">
           <h2 className="text-sm font-semibold text-[#1C1917]">Time entries</h2>
           <p className="mt-1 text-xs text-[#78716C]">Pull unbilled timer hours onto this invoice as lines.</p>
@@ -216,7 +202,7 @@ export function PracticeInvoiceDetail() {
             type="button"
             className="mt-3 rounded-xl border border-[#D6D3D1] bg-white px-4 py-2 text-sm font-semibold text-[#44403C] hover:bg-[#FAFAF9]"
             disabled={attachTime.isPending}
-            onClick={() => void attachTime.mutateAsync({ invoiceId, caseId: inv.caseId! })}
+            onClick={() => void attachTime.mutateAsync({ invoiceId, caseId: invoice.caseId! })}
           >
             Attach unbilled time
           </button>
@@ -360,5 +346,24 @@ export function PracticeInvoiceDetail() {
         </section>
       ) : null}
     </div>
+  );
+}
+
+export function PracticeInvoiceDetail() {
+  const params = useParams();
+  const invoiceId = typeof params.invoiceId === 'string' ? params.invoiceId : '';
+
+  const q = trpc.practice.billing.invoice.byId.useQuery({ id: invoiceId }, { enabled: Boolean(invoiceId) });
+  const inv = q.data?.invoice;
+  const lines = q.data?.lines ?? [];
+  const payments = q.data?.payments ?? [];
+
+  if (!invoiceId) return <p className="text-sm text-red-700">Invalid invoice.</p>;
+  if (q.isPending) return <p className="text-sm text-[#57534E]">Loading…</p>;
+  if (q.isError) return <p className="text-sm text-red-700">{q.error.message}</p>;
+  if (!inv) return null;
+
+  return (
+    <InvoiceDetailBody key={invoiceId} invoiceId={invoiceId} invoice={inv} lines={lines} payments={payments} />
   );
 }

@@ -15,7 +15,10 @@ export function computeRazorpayWebhookSignature(opts: {
   secret: string;
   body: Buffer;
 }): string {
-  return crypto.createHmac('sha256', opts.secret).update(opts.body).digest('hex');
+  return crypto
+    .createHmac('sha256', opts.secret)
+    .update(opts.body)
+    .digest('hex');
 }
 
 export function verifyRazorpayWebhookSignature(opts: {
@@ -24,15 +27,25 @@ export function verifyRazorpayWebhookSignature(opts: {
   signatureHeader: string | undefined;
 }): boolean {
   if (!opts.signatureHeader) return false;
-  const expected = computeRazorpayWebhookSignature({ secret: opts.secret, body: opts.body });
+  const expected = computeRazorpayWebhookSignature({
+    secret: opts.secret,
+    body: opts.body,
+  });
   return safeTimingEqualHex(expected, opts.signatureHeader);
 }
 
-type RazorpayWebhookEvent =
-  | 'payment.captured'
-  | 'payment.failed'
-  | 'refund.processed'
-  | string;
+/** After summing paid invoice payments, derive the invoice row status (idempotent rollup). */
+export function rollupLawyerInvoiceStatus(opts: {
+  previousStatus: string;
+  totalInr: number;
+  paidSumInr: number;
+}): string {
+  if (opts.paidSumInr >= opts.totalInr) return 'paid';
+  if (opts.paidSumInr > 0) return 'partially_paid';
+  return opts.previousStatus;
+}
+
+type RazorpayWebhookEvent = string;
 
 interface RazorpayWebhookPayload {
   event: RazorpayWebhookEvent;
@@ -145,12 +158,17 @@ export function createRazorpayWebhookHandler(opts: {
             ),
           );
         const paidSum = Number(agg?.s ?? 0);
-        let status = inv.status;
-        if (paidSum >= inv.totalInr) status = 'paid';
-        else if (paidSum > 0) status = 'partially_paid';
+        const status = rollupLawyerInvoiceStatus({
+          previousStatus: inv.status,
+          totalInr: inv.totalInr,
+          paidSumInr: paidSum,
+        });
         await tx
           .update(schema.lawyerInvoice)
-          .set({ status, updatedAt: new Date() })
+          .set({
+            status: status as (typeof inv)['status'],
+            updatedAt: new Date(),
+          })
           .where(eq(schema.lawyerInvoice.id, inv.id));
       });
     }
@@ -200,4 +218,3 @@ export function createRazorpayWebhookHandler(opts: {
     res.status(200).json({ ok: true });
   };
 }
-

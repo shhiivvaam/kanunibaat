@@ -1,6 +1,9 @@
 export type SupplyType = 'intrastate' | 'interstate';
 
-export type LineTaxInput = { taxableInr: number; taxRatePercent: number };
+export interface LineTaxInput {
+  taxableInr: number;
+  taxRatePercent: number;
+}
 
 export function lineTaxAmount(line: LineTaxInput): number {
   return Math.round((line.taxableInr * line.taxRatePercent) / 100);

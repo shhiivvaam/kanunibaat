@@ -32,7 +32,9 @@ describe('Phase 6 emergencyGuide router', () => {
 
   it('bySlug throws NOT_FOUND for unknown slug', async () => {
     const caller = appRouter.createCaller(baseCtx as never);
-    await expect(caller.emergencyGuide.bySlug({ slug: 'no-such-scenario' })).rejects.toMatchObject<Partial<TRPCError>>({
+    await expect(
+      caller.emergencyGuide.bySlug({ slug: 'no-such-scenario' }),
+    ).rejects.toMatchObject<Partial<TRPCError>>({
       code: 'NOT_FOUND',
     });
   });

@@ -31,7 +31,10 @@ describe('Phase 7 vault router', () => {
   };
 
   it('document.requestUpload fails when storage is not configured', async () => {
-    const caller = appRouter.createCaller({ ...baseCtx, authUserId: 'user-1' } as never);
+    const caller = appRouter.createCaller({
+      ...baseCtx,
+      authUserId: 'user-1',
+    } as never);
     await expect(
       caller.vault.document.requestUpload({
         displayName: 'Lease',
@@ -121,9 +124,16 @@ describe('Phase 7 vault router', () => {
   });
 
   it('document.summarize fails when OpenAI is not configured', async () => {
-    const caller = appRouter.createCaller({ ...baseCtx, authUserId: 'user-1', openaiApiKey: null } as never);
+    const caller = appRouter.createCaller({
+      ...baseCtx,
+      authUserId: 'user-1',
+      openaiApiKey: null,
+    } as never);
     await expect(
-      caller.vault.document.summarize({ plaintext: 'Sample notice text for vault.', locale: 'en' }),
+      caller.vault.document.summarize({
+        plaintext: 'Sample notice text for vault.',
+        locale: 'en',
+      }),
     ).rejects.toMatchObject<Partial<TRPCError>>({
       code: 'PRECONDITION_FAILED',
     });

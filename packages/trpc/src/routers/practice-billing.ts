@@ -91,7 +91,7 @@ async function allocateInvoiceNumber(
     .for('update')
     .limit(1);
 
-  let nextSeq = (existing?.lastSequence ?? 0) + 1;
+  const nextSeq = (existing?.lastSequence ?? 0) + 1;
   if (!existing) {
     await tx.insert(lawyerInvoiceCounter).values({
       lawyerUserId,

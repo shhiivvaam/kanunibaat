@@ -8,7 +8,7 @@ function q(
   id: string,
   labelEn: string,
   labelHi: string,
-  required: boolean = true,
+  required = true,
 ): ContextQuestion {
   return { id, labelEn, labelHi, required };
 }
