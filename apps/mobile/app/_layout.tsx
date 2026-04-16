@@ -5,12 +5,14 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import * as SecureStore from 'expo-secure-store';
+import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
 
 import { TrpcProvider } from '@/components/TrpcProvider';
 import { useColorScheme } from '@/components/useColorScheme';
 import { PushNotificationsClient } from '@/components/PushNotificationsClient';
+import { I18nProvider, mobileLocales, type MobileLocale } from '@/src/i18n';
 import * as Sentry from '@sentry/react-native';
 
 const mobileDsn = process.env.EXPO_PUBLIC_SENTRY_DSN;
@@ -62,16 +64,36 @@ export default Sentry.wrap(function RootLayout() {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
+  const [initialLocale, setInitialLocale] = useState<MobileLocale | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const stored = await SecureStore.getItemAsync('kb.locale');
+        const next =
+          stored && (mobileLocales as readonly string[]).includes(stored) ? (stored as MobileLocale) : null;
+        if (!cancelled) setInitialLocale(next);
+      } catch {
+        if (!cancelled) setInitialLocale(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <TrpcProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <PushNotificationsClient />
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-        </Stack>
-      </ThemeProvider>
+      <I18nProvider initialLocale={initialLocale ?? undefined}>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <PushNotificationsClient />
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+          </Stack>
+        </ThemeProvider>
+      </I18nProvider>
     </TrpcProvider>
   );
 }

@@ -1,0 +1,23 @@
+{
+  "common": { "appName": "KanuniBaat", "language": "Language" },
+  "nav": {
+    "consultations": "Consultations",
+    "vault": "Vault",
+    "notifications": "Notifications",
+    "billing": "Billing",
+    "practice": "Practice",
+    "analytics": "Analytics",
+    "invoices": "Invoices",
+    "research": "Research",
+    "marketingSite": "Marketing site"
+  },
+  "billing": {
+    "title": "Billing",
+    "subtitle": "Manage your subscription and see your billing history.",
+    "currentPlan": "Current plan",
+    "plans": "Plans",
+    "billingHistory": "Billing history",
+    "subscribe": "Subscribe",
+    "cancelAtPeriodEnd": "Cancel at period end"
+  }
+}

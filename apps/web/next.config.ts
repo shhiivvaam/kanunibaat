@@ -1,6 +1,9 @@
 import { withSentryConfig } from '@sentry/nextjs';
 import type { NextConfig } from 'next';
+import createNextIntlPlugin from 'next-intl/plugin';
 import path from 'node:path';
+
+const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextConfig: NextConfig = {
   images: {
@@ -27,7 +30,7 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ['postgres', 'better-auth'],
 };
 
-export default withSentryConfig(nextConfig, {
+export default withSentryConfig(withNextIntl(nextConfig), {
   // For all available options, see:
   // https://www.npmjs.com/package/@sentry/webpack-plugin#options
 

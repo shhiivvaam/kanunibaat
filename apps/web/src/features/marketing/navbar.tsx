@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
+import { LanguageSwitcher } from '@/components/language-switcher';
+
 const services = [
   { name: 'Legal Q&A', href: '/legal-qa', desc: 'Ask any legal question' },
   { name: 'Document Review', href: '/document-review', desc: 'Upload & understand contracts' },
@@ -188,6 +190,7 @@ export function Navbar() {
           </div>
 
           <div className="hidden items-center gap-3 lg:flex">
+            <LanguageSwitcher compact />
             <Link
               href="/waitlist/lawyer"
               className="h-11 rounded-[16px] border border-[#1C1917] px-5 text-sm leading-[44px] text-[#1C1917] transition-all duration-150 hover:bg-[#1C1917] hover:text-white active:scale-[0.97]"

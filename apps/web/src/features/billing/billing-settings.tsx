@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 import { trpc } from '@kb/api-client';
 
@@ -29,6 +30,7 @@ function useRazorpayScript(): { ready: boolean; error: string | null } {
 }
 
 export function BillingSettings() {
+  const t = useTranslations();
   const plans = trpc.billing.plans.list.useQuery();
   const sub = trpc.billing.subscription.me.useQuery();
   const ent = trpc.billing.entitlements.me.useQuery();
@@ -75,13 +77,13 @@ export function BillingSettings() {
     <div className="space-y-8" style={{ fontFamily: 'var(--font-body)' }}>
       <div>
         <h1 className="text-2xl font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
-          Billing
+          {t('billing.title')}
         </h1>
-        <p className="mt-1 text-sm text-[#57534E]">Manage your subscription and see your billing history.</p>
+        <p className="mt-1 text-sm text-[#57534E]">{t('billing.subtitle')}</p>
       </div>
 
       <section className="rounded-xl border border-[#E7E5E4] bg-white p-4 shadow-sm space-y-2">
-        <p className="text-sm font-semibold text-[#1C1917]">Current plan</p>
+        <p className="text-sm font-semibold text-[#1C1917]">{t('billing.currentPlan')}</p>
         <p className="text-sm text-[#57534E]">
           {currentPlanKey.toUpperCase()} · Notice scans remaining this month:{' '}
           {ent.data?.entitlements.usage.noticeScansRemaining ?? 'Unlimited'}
@@ -96,7 +98,7 @@ export function BillingSettings() {
       {cancel.error ? <p className="text-sm text-red-700">{cancel.error.message}</p> : null}
 
       <section className="rounded-xl border border-[#E7E5E4] bg-white p-4 shadow-sm space-y-3">
-        <p className="text-sm font-semibold text-[#1C1917]">Plans</p>
+        <p className="text-sm font-semibold text-[#1C1917]">{t('billing.plans')}</p>
         {plans.isPending ? <p className="text-sm text-[#57534E]">Loading…</p> : null}
         {plans.isError ? <p className="text-sm text-red-700">{plans.error.message}</p> : null}
         <div className="grid gap-3 sm:grid-cols-2">
@@ -112,7 +114,7 @@ export function BillingSettings() {
                   onClick={() => void startCheckout(p.key as 'pro' | 'plus')}
                   className="mt-3 rounded-xl bg-[#C2410C] px-4 py-2 text-sm font-semibold text-white hover:bg-[#9a3409] disabled:opacity-60"
                 >
-                  Subscribe
+                  {t('billing.subscribe')}
                 </button>
               </div>
             ))}
@@ -130,13 +132,13 @@ export function BillingSettings() {
             }
             className="rounded-xl border border-[#E7E5E4] px-4 py-2 text-sm font-semibold text-[#44403C] hover:bg-[#FAFAF9] disabled:opacity-60"
           >
-            Cancel at period end
+            {t('billing.cancelAtPeriodEnd')}
           </button>
         ) : null}
       </section>
 
       <section className="rounded-xl border border-[#E7E5E4] bg-white p-4 shadow-sm space-y-2">
-        <p className="text-sm font-semibold text-[#1C1917]">Billing history</p>
+        <p className="text-sm font-semibold text-[#1C1917]">{t('billing.billingHistory')}</p>
         {history.isPending ? <p className="text-sm text-[#57534E]">Loading…</p> : null}
         {history.isError ? <p className="text-sm text-red-700">{history.error.message}</p> : null}
         <div className="space-y-2">
