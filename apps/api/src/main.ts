@@ -60,6 +60,8 @@ async function bootstrap() {
     livekitUrl: apiEnv.LIVEKIT_URL?.trim() || null,
     livekitApiKey: apiEnv.LIVEKIT_API_KEY?.trim() || null,
     livekitApiSecret: apiEnv.LIVEKIT_API_SECRET?.trim() || null,
+    njdgBridgeUrl: process.env.NJDG_BRIDGE_URL?.trim() || null,
+    njdgBridgeSecret: process.env.NJDG_BRIDGE_SECRET?.trim() || null,
   });
 
   attachPublicHttpMiddlewares(app, { logger, createTrpcContext });

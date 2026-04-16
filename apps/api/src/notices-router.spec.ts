@@ -25,6 +25,8 @@ describe('Phase 4 notices router', () => {
     livekitUrl: null,
     livekitApiKey: null,
     livekitApiSecret: null,
+    njdgBridgeUrl: null,
+    njdgBridgeSecret: null,
   };
 
   it('requestUpload fails clearly when storage is not configured', async () => {

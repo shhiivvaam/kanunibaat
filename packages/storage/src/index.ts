@@ -95,6 +95,42 @@ export function vaultDocumentObjectKey(userId: string, documentId: string): stri
   return `vault/${userId}/${documentId}/blob`;
 }
 
+export function caseDocumentObjectKey(
+  lawyerUserId: string,
+  caseId: string,
+  documentId: string,
+  fileName: string,
+): string {
+  const safe = safeObjectFileName(fileName);
+  return `case-docs/${lawyerUserId}/${caseId}/${documentId}/${safe}`;
+}
+
+/** Presigned GET for lawyer case documents (same bucket as other document objects). */
+export async function presignGetCaseDocumentObject(
+  config: S3DocumentsConfig,
+  input: { key: string; expiresSeconds?: number },
+): Promise<{ url: string }> {
+  const client = createClient(config);
+  const cmd = new GetObjectCommand({
+    Bucket: config.bucket,
+    Key: input.key,
+  });
+  const url = await getSignedUrl(client, cmd, {
+    expiresIn: input.expiresSeconds ?? 900,
+  });
+  return { url };
+}
+
+export async function deleteCaseDocumentObject(config: S3DocumentsConfig, key: string): Promise<void> {
+  const client = createClient(config);
+  await client.send(
+    new DeleteObjectCommand({
+      Bucket: config.bucket,
+      Key: key,
+    }),
+  );
+}
+
 function validateVaultPut(contentType: string, contentLength: number): void {
   const ct = contentType.toLowerCase();
   if (ct !== 'application/octet-stream') {

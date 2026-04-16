@@ -2,6 +2,7 @@ import { headers } from 'next/headers';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
+import { AppShellNav } from '@/components/app-shell-nav';
 import { auth } from '@/lib/auth';
 
 export default async function AppShellLayout({ children }: { children: React.ReactNode }) {
@@ -17,17 +18,7 @@ export default async function AppShellLayout({ children }: { children: React.Rea
           <Link href="/app" className="text-sm font-semibold text-[#C2410C]" style={{ fontFamily: 'var(--font-display)' }}>
             KanuniBaat
           </Link>
-          <nav className="flex gap-4 text-sm" style={{ fontFamily: 'var(--font-body)' }}>
-            <Link href="/app/consultations" className="text-[#57534E] hover:text-[#C2410C]">
-              Consultations
-            </Link>
-            <Link href="/app/vault" className="text-[#57534E] hover:text-[#C2410C]">
-              Vault
-            </Link>
-            <Link href="/" className="text-[#57534E] hover:text-[#C2410C]">
-              Marketing site
-            </Link>
-          </nav>
+          <AppShellNav />
         </div>
       </header>
       <main className="mx-auto max-w-3xl px-4 py-10">{children}</main>

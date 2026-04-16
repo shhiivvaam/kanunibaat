@@ -25,6 +25,8 @@ describe('Phase 6 emergencyGuide router', () => {
     livekitUrl: null,
     livekitApiKey: null,
     livekitApiSecret: null,
+    njdgBridgeUrl: null,
+    njdgBridgeSecret: null,
   };
 
   it('bySlug throws NOT_FOUND for unknown slug', async () => {

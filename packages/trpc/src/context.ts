@@ -28,6 +28,9 @@ export interface TrpcContext {
   livekitUrl: string | null;
   livekitApiKey: string | null;
   livekitApiSecret: string | null;
+  /** Optional HTTPS bridge that returns NJDG/eCourts JSON for a CNR (server-controlled). */
+  njdgBridgeUrl: string | null;
+  njdgBridgeSecret: string | null;
 }
 
 export interface TrpcContextDeps {
@@ -43,6 +46,8 @@ export interface TrpcContextDeps {
   livekitUrl: string | null;
   livekitApiKey: string | null;
   livekitApiSecret: string | null;
+  njdgBridgeUrl: string | null;
+  njdgBridgeSecret: string | null;
 }
 
 async function loadRoles(
@@ -89,6 +94,8 @@ export function createTrpcContextFactory(deps: TrpcContextDeps) {
       livekitUrl: deps.livekitUrl,
       livekitApiKey: deps.livekitApiKey,
       livekitApiSecret: deps.livekitApiSecret,
+      njdgBridgeUrl: deps.njdgBridgeUrl,
+      njdgBridgeSecret: deps.njdgBridgeSecret,
     };
   };
 }

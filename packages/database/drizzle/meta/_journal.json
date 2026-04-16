@@ -36,6 +36,13 @@
       "when": 1776290000000,
       "tag": "0004_phase7_vault",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1776292000000,
+      "tag": "0005_phase8_lawyer_case_management",
+      "breakpoints": true
     }
   ]
 }

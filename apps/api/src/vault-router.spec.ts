@@ -25,6 +25,8 @@ describe('Phase 7 vault router', () => {
     livekitUrl: null,
     livekitApiKey: null,
     livekitApiSecret: null,
+    njdgBridgeUrl: null,
+    njdgBridgeSecret: null,
   };
 
   it('document.requestUpload fails when storage is not configured', async () => {

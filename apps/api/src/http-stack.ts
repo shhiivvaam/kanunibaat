@@ -40,6 +40,7 @@ export function attachPublicHttpMiddlewares(
         if (typeof u !== 'string') return 120;
         if (u.includes('emergencyGuide.personalize')) return 25;
         if (u.includes('vault.document.summarize') || u.includes('vault.share.get')) return 30;
+        if (u.includes('cases.court.lookupByCnr')) return 20;
         return 120;
       },
       standardHeaders: true,

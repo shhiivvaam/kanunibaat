@@ -4,6 +4,7 @@
 import { relations, sql } from 'drizzle-orm';
 import type { AnyPgColumn } from 'drizzle-orm/pg-core';
 import {
+  boolean,
   integer,
   jsonb,
   pgEnum,
@@ -260,6 +261,119 @@ export const vaultShare = pgTable('vault_share', {
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
 });
 
+export const lawyerCourtTypeEnum = pgEnum('lawyer_court_type', [
+  'district',
+  'high_court',
+  'supreme_court',
+  'tribunal',
+  'other',
+]);
+
+export const lawyerCaseStatusEnum = pgEnum('lawyer_case_status', [
+  'intake',
+  'active',
+  'hearing_scheduled',
+  'pending_docs',
+  'judgement',
+  'closed',
+  'appealed',
+]);
+
+export const lawyerCaseTaskPriorityEnum = pgEnum('lawyer_case_task_priority', ['low', 'normal', 'high']);
+
+export const lawyerCaseTaskStatusEnum = pgEnum('lawyer_case_task_status', ['open', 'done']);
+
+export const lawyerCaseDocumentUploadStatusEnum = pgEnum('lawyer_case_document_upload_status', [
+  'pending',
+  'complete',
+]);
+
+export const lawyerClient = pgTable('lawyer_client', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  lawyerUserId: text('lawyer_user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  platformUserId: text('platform_user_id').references(() => user.id, { onDelete: 'set null' }),
+  displayName: text('display_name').notNull(),
+  phone: text('phone'),
+  email: text('email'),
+  notes: text('notes').notNull().default(''),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+});
+
+export const lawyerCase = pgTable('lawyer_case', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  lawyerUserId: text('lawyer_user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  lawyerClientId: uuid('lawyer_client_id').references(() => lawyerClient.id, { onDelete: 'set null' }),
+  clientDisplayName: text('client_display_name'),
+  courtCaseNumber: text('court_case_number'),
+  cnrNumber: text('cnr_number'),
+  courtName: text('court_name').notNull().default(''),
+  courtType: lawyerCourtTypeEnum('court_type').notNull().default('other'),
+  state: text('state').notNull().default(''),
+  district: text('district').notNull().default(''),
+  caseType: text('case_type').notNull().default(''),
+  description: text('description').notNull().default(''),
+  status: lawyerCaseStatusEnum('status').notNull().default('intake'),
+  opposingParty: text('opposing_party'),
+  nextHearingAt: timestamp('next_hearing_at', { withTimezone: true, mode: 'date' }),
+  feeAgreedInr: integer('fee_agreed_inr'),
+  outcome: text('outcome'),
+  closedAt: timestamp('closed_at', { withTimezone: true, mode: 'date' }),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+});
+
+export const lawyerCaseHearing = pgTable('lawyer_case_hearing', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  caseId: uuid('case_id')
+    .notNull()
+    .references(() => lawyerCase.id, { onDelete: 'cascade' }),
+  hearingAt: timestamp('hearing_at', { withTimezone: true, mode: 'date' }).notNull(),
+  courtRoom: text('court_room'),
+  judgeName: text('judge_name'),
+  whatHappened: text('what_happened'),
+  nextHearingAt: timestamp('next_hearing_at', { withTimezone: true, mode: 'date' }),
+  actionItems: jsonb('action_items').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+});
+
+export const lawyerCaseTask = pgTable('lawyer_case_task', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  caseId: uuid('case_id')
+    .notNull()
+    .references(() => lawyerCase.id, { onDelete: 'cascade' }),
+  title: text('title').notNull(),
+  dueAt: timestamp('due_at', { withTimezone: true, mode: 'date' }),
+  priority: lawyerCaseTaskPriorityEnum('priority').notNull().default('normal'),
+  status: lawyerCaseTaskStatusEnum('task_status').notNull().default('open'),
+  assigneeUserId: text('assignee_user_id').references(() => user.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+});
+
+export const lawyerCaseDocument = pgTable('lawyer_case_document', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  caseId: uuid('case_id')
+    .notNull()
+    .references(() => lawyerCase.id, { onDelete: 'cascade' }),
+  uploadedByUserId: text('uploaded_by_user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  storageKey: text('storage_key').notNull(),
+  fileName: text('file_name').notNull(),
+  contentType: text('content_type').notNull(),
+  byteSize: integer('byte_size').notNull().default(0),
+  visibleToClient: boolean('visible_to_client').notNull().default(false),
+  uploadStatus: lawyerCaseDocumentUploadStatusEnum('upload_status').notNull().default('pending'),
+  uploadedAt: timestamp('uploaded_at', { withTimezone: true, mode: 'date' }),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+});
+
 export const userProfileRelations = relations(userProfile, ({ one }) => ({
   user: one(user, { fields: [userProfile.userId], references: [user.id] }),
 }));
@@ -329,4 +443,40 @@ export const vaultDocumentRelations = relations(vaultDocument, ({ one, many }) =
 
 export const vaultShareRelations = relations(vaultShare, ({ one }) => ({
   document: one(vaultDocument, { fields: [vaultShare.documentId], references: [vaultDocument.id] }),
+}));
+
+export const lawyerClientRelations = relations(lawyerClient, ({ one, many }) => ({
+  lawyer: one(user, {
+    fields: [lawyerClient.lawyerUserId],
+    references: [user.id],
+    relationName: 'lawyer_client_owner',
+  }),
+  platformUser: one(user, {
+    fields: [lawyerClient.platformUserId],
+    references: [user.id],
+    relationName: 'lawyer_client_platform_user',
+  }),
+  cases: many(lawyerCase),
+}));
+
+export const lawyerCaseRelations = relations(lawyerCase, ({ one, many }) => ({
+  lawyer: one(user, { fields: [lawyerCase.lawyerUserId], references: [user.id] }),
+  client: one(lawyerClient, { fields: [lawyerCase.lawyerClientId], references: [lawyerClient.id] }),
+  hearings: many(lawyerCaseHearing),
+  tasks: many(lawyerCaseTask),
+  documents: many(lawyerCaseDocument),
+}));
+
+export const lawyerCaseHearingRelations = relations(lawyerCaseHearing, ({ one }) => ({
+  case: one(lawyerCase, { fields: [lawyerCaseHearing.caseId], references: [lawyerCase.id] }),
+}));
+
+export const lawyerCaseTaskRelations = relations(lawyerCaseTask, ({ one }) => ({
+  case: one(lawyerCase, { fields: [lawyerCaseTask.caseId], references: [lawyerCase.id] }),
+  assignee: one(user, { fields: [lawyerCaseTask.assigneeUserId], references: [user.id] }),
+}));
+
+export const lawyerCaseDocumentRelations = relations(lawyerCaseDocument, ({ one }) => ({
+  case: one(lawyerCase, { fields: [lawyerCaseDocument.caseId], references: [lawyerCase.id] }),
+  uploadedBy: one(user, { fields: [lawyerCaseDocument.uploadedByUserId], references: [user.id] }),
 }));
