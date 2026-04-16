@@ -15,6 +15,7 @@ describe('Phase 7 vault router', () => {
     },
     meili: null,
     meiliIndexName: 'lawyers',
+    meiliJudgmentsIndexName: 'judgments',
     s3Documents: null,
     requestIp: '127.0.0.1',
     userAgent: 'jest',

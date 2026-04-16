@@ -10,6 +10,8 @@ export type { MeiliConnection } from './meili-http';
 
 export const DEFAULT_LAWYERS_INDEX = 'lawyers';
 
+export const DEFAULT_JUDGMENTS_INDEX = 'judgments';
+
 export function parseMeiliConfigFromEnv(env: NodeJS.ProcessEnv): MeiliConnection | null {
   const host = env.MEILISEARCH_URL?.trim();
   const apiKey = env.MEILISEARCH_MASTER_KEY?.trim() ?? '';

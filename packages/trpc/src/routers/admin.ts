@@ -3,7 +3,7 @@ import { asc, eq, inArray } from 'drizzle-orm';
 import { z } from 'zod';
 
 import { lawyerDocument, lawyerProfile, user, userProfile } from '@kb/database/schema';
-import { syncLawyerMeiliFromDb } from '@kb/search';
+import { syncLawyerMeiliFromDb, syncResearchJudgmentsToMeili } from '@kb/search';
 
 import { adminProcedure, router } from '../init';
 
@@ -121,5 +121,16 @@ export const adminRouter = router({
 
     await syncLawyerMeiliFromDb(ctx.db, ctx.meili, ctx.meiliIndexName, input.userId);
     return { ok: true as const };
+  }),
+
+  reindexResearchJudgments: adminProcedure.mutation(async ({ ctx }) => {
+    if (!ctx.meili) {
+      throw new TRPCError({
+        code: 'PRECONDITION_FAILED',
+        message: 'Meilisearch is not configured (MEILISEARCH_URL / MEILISEARCH_MASTER_KEY).',
+      });
+    }
+    const { count } = await syncResearchJudgmentsToMeili(ctx.db, ctx.meili, ctx.meiliJudgmentsIndexName);
+    return { indexed: count };
   }),
 });

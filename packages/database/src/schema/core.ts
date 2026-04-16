@@ -374,6 +374,47 @@ export const lawyerCaseDocument = pgTable('lawyer_case_document', {
   updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
 });
 
+/** Curated judgment snippets for lawyer research (Phase 9). Sync to Meilisearch via admin reindex. */
+export const researchJudgment = pgTable('research_judgment', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  title: text('title').notNull(),
+  court: text('court').notNull(),
+  decisionAt: timestamp('decision_at', { withTimezone: true, mode: 'date' }),
+  citation: text('citation').notNull(),
+  summaryExcerpt: text('summary_excerpt').notNull().default(''),
+  bodyForSearch: text('body_for_search').notNull().default(''),
+  topics: jsonb('topics').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+});
+
+/** Central Acts metadata — law library (Phase 9). */
+export const researchCentralAct = pgTable('research_central_act', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  slug: text('slug').notNull().unique(),
+  shortTitle: text('short_title').notNull(),
+  category: text('category').notNull(),
+  year: integer('year'),
+  sourceUrl: text('source_url').notNull().default(''),
+  description: text('description').notNull().default(''),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+});
+
+/** IPC / CrPC / IEA → BNS / BNSS / BSA illustrative mappings (verify against official conversion tables in production). */
+export const researchStatuteCrosswalk = pgTable(
+  'research_statute_crosswalk',
+  {
+    sourceStatute: text('source_statute').notNull(),
+    sourceSection: text('source_section').notNull(),
+    targetStatute: text('target_statute').notNull(),
+    targetSection: text('target_section').notNull(),
+    note: text('note').notNull().default(''),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.sourceStatute, t.sourceSection, t.targetStatute] })],
+);
+
 export const userProfileRelations = relations(userProfile, ({ one }) => ({
   user: one(user, { fields: [userProfile.userId], references: [user.id] }),
 }));

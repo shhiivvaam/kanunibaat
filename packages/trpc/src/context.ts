@@ -18,6 +18,7 @@ export interface TrpcContext {
   waitlistEnv: WaitlistEnv;
   meili: MeiliConnection | null;
   meiliIndexName: string;
+  meiliJudgmentsIndexName: string;
   s3Documents: S3DocumentsConfig | null;
   requestIp: string | null;
   userAgent: string | null;
@@ -38,6 +39,7 @@ export interface TrpcContextDeps {
   waitlistEnv: WaitlistEnv;
   meili: MeiliConnection | null;
   meiliIndexName: string;
+  meiliJudgmentsIndexName: string;
   s3Documents: S3DocumentsConfig | null;
   googleVisionApiKey: string | null;
   openaiApiKey: string | null;
@@ -84,6 +86,7 @@ export function createTrpcContextFactory(deps: TrpcContextDeps) {
       waitlistEnv: deps.waitlistEnv,
       meili: deps.meili,
       meiliIndexName: deps.meiliIndexName,
+      meiliJudgmentsIndexName: deps.meiliJudgmentsIndexName,
       s3Documents: deps.s3Documents,
       requestIp,
       userAgent,

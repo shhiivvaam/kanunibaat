@@ -17,6 +17,7 @@ const envSchema = z.object({
   MEILISEARCH_URL: z.string().optional(),
   MEILISEARCH_MASTER_KEY: z.string().optional(),
   MEILISEARCH_INDEX_LAWYERS: z.string().optional(),
+  MEILISEARCH_INDEX_JUDGMENTS: z.string().optional(),
   AWS_ACCESS_KEY_ID: z.string().optional(),
   AWS_SECRET_ACCESS_KEY: z.string().optional(),
   AWS_REGION: z.string().optional(),

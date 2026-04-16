@@ -92,3 +92,48 @@ export async function deleteLawyerMeili(conn: MeiliConnection, indexName: string
     throw new Error(`Meilisearch delete failed: ${res.status} ${text}`);
   }
 }
+
+/** Generic Meilisearch query; returns raw hit objects (e.g. judgments index). */
+export async function searchMeiliRaw(
+  conn: MeiliConnection,
+  indexName: string,
+  query: string,
+  limit: number,
+): Promise<Record<string, unknown>[]> {
+  const url = `${baseUrl(conn.host)}/indexes/${encodeURIComponent(indexName)}/search`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: authHeaders(conn.apiKey),
+    body: JSON.stringify({ q: query, limit, attributesToRetrieve: ['*'] }),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Meilisearch search failed: ${res.status} ${text}`);
+  }
+  const body = (await res.json()) as { hits?: unknown[] };
+  const out: Record<string, unknown>[] = [];
+  for (const h of body.hits ?? []) {
+    if (h && typeof h === 'object') out.push(h as Record<string, unknown>);
+  }
+  return out;
+}
+
+/** Bulk upsert documents; `primaryKey` must match Meili index primary key (e.g. `id`, `userId`). */
+export async function upsertMeiliDocuments(
+  conn: MeiliConnection,
+  indexName: string,
+  primaryKey: string,
+  documents: Record<string, unknown>[],
+): Promise<void> {
+  if (documents.length === 0) return;
+  const url = `${baseUrl(conn.host)}/indexes/${encodeURIComponent(indexName)}/documents?primaryKey=${encodeURIComponent(primaryKey)}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: authHeaders(conn.apiKey),
+    body: JSON.stringify(documents),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Meilisearch upsert failed: ${res.status} ${text}`);
+  }
+}

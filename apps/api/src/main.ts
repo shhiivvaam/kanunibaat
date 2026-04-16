@@ -3,7 +3,7 @@ import * as Sentry from '@sentry/node';
 import pino from 'pino';
 
 import { db } from '@kb/database';
-import { DEFAULT_LAWYERS_INDEX, parseMeiliConfigFromEnv } from '@kb/search';
+import { DEFAULT_JUDGMENTS_INDEX, DEFAULT_LAWYERS_INDEX, parseMeiliConfigFromEnv } from '@kb/search';
 import { parseS3DocumentsConfigFromEnv } from '@kb/storage';
 import { createTrpcContextFactory } from '@kb/trpc';
 
@@ -46,12 +46,15 @@ async function bootstrap() {
   const meili = parseMeiliConfigFromEnv(process.env);
   const meiliIndexName =
     apiEnv.MEILISEARCH_INDEX_LAWYERS?.trim() || DEFAULT_LAWYERS_INDEX;
+  const meiliJudgmentsIndexName =
+    apiEnv.MEILISEARCH_INDEX_JUDGMENTS?.trim() || DEFAULT_JUDGMENTS_INDEX;
 
   const createTrpcContext = createTrpcContextFactory({
     db,
     waitlistEnv: buildWaitlistEnv(apiEnv),
     meili,
     meiliIndexName,
+    meiliJudgmentsIndexName,
     s3Documents: parseS3DocumentsConfigFromEnv(process.env),
     googleVisionApiKey: apiEnv.GOOGLE_CLOUD_VISION_API_KEY?.trim() || null,
     openaiApiKey: apiEnv.OPENAI_API_KEY?.trim() || null,
