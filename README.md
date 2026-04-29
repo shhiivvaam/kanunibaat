@@ -9,6 +9,19 @@ Monorepo for **KanuniBaat** — legal infrastructure for India (web, API, mobile
 | [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) | Monorepo layout, auth, API boundaries |
 | [docs/PHASE-0.md](./docs/PHASE-0.md) | Phase 0 foundation checklist and deployment notes |
 | [docs/PHASE-1.md](./docs/PHASE-1.md) | Phase 1 marketing site, waitlists, legal pages, SEO |
+| [docs/PHASE-2.md](./docs/PHASE-2.md) | Phase 2 auth, sessions, profile/role API, OTP |
+| [docs/PHASE-3.md](./docs/PHASE-3.md) | Phase 3 lawyer verification and marketplace |
+| [docs/PHASE-4.md](./docs/PHASE-4.md) | Phase 4 notice scanner |
+| [docs/PHASE-5.md](./docs/PHASE-5.md) | Phase 5 consultations and payments |
+| [docs/PHASE-6.md](./docs/PHASE-6.md) | Phase 6 emergency guide ("Kya Karein?") |
+| [docs/PHASE-7.md](./docs/PHASE-7.md) | Phase 7 document vault |
+| [docs/PHASE-8.md](./docs/PHASE-8.md) | Phase 8 lawyer case management |
+| [docs/PHASE-9.md](./docs/PHASE-9.md) | Phase 9 AI legal research |
+| [docs/PHASE-10.md](./docs/PHASE-10.md) | Phase 10 practice analytics and billing |
+| [docs/PHASE-11.md](./docs/PHASE-11.md) | Phase 11 notifications and case tracker |
+| [docs/PHASE-12.md](./docs/PHASE-12.md) | Phase 12 content platform and legal Q&A |
+| [docs/PHASE-13.md](./docs/PHASE-13.md) | Phase 13 subscriptions and monetization |
+| [docs/PHASE-14.md](./docs/PHASE-14.md) | Phase 14 i18n and vernacular rollout |
 
 ## Prerequisites
 
