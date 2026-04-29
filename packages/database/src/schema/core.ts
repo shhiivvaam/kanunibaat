@@ -505,6 +505,78 @@ export const caseTracker = pgTable(
   (t) => [uniqueIndex('case_tracker_user_cnr_uidx').on(t.userId, t.cnr)],
 );
 
+export const whatsappMessageDirectionEnum = pgEnum('whatsapp_message_direction', ['in', 'out']);
+
+export const whatsappConversation = pgTable(
+  'whatsapp_conversation',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: text('user_id').references(() => user.id, { onDelete: 'set null' }),
+    waUserId: text('wa_user_id').notNull(),
+    lastState: text('last_state').notNull().default('entry'),
+    lastLocale: text('last_locale').notNull().default('en'),
+    lastSeenAt: timestamp('last_seen_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('whatsapp_conversation_wa_user_uidx').on(t.waUserId)],
+);
+
+export const whatsappMessage = pgTable('whatsapp_message', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  conversationId: uuid('conversation_id')
+    .notNull()
+    .references(() => whatsappConversation.id, { onDelete: 'cascade' }),
+  waMessageId: text('wa_message_id').notNull().unique(),
+  direction: whatsappMessageDirectionEnum('direction').notNull(),
+  body: text('body').notNull().default(''),
+  rawJson: jsonb('raw_json').$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+});
+
+export const digilockerConnectionStatusEnum = pgEnum('digilocker_connection_status', [
+  'connected',
+  'revoked',
+  'error',
+]);
+
+export const digilockerConnection = pgTable(
+  'digilocker_connection',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    status: digilockerConnectionStatusEnum('status').notNull().default('connected'),
+    accessTokenEnc: text('access_token_enc').notNull(),
+    refreshTokenEnc: text('refresh_token_enc').notNull(),
+    expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'date' }),
+    scopesJson: jsonb('scopes_json').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('digilocker_connection_user_uidx').on(t.userId)],
+);
+
+export const digilockerDocument = pgTable(
+  'digilocker_document',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    connectionId: uuid('connection_id')
+      .notNull()
+      .references(() => digilockerConnection.id, { onDelete: 'cascade' }),
+    docId: text('doc_id').notNull(),
+    issuer: text('issuer').notNull().default(''),
+    docType: text('doc_type').notNull().default(''),
+    title: text('title').notNull().default(''),
+    mime: text('mime'),
+    fetchedAt: timestamp('fetched_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+    vaultDocumentId: uuid('vault_document_id').references(() => vaultDocument.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('digilocker_document_conn_doc_uidx').on(t.connectionId, t.docId)],
+);
+
 export const kbQaQuestionStatusEnum = pgEnum('kb_qa_question_status', ['open', 'answered', 'closed', 'hidden']);
 export const kbQaVoteValueEnum = pgEnum('kb_qa_vote_value', ['up', 'down']);
 
@@ -954,4 +1026,32 @@ export const kbSubscriptionRelations = relations(kbSubscription, ({ one }) => ({
 
 export const kbUsageMeterRelations = relations(kbUsageMeter, ({ one }) => ({
   user: one(user, { fields: [kbUsageMeter.userId], references: [user.id] }),
+}));
+
+export const whatsappConversationRelations = relations(whatsappConversation, ({ one, many }) => ({
+  user: one(user, { fields: [whatsappConversation.userId], references: [user.id] }),
+  messages: many(whatsappMessage),
+}));
+
+export const whatsappMessageRelations = relations(whatsappMessage, ({ one }) => ({
+  conversation: one(whatsappConversation, {
+    fields: [whatsappMessage.conversationId],
+    references: [whatsappConversation.id],
+  }),
+}));
+
+export const digilockerConnectionRelations = relations(digilockerConnection, ({ one, many }) => ({
+  user: one(user, { fields: [digilockerConnection.userId], references: [user.id] }),
+  documents: many(digilockerDocument),
+}));
+
+export const digilockerDocumentRelations = relations(digilockerDocument, ({ one }) => ({
+  connection: one(digilockerConnection, {
+    fields: [digilockerDocument.connectionId],
+    references: [digilockerConnection.id],
+  }),
+  vaultDocument: one(vaultDocument, {
+    fields: [digilockerDocument.vaultDocumentId],
+    references: [vaultDocument.id],
+  }),
 }));

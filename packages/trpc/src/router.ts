@@ -27,6 +27,7 @@ import { consultationsRouter } from './routers/consultations';
 import { contentRouter } from './routers/content';
 import { emergencyGuideRouter } from './routers/emergency-guide';
 import { lawyerRouter } from './routers/lawyer';
+import { integrationsRouter } from './routers/integrations';
 import { marketplaceRouter } from './routers/marketplace';
 import { noticesRouter } from './routers/notices';
 import { notificationsRouter } from './routers/notifications';
@@ -66,6 +67,7 @@ export const appRouter = router({
   content: contentRouter,
   qa: qaRouter,
   billing: billingRouter,
+  integrations: integrationsRouter,
 
   waitlist: router({
     submitUser: publicProcedure.input(userWaitlistInputSchema).mutation(async ({ ctx, input }) => {

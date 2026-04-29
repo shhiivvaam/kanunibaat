@@ -85,6 +85,20 @@
       "when": 1776304000000,
       "tag": "0011_phase13_subscriptions",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1776306000000,
+      "tag": "0012_phase15_whatsapp",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1776308000000,
+      "tag": "0013_phase15_digilocker",
+      "breakpoints": true
     }
   ]
 }

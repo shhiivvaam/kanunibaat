@@ -4,7 +4,7 @@ import { computeRazorpayWebhookSignature } from './razorpay-webhook';
 import { createRazorpaySubscriptionsWebhookHandler } from './razorpay-subscriptions-webhook';
 
 jest.mock('./billing-email', () => ({
-  sendBillingReceiptEmail: jest.fn(async () => { }),
+  sendBillingReceiptEmail: jest.fn(async () => {}),
 }));
 
 jest.mock('@kb/database', () => {
@@ -39,7 +39,7 @@ jest.mock('@kb/database', () => {
     }),
     update: () => ({
       set: () => ({
-        where: async () => { },
+        where: async () => {},
       }),
     }),
   };
@@ -79,7 +79,7 @@ describe('Phase 13 Razorpay subscriptions webhook', () => {
       json: () => res,
     } as unknown as Response;
 
-    await handler(req, res, () => { });
-    await handler(req, res, () => { });
+    await handler(req, res, () => {});
+    await handler(req, res, () => {});
   });
 });

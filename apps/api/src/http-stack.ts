@@ -13,6 +13,7 @@ import { createCaseTrackerPollHandler } from './case-tracker-poll';
 import { createNotificationsDispatchHandler } from './notifications-dispatch';
 import { createRazorpayWebhookHandler } from './razorpay-webhook';
 import { createRazorpaySubscriptionsWebhookHandler } from './razorpay-subscriptions-webhook';
+import { createWhatsAppWebhookHandlers } from './whatsapp/webhook';
 
 export type TrpcContextCreator = ReturnType<typeof createTrpcContextFactory>;
 
@@ -85,6 +86,23 @@ export function attachPublicHttpMiddlewares(
       '/webhooks/razorpay/subscriptions',
       express.raw({ type: 'application/json' }),
       createRazorpaySubscriptionsWebhookHandler({ webhookSecret }),
+    );
+  }
+
+  const waToken = process.env.WHATSAPP_API_TOKEN?.trim();
+  const waPhoneId = process.env.WHATSAPP_PHONE_NUMBER_ID?.trim();
+  const waVerify = process.env.WHATSAPP_VERIFY_TOKEN?.trim();
+  const waAppSecret = process.env.WHATSAPP_APP_SECRET?.trim();
+  if (waToken && waPhoneId && waVerify) {
+    const wa = createWhatsAppWebhookHandlers({
+      verifyToken: waVerify,
+      appSecret: waAppSecret,
+    });
+    httpServer.get('/webhooks/whatsapp', wa.verify);
+    httpServer.post(
+      '/webhooks/whatsapp',
+      express.raw({ type: 'application/json' }),
+      wa.receive,
     );
   }
 
