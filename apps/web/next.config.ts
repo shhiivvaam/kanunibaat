@@ -18,14 +18,21 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.join(__dirname, '../..'),
   },
+  async rewrites() {
+    const internal =
+      process.env.API_INTERNAL_URL?.trim().replace(/\/$/, '') ||
+      process.env.INTERNAL_API_URL?.trim().replace(/\/$/, '') ||
+      'http://127.0.0.1:4000';
+    return [{ source: '/api/backend/:path*', destination: `${internal}/:path*` }];
+  },
   transpilePackages: [
-    '@kb/api-client',
-    '@kb/config',
-    '@kb/database',
-    '@kb/trpc',
-    '@kb/types',
-    '@kb/ui',
-    '@kb/utils',
+    '@jurisly/api-client',
+    '@jurisly/config',
+    '@jurisly/database',
+    '@jurisly/trpc',
+    '@jurisly/types',
+    '@jurisly/ui',
+    '@jurisly/utils',
   ],
   serverExternalPackages: ['postgres', 'better-auth'],
 };
@@ -34,9 +41,9 @@ export default withSentryConfig(withNextIntl(nextConfig), {
   // For all available options, see:
   // https://www.npmjs.com/package/@sentry/webpack-plugin#options
 
-  org: "newsbite",
+  org: 'newsbite',
 
-  project: "kanunibaat",
+  project: 'jurisly',
 
   // Only print logs for uploading source maps in CI
   silent: !process.env.CI,
@@ -51,7 +58,7 @@ export default withSentryConfig(withNextIntl(nextConfig), {
   // This can increase your server load as well as your hosting bill.
   // Note: Check that the configured route will not match with your Next.js middleware, otherwise reporting of client-
   // side errors will fail.
-  tunnelRoute: "/monitoring",
+  tunnelRoute: '/monitoring',
 
   webpack: {
     // Enables automatic instrumentation of Vercel Cron Monitors. (Does not yet work with App Router route handlers.)

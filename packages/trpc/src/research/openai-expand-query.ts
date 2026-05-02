@@ -4,7 +4,10 @@ const schema = z.object({
   searchTerms: z.string().min(1).max(500),
 });
 
-export async function expandResearchQueryWithOpenAI(apiKey: string, naturalLanguage: string): Promise<string> {
+export async function expandResearchQueryWithOpenAI(
+  apiKey: string,
+  naturalLanguage: string,
+): Promise<string> {
   const nl = naturalLanguage.trim().slice(0, 2000);
   const system =
     'You help lawyers search a judgment database. Output STRICT JSON only: {"searchTerms":"..."} — a concise keyword string suitable for full-text search (cases, statutes, topics). Indian legal context. No markdown.';

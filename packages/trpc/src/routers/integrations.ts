@@ -2,9 +2,10 @@ import { TRPCError } from '@trpc/server';
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 
-import { schema } from '@kb/database';
+import { schema } from '@jurisly/database';
 
 import { protectedProcedure, router } from '../init';
+import { writeAuditLog } from '../lib/audit-log';
 import {
   decryptToken,
   digilockerDownload,
@@ -74,8 +75,14 @@ export const integrationsRouter = router({
         const now = new Date();
         const expiresAt =
           typeof tok.expires_in === 'number' ? new Date(Date.now() + tok.expires_in * 1000) : null;
-        const accessEnc = encryptToken({ token: tok.access_token, secret: cfg.tokenSecret }).ciphertext;
-        const refreshEnc = encryptToken({ token: tok.refresh_token ?? '', secret: cfg.tokenSecret }).ciphertext;
+        const accessEnc = encryptToken({
+          token: tok.access_token,
+          secret: cfg.tokenSecret,
+        }).ciphertext;
+        const refreshEnc = encryptToken({
+          token: tok.refresh_token ?? '',
+          secret: cfg.tokenSecret,
+        }).ciphertext;
 
         await ctx.db
           .insert(schema.digilockerConnection)
@@ -100,6 +107,16 @@ export const integrationsRouter = router({
               updatedAt: now,
             },
           });
+
+        await writeAuditLog({
+          db: ctx.db,
+          userId: ctx.authUserId,
+          action: 'digilocker.oauth.success',
+          entityType: 'digilocker_connection',
+          entityId: ctx.authUserId,
+          ipAddress: ctx.requestIp ?? undefined,
+          userAgent: ctx.userAgent ?? undefined,
+        });
 
         return { ok: true as const };
       }),
@@ -128,7 +145,12 @@ export const integrationsRouter = router({
       const [row] = await ctx.db
         .select()
         .from(schema.digilockerConnection)
-        .where(and(eq(schema.digilockerConnection.userId, ctx.authUserId), eq(schema.digilockerConnection.status, 'connected')))
+        .where(
+          and(
+            eq(schema.digilockerConnection.userId, ctx.authUserId),
+            eq(schema.digilockerConnection.status, 'connected'),
+          ),
+        )
         .limit(1);
       if (!row) {
         throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'DigiLocker not connected.' });
@@ -169,10 +191,18 @@ export const integrationsRouter = router({
         const [row] = await ctx.db
           .select()
           .from(schema.digilockerConnection)
-          .where(and(eq(schema.digilockerConnection.userId, ctx.authUserId), eq(schema.digilockerConnection.status, 'connected')))
+          .where(
+            and(
+              eq(schema.digilockerConnection.userId, ctx.authUserId),
+              eq(schema.digilockerConnection.status, 'connected'),
+            ),
+          )
           .limit(1);
         if (!row) {
-          throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'DigiLocker not connected.' });
+          throw new TRPCError({
+            code: 'PRECONDITION_FAILED',
+            message: 'DigiLocker not connected.',
+          });
         }
         const access = decryptToken({ ciphertext: row.accessTokenEnc, secret: cfg.tokenSecret });
         const dl = await digilockerDownload({
@@ -180,6 +210,18 @@ export const integrationsRouter = router({
           accessToken: access,
           uri: input.uri,
           maxBytes: MAX_IMPORT_BYTES,
+        });
+        await writeAuditLog({
+          db: ctx.db,
+          userId: ctx.authUserId,
+          action: 'digilocker.document.downloaded',
+          entityType: 'digilocker',
+          metadata: {
+            byte_length: dl.bytes.length,
+            content_type: dl.contentType,
+          },
+          ipAddress: ctx.requestIp ?? undefined,
+          userAgent: ctx.userAgent ?? undefined,
         });
         const b64 = Buffer.from(dl.bytes).toString('base64');
         return { base64: b64, contentType: dl.contentType };
@@ -197,10 +239,18 @@ export const integrationsRouter = router({
         const [conn] = await ctx.db
           .select()
           .from(schema.digilockerConnection)
-          .where(and(eq(schema.digilockerConnection.userId, ctx.authUserId), eq(schema.digilockerConnection.status, 'connected')))
+          .where(
+            and(
+              eq(schema.digilockerConnection.userId, ctx.authUserId),
+              eq(schema.digilockerConnection.status, 'connected'),
+            ),
+          )
           .limit(1);
         if (!conn) {
-          throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'DigiLocker not connected.' });
+          throw new TRPCError({
+            code: 'PRECONDITION_FAILED',
+            message: 'DigiLocker not connected.',
+          });
         }
         void cfg; // ensures requireDigiLockerEnabled was called
         await ctx.db
@@ -220,4 +270,3 @@ export const integrationsRouter = router({
       }),
   }),
 });
-

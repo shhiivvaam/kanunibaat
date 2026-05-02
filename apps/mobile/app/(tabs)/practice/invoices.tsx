@@ -2,7 +2,7 @@ import { Link, useGlobalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export default function PracticeInvoicesScreen() {
   const router = useRouter();
@@ -57,14 +57,20 @@ export default function PracticeInvoicesScreen() {
       ) : (
         <View style={{ marginTop: 16, gap: 10 }}>
           {(list.data ?? []).map((inv) => (
-            <Link key={inv.id} href={`/(tabs)/practice/invoice/${inv.id}` as never} style={styles.card}>
+            <Link
+              key={inv.id}
+              href={`/(tabs)/practice/invoice/${inv.id}` as never}
+              style={styles.card}
+            >
               <Text style={styles.cardTitle}>{inv.invoiceNumber}</Text>
               <Text style={styles.cardMeta}>
                 {inv.status} · ₹{inv.totalInr}
               </Text>
             </Link>
           ))}
-          {(list.data?.length ?? 0) === 0 ? <Text style={styles.muted}>No invoices yet.</Text> : null}
+          {(list.data?.length ?? 0) === 0 ? (
+            <Text style={styles.muted}>No invoices yet.</Text>
+          ) : null}
         </View>
       )}
     </ScrollView>

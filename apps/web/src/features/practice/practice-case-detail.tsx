@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 const STATUSES = [
   'intake',
@@ -29,8 +29,13 @@ export function PracticeCaseDetail() {
   const hearings = trpc.cases.hearing.list.useQuery({ caseId }, { enabled: Boolean(caseId) });
   const tasks = trpc.cases.task.list.useQuery({ caseId }, { enabled: Boolean(caseId) });
   const documents = trpc.cases.document.list.useQuery({ caseId }, { enabled: Boolean(caseId) });
-  const timeList = trpc.practice.billing.timeEntry.list.useQuery({ caseId }, { enabled: Boolean(caseId) });
-  const timeActive = trpc.practice.billing.timeEntry.active.useQuery(undefined, { enabled: Boolean(caseId) });
+  const timeList = trpc.practice.billing.timeEntry.list.useQuery(
+    { caseId },
+    { enabled: Boolean(caseId) },
+  );
+  const timeActive = trpc.practice.billing.timeEntry.active.useQuery(undefined, {
+    enabled: Boolean(caseId),
+  });
 
   const timeStart = trpc.practice.billing.timeEntry.start.useMutation({
     onSuccess: async () => {
@@ -117,7 +122,10 @@ export function PracticeCaseDetail() {
 
   const [lookupInput, setLookupInput] = useState('');
   const [lookupState, setLookupState] = useState<
-    { kind: 'idle' } | { kind: 'loading' } | { kind: 'ok'; snapshot: unknown } | { kind: 'err'; message: string }
+    | { kind: 'idle' }
+    | { kind: 'loading' }
+    | { kind: 'ok'; snapshot: unknown }
+    | { kind: 'err'; message: string }
   >({ kind: 'idle' });
 
   const taskUpdate = trpc.cases.task.update.useMutation({
@@ -191,7 +199,10 @@ export function PracticeCaseDetail() {
         <Link href="/app/practice/cases" className="text-sm text-[#C2410C] hover:underline">
           ← Cases
         </Link>
-        <h1 className="mt-2 text-xl font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+        <h1
+          className="mt-2 text-xl font-semibold text-[#1C1917]"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
           {row.courtName || row.caseType || 'Case'}
         </h1>
         <p className="mt-1 text-xs text-[#78716C]">
@@ -287,12 +298,16 @@ export function PracticeCaseDetail() {
         >
           Save
         </button>
-        {updateCase.error ? <p className="mt-2 text-sm text-red-700">{updateCase.error.message}</p> : null}
+        {updateCase.error ? (
+          <p className="mt-2 text-sm text-red-700">{updateCase.error.message}</p>
+        ) : null}
       </section>
 
       <section className="rounded-xl border border-[#E7E5E4] bg-white p-4 shadow-sm">
         <h2 className="text-sm font-semibold text-[#1C1917]">Billable time</h2>
-        <p className="mt-1 text-xs text-[#78716C]">One running timer per account. Stop before starting another.</p>
+        <p className="mt-1 text-xs text-[#78716C]">
+          One running timer per account. Stop before starting another.
+        </p>
         {timeActive.data?.entry && timeActive.data.entry.caseId === caseId ? (
           <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950">
             <p className="font-medium">Timer running on this case</p>
@@ -453,7 +468,12 @@ export function PracticeCaseDetail() {
             value={taskTitle}
             onChange={(e) => setTaskTitle(e.target.value)}
           />
-          <input type="date" className="rounded-lg border border-[#D6D3D1] px-2 py-1 text-sm" value={taskDue} onChange={(e) => setTaskDue(e.target.value)} />
+          <input
+            type="date"
+            className="rounded-lg border border-[#D6D3D1] px-2 py-1 text-sm"
+            value={taskDue}
+            onChange={(e) => setTaskDue(e.target.value)}
+          />
           <button
             type="button"
             disabled={!taskTitle.trim() || taskCreate.isPending}
@@ -498,9 +518,15 @@ export function PracticeCaseDetail() {
 
       <section className="rounded-xl border border-[#E7E5E4] bg-white p-4 shadow-sm">
         <h2 className="text-sm font-semibold text-[#1C1917]">Documents</h2>
-        <p className="mt-1 text-xs text-[#78716C]">PDF or image (JPEG/PNG/WebP), same limits as other uploads.</p>
+        <p className="mt-1 text-xs text-[#78716C]">
+          PDF or image (JPEG/PNG/WebP), same limits as other uploads.
+        </p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          <input type="file" accept=".pdf,image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+          <input
+            type="file"
+            accept=".pdf,image/*"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          />
           <button
             type="button"
             disabled={uploadBusy || !file}

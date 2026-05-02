@@ -1,8 +1,8 @@
 import { eq } from 'drizzle-orm';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 
-import type * as DbSchema from '@kb/database/schema';
-import { lawyerProfile } from '@kb/database/schema';
+import type * as DbSchema from '@jurisly/database/schema';
+import { lawyerProfile } from '@jurisly/database/schema';
 
 export function slugifyDisplayName(raw: string): string {
   const s = raw
@@ -27,7 +27,11 @@ export async function allocateLawyerSlug(
   let candidate = base.slice(0, 80);
   let n = 0;
   while (n < 50) {
-    const [hit] = await db.select({ userId: lawyerProfile.userId }).from(lawyerProfile).where(eq(lawyerProfile.slug, candidate)).limit(1);
+    const [hit] = await db
+      .select({ userId: lawyerProfile.userId })
+      .from(lawyerProfile)
+      .where(eq(lawyerProfile.slug, candidate))
+      .limit(1);
     if (!hit || hit.userId === userId) return candidate;
     n += 1;
     candidate = `${base}-${n}`.slice(0, 80);

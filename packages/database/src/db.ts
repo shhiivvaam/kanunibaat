@@ -14,11 +14,11 @@ function resolveDatabaseUrl(): string {
   if (process.env.VERCEL === '1' || process.env.RAILWAY_ENVIRONMENT === 'production') {
     throw new Error('DATABASE_URL is required in this hosted environment.');
   }
-  return 'postgresql://postgres:postgres@127.0.0.1:5432/kanunibaat';
+  return 'postgresql://postgres:postgres@127.0.0.1:5432/jurisly';
 }
 
 const globalForDb = globalThis as unknown as {
-  kbSql?: ReturnType<typeof postgres>;
+  jurislySql?: ReturnType<typeof postgres>;
 };
 
 /**
@@ -26,13 +26,13 @@ const globalForDb = globalThis as unknown as {
  * In production (Vercel/serverless), use Supabase pooler + `max: 1` (or a pooler-aware driver).
  */
 const sql =
-  globalForDb.kbSql ??
+  globalForDb.jurislySql ??
   postgres(resolveDatabaseUrl(), {
     max: 1,
   });
 
 if (process.env.NODE_ENV !== 'production') {
-  globalForDb.kbSql = sql;
+  globalForDb.jurislySql = sql;
 }
 
 export const db = drizzle(sql, { schema });

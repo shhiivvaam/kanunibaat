@@ -4,11 +4,17 @@ import { TRPCClientError } from '@trpc/client';
 import Link from 'next/link';
 import { useState } from 'react';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 function fieldErrorsFromTrpc(err: unknown): Record<string, string[] | undefined> | undefined {
-  if (err instanceof TRPCClientError && err.data && typeof err.data === 'object' && 'zodError' in err.data) {
-    const z = (err.data as { zodError?: { fieldErrors?: Record<string, string[] | undefined> } }).zodError;
+  if (
+    err instanceof TRPCClientError &&
+    err.data &&
+    typeof err.data === 'object' &&
+    'zodError' in err.data
+  ) {
+    const z = (err.data as { zodError?: { fieldErrors?: Record<string, string[] | undefined> } })
+      .zodError;
     return z?.fieldErrors;
   }
   return undefined;
@@ -87,9 +93,12 @@ export function WaitlistLawyerPage() {
         >
           Lawyer early-access waitlist
         </h1>
-        <p className="mb-8 text-[#57534E]" style={{ fontFamily: 'var(--font-body)', lineHeight: 1.65 }}>
-          We verify every advocate against Bar Council records. Tell us who you are — we will follow up with onboarding
-          steps and verification requirements.
+        <p
+          className="mb-8 text-[#57534E]"
+          style={{ fontFamily: 'var(--font-body)', lineHeight: 1.65 }}
+        >
+          We verify every advocate against Bar Council records. Tell us who you are — we will follow
+          up with onboarding steps and verification requirements.
         </p>
 
         {submittedMessage ? (
@@ -99,12 +108,18 @@ export function WaitlistLawyerPage() {
           >
             <p className="font-semibold">Received.</p>
             <p className="mt-2 text-sm leading-relaxed">{submittedMessage}</p>
-            <Link href="/for-lawyers" className="mt-4 inline-block text-sm font-semibold text-[#C2410C] hover:underline">
+            <Link
+              href="/for-lawyers"
+              className="mt-4 inline-block text-sm font-semibold text-[#C2410C] hover:underline"
+            >
               Back to For Lawyers
             </Link>
           </div>
         ) : (
-          <form onSubmit={onSubmit} className="space-y-5 rounded-[24px] border border-[#E7E5E4] bg-white p-8 shadow-sm">
+          <form
+            onSubmit={onSubmit}
+            className="space-y-5 rounded-[24px] border border-[#E7E5E4] bg-white p-8 shadow-sm"
+          >
             {mutation.isError ? (
               <p className="rounded-xl bg-[#FEF2F2] px-4 py-3 text-sm text-[#B91C1C]" role="alert">
                 {mutation.error.message}
@@ -112,7 +127,10 @@ export function WaitlistLawyerPage() {
             ) : null}
 
             <div>
-              <label htmlFor="wl-name" className="mb-1.5 block text-sm font-semibold text-[#1C1917]">
+              <label
+                htmlFor="wl-name"
+                className="mb-1.5 block text-sm font-semibold text-[#1C1917]"
+              >
                 Full name (as on enrollment)
               </label>
               <input
@@ -130,7 +148,10 @@ export function WaitlistLawyerPage() {
             </div>
 
             <div>
-              <label htmlFor="wl-email" className="mb-1.5 block text-sm font-semibold text-[#1C1917]">
+              <label
+                htmlFor="wl-email"
+                className="mb-1.5 block text-sm font-semibold text-[#1C1917]"
+              >
                 Work email
               </label>
               <input
@@ -149,7 +170,10 @@ export function WaitlistLawyerPage() {
             </div>
 
             <div>
-              <label htmlFor="wl-phone" className="mb-1.5 block text-sm font-semibold text-[#1C1917]">
+              <label
+                htmlFor="wl-phone"
+                className="mb-1.5 block text-sm font-semibold text-[#1C1917]"
+              >
                 Phone
               </label>
               <input
@@ -194,7 +218,10 @@ export function WaitlistLawyerPage() {
             </div>
 
             <div>
-              <label htmlFor="wl-enroll" className="mb-1.5 block text-sm font-semibold text-[#1C1917]">
+              <label
+                htmlFor="wl-enroll"
+                className="mb-1.5 block text-sm font-semibold text-[#1C1917]"
+              >
                 Bar enrollment number
               </label>
               <input
@@ -211,8 +238,12 @@ export function WaitlistLawyerPage() {
             </div>
 
             <div>
-              <label htmlFor="wl-areas" className="mb-1.5 block text-sm font-semibold text-[#1C1917]">
-                Primary practice areas <span className="font-normal text-[#78716C]">(optional)</span>
+              <label
+                htmlFor="wl-areas"
+                className="mb-1.5 block text-sm font-semibold text-[#1C1917]"
+              >
+                Primary practice areas{' '}
+                <span className="font-normal text-[#78716C]">(optional)</span>
               </label>
               <textarea
                 id="wl-areas"
@@ -245,7 +276,10 @@ export function WaitlistLawyerPage() {
               {mutation.isPending ? 'Submitting…' : 'Request early access'}
             </button>
 
-            <p className="text-center text-xs text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
+            <p
+              className="text-center text-xs text-[#78716C]"
+              style={{ fontFamily: 'var(--font-body)' }}
+            >
               By submitting, you agree to our{' '}
               <Link href="/terms" className="text-[#C2410C] hover:underline">
                 Terms

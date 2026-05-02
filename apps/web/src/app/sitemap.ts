@@ -1,7 +1,8 @@
-import { EMERGENCY_SCENARIOS } from '@kb/emergency-guide';
+import { EMERGENCY_SCENARIOS } from '@jurisly/emergency-guide';
 import type { MetadataRoute } from 'next';
 
 import { getAllSlugs } from '@/lib/blog';
+import { isWaitlistCampaign } from '@/lib/marketing-campaign';
 import { getSiteUrl } from '@/lib/site-url';
 
 const STATIC_PATHS = [
@@ -28,6 +29,22 @@ const STATIC_PATHS = [
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = getSiteUrl();
   const lastMod = new Date();
+
+  if (isWaitlistCampaign()) {
+    const waitlistPaths = [
+      '/',
+      '/waitlist/lawyer',
+      '/privacy',
+      '/terms',
+      '/privacy-charter',
+    ] as const;
+    return waitlistPaths.map((path) => ({
+      url: `${base}${path}`,
+      lastModified: lastMod,
+      changeFrequency: path === '/' ? 'weekly' : 'monthly',
+      priority: path === '/' ? 1 : 0.65,
+    }));
+  }
 
   const staticEntries: MetadataRoute.Sitemap = STATIC_PATHS.map((path) => ({
     url: `${base}${path}`,

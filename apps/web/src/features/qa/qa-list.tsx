@@ -3,22 +3,31 @@
 import Link from 'next/link';
 import { useState } from 'react';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export function QaList() {
   const [category, setCategory] = useState('');
   const [q, setQ] = useState('');
 
-  const list = trpc.qa.question.list.useQuery({ category: category || undefined, q: q.trim() || undefined, limit: 30 });
+  const list = trpc.qa.question.list.useQuery({
+    category: category || undefined,
+    q: q.trim() || undefined,
+    limit: 30,
+  });
 
   return (
     <div className="space-y-8" style={{ fontFamily: 'var(--font-body)' }}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+          <h1
+            className="text-2xl font-semibold text-[#1C1917]"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
             Legal Q&A
           </h1>
-          <p className="mt-1 text-sm text-[#57534E]">Ask a question. Verified lawyers answer. AI gives a safe preview.</p>
+          <p className="mt-1 text-sm text-[#57534E]">
+            Ask a question. Verified lawyers answer. AI gives a safe preview.
+          </p>
         </div>
         <Link
           href="/legal-qa/ask"
@@ -64,8 +73,9 @@ export function QaList() {
         ))}
       </div>
 
-      {list.data && list.data.items.length === 0 ? <p className="text-sm text-[#78716C]">No questions yet.</p> : null}
+      {list.data && list.data.items.length === 0 ? (
+        <p className="text-sm text-[#78716C]">No questions yet.</p>
+      ) : null}
     </div>
   );
 }
-

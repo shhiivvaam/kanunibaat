@@ -1,8 +1,8 @@
 import { eq } from 'drizzle-orm';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 
-import type * as DbSchema from '@kb/database/schema';
-import { lawyerProfile, userProfile } from '@kb/database/schema';
+import type * as DbSchema from '@jurisly/database/schema';
+import { lawyerProfile, userProfile } from '@jurisly/database/schema';
 
 import type { MeiliConnection } from './meili-http';
 import { deleteLawyerMeili, upsertLawyersMeili } from './meili';

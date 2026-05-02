@@ -1,8 +1,8 @@
 import * as SecureStore from 'expo-secure-store';
 import { DeviceEventEmitter } from 'react-native';
 
-const STORAGE_KEY = 'kanunibaat_session_token';
-const CHANGED_EVENT = 'kanunibaat_session_token_changed';
+const STORAGE_KEY = 'jurisly_session_token';
+const CHANGED_EVENT = 'jurisly_session_token_changed';
 
 export async function getSessionToken(): Promise<string | null> {
   try {

@@ -1,8 +1,8 @@
 import { and, eq } from 'drizzle-orm';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 
-import type * as DbSchema from '@kb/database/schema';
-import { lawyerProfile, user, userProfile, userRole } from '@kb/database/schema';
+import type * as DbSchema from '@jurisly/database/schema';
+import { lawyerProfile, user, userProfile, userRole } from '@jurisly/database/schema';
 
 import type { KbRole } from './context';
 
@@ -64,7 +64,11 @@ export async function ensureUserProfileRow(
   userId: string,
   fallbackName: string,
 ): Promise<void> {
-  const existing = await db.select().from(userProfile).where(eq(userProfile.userId, userId)).limit(1);
+  const existing = await db
+    .select()
+    .from(userProfile)
+    .where(eq(userProfile.userId, userId))
+    .limit(1);
   if (existing.length > 0) return;
   await db.insert(userProfile).values({
     userId,
@@ -83,8 +87,15 @@ export async function loadProfileBundle(
   const [p] = await db.select().from(userProfile).where(eq(userProfile.userId, userId)).limit(1);
   if (!p) return null;
 
-  const roleRows = await db.select({ role: userRole.role }).from(userRole).where(eq(userRole.userId, userId));
-  const [law] = await db.select().from(lawyerProfile).where(eq(lawyerProfile.userId, userId)).limit(1);
+  const roleRows = await db
+    .select({ role: userRole.role })
+    .from(userRole)
+    .where(eq(userRole.userId, userId));
+  const [law] = await db
+    .select()
+    .from(lawyerProfile)
+    .where(eq(lawyerProfile.userId, userId))
+    .limit(1);
 
   return {
     user: {
@@ -105,19 +116,19 @@ export async function loadProfileBundle(
     roles: roleRows.map((r) => r.role),
     lawyer: law
       ? {
-        userId: law.userId,
-        slug: law.slug,
-        barState: law.barState,
-        enrollmentNumber: law.enrollmentNumber,
-        headline: law.headline,
-        bio: law.bio,
-        city: law.city,
-        practiceAreas: Array.isArray(law.practiceAreas) ? law.practiceAreas : [],
-        languages: Array.isArray(law.languages) ? law.languages : [],
-        yearsExperience: law.yearsExperience ?? null,
-        verificationStatus: law.verificationStatus,
-        rejectionReason: law.rejectionReason ?? null,
-      }
+          userId: law.userId,
+          slug: law.slug,
+          barState: law.barState,
+          enrollmentNumber: law.enrollmentNumber,
+          headline: law.headline,
+          bio: law.bio,
+          city: law.city,
+          practiceAreas: Array.isArray(law.practiceAreas) ? law.practiceAreas : [],
+          languages: Array.isArray(law.languages) ? law.languages : [],
+          yearsExperience: law.yearsExperience ?? null,
+          verificationStatus: law.verificationStatus,
+          rejectionReason: law.rejectionReason ?? null,
+        }
       : null,
   };
 }

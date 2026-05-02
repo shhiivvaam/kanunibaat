@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export function ResearchJudgmentDetail() {
   const params = useParams();
@@ -32,7 +32,10 @@ export function ResearchJudgmentDetail() {
         ← Judgments
       </Link>
       <div>
-        <h1 className="text-xl font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+        <h1
+          className="text-xl font-semibold text-[#1C1917]"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
           {j.title}
         </h1>
         <p className="mt-1 text-sm text-[#78716C]">
@@ -54,7 +57,9 @@ export function ResearchJudgmentDetail() {
         >
           Generate summary
         </button>
-        {summarize.error ? <p className="mt-2 text-sm text-red-700">{summarize.error.message}</p> : null}
+        {summarize.error ? (
+          <p className="mt-2 text-sm text-red-700">{summarize.error.message}</p>
+        ) : null}
         {summarize.data ? (
           <div className="mt-3 text-sm">
             <p className="text-[#44403C]">{summarize.data.summary.summary}</p>
@@ -86,7 +91,9 @@ export function ResearchJudgmentDetail() {
         </button>
         {chain.error ? <p className="mt-2 text-sm text-red-700">{chain.error.message}</p> : null}
         {citationJson ? (
-          <pre className="mt-2 max-h-64 overflow-auto rounded-lg bg-[#F5F5F4] p-3 text-xs">{citationJson}</pre>
+          <pre className="mt-2 max-h-64 overflow-auto rounded-lg bg-[#F5F5F4] p-3 text-xs">
+            {citationJson}
+          </pre>
         ) : null}
       </section>
     </div>

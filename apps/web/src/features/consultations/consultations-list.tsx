@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export function ConsultationsList() {
   const q = trpc.consultations.me.useQuery();
@@ -37,14 +37,20 @@ export function ConsultationsList() {
           className="block rounded-2xl border border-[#E7E5E4] bg-white p-5 shadow-sm hover:border-[#FDBA74]"
         >
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-sm font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+            <p
+              className="text-sm font-semibold text-[#1C1917]"
+              style={{ fontFamily: 'var(--font-display)' }}
+            >
               {c.mode.toUpperCase()} · {c.status.replaceAll('_', ' ')}
             </p>
             <p className="text-xs text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
               {c.scheduledAt ? new Date(c.scheduledAt).toLocaleString() : 'Not scheduled'}
             </p>
           </div>
-          <p className="mt-2 line-clamp-2 text-sm text-[#44403C]" style={{ fontFamily: 'var(--font-body)' }}>
+          <p
+            className="mt-2 line-clamp-2 text-sm text-[#44403C]"
+            style={{ fontFamily: 'var(--font-body)' }}
+          >
             {c.issueSummary}
           </p>
         </Link>
@@ -52,4 +58,3 @@ export function ConsultationsList() {
     </div>
   );
 }
-

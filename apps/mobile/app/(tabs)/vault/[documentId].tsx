@@ -2,8 +2,8 @@ import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { trpc } from '@kb/api-client';
-import { decryptVaultPayload } from '@kb/vault-crypto';
+import { trpc } from '@jurisly/api-client';
+import { decryptVaultPayload } from '@jurisly/vault-crypto';
 
 export default function VaultDocumentScreen() {
   const { documentId } = useLocalSearchParams<{ documentId: string }>();
@@ -88,7 +88,12 @@ export default function VaultDocumentScreen() {
       </Text>
 
       <Text style={styles.label}>Passphrase</Text>
-      <TextInput style={styles.input} secureTextEntry value={passphrase} onChangeText={setPassphrase} />
+      <TextInput
+        style={styles.input}
+        secureTextEntry
+        value={passphrase}
+        onChangeText={setPassphrase}
+      />
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
 

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 declare global {
   interface Window {
@@ -12,7 +12,9 @@ declare global {
 }
 
 function useRazorpayScript(): { ready: boolean; error: string | null } {
-  const [ready, setReady] = useState(() => typeof window !== 'undefined' && Boolean(window.Razorpay));
+  const [ready, setReady] = useState(
+    () => typeof window !== 'undefined' && Boolean(window.Razorpay),
+  );
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -61,7 +63,7 @@ export function BillingSettings() {
     const options = {
       key: r.keyId,
       subscription_id: r.subscriptionId,
-      name: 'KanuniBaat',
+      name: 'Jurisly',
       description: `Subscription: ${planKey}`,
       handler: async () => {
         await utils.billing.subscription.me.invalidate();
@@ -76,7 +78,10 @@ export function BillingSettings() {
   return (
     <div className="space-y-8" style={{ fontFamily: 'var(--font-body)' }}>
       <div>
-        <h1 className="text-2xl font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+        <h1
+          className="text-2xl font-semibold text-[#1C1917]"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
           {t('billing.title')}
         </h1>
         <p className="mt-1 text-sm text-[#57534E]">{t('billing.subtitle')}</p>
@@ -89,7 +94,9 @@ export function BillingSettings() {
           {ent.data?.entitlements.usage.noticeScansRemaining ?? 'Unlimited'}
         </p>
         {sub.data?.subscription?.razorpaySubscriptionId ? (
-          <p className="text-xs text-[#78716C]">Razorpay subscription: {sub.data.subscription.razorpaySubscriptionId}</p>
+          <p className="text-xs text-[#78716C]">
+            Razorpay subscription: {sub.data.subscription.razorpaySubscriptionId}
+          </p>
         ) : null}
       </section>
 
@@ -150,10 +157,11 @@ export function BillingSettings() {
               </p>
             </div>
           ))}
-          {history.data && history.data.items.length === 0 ? <p className="text-sm text-[#78716C]">No events yet.</p> : null}
+          {history.data && history.data.items.length === 0 ? (
+            <p className="text-sm text-[#78716C]">No events yet.</p>
+          ) : null}
         </div>
       </section>
     </div>
   );
 }
-

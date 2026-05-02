@@ -1,17 +1,17 @@
 # Phase 8 — Lawyer Case Management Suite
 
-**Goal (from [KanuniBaat.md](../KanuniBaat.md) §6 Phase 8):** Ship core case-management workflows for lawyers: case records, hearings, task surfaces, and client context.
+**Goal (from [Jurisly.md](../Jurisly.md) §6 Phase 8):** Ship core case-management workflows for lawyers: case records, hearings, task surfaces, and client context.
 
 ## Blueprint features -> repo checklist
 
-| Area | Task | Status | Notes / where |
-|------|------|--------|----------------|
-| Schema | Case-management tables and relations | Done | `packages/database/drizzle/0005_phase8_lawyer_case_management.sql`, `packages/database/src/schema/core.ts` |
-| API | Case CRUD and workflow procedures | Done | `packages/trpc/src/routers/cases.ts`, `packages/trpc/src/routers/practice.ts` |
-| API | Lawyer practice composition router | Done | `packages/trpc/src/routers/practice.ts` |
-| Web | Practice case list/new/detail pages | Done | `apps/web/src/app/[locale]/app/practice/cases/page.tsx`, `.../cases/new/page.tsx`, `.../cases/[caseId]/page.tsx` |
-| Web | Practice app shell entry points | Done | `apps/web/src/app/[locale]/app/practice/page.tsx` |
-| NJDG sync depth | External court tracker automation | Partial | Case-tracker support is available and expanded in Phase 11 |
+| Area            | Task                                 | Status  | Notes / where                                                                                                    |
+| --------------- | ------------------------------------ | ------- | ---------------------------------------------------------------------------------------------------------------- |
+| Schema          | Case-management tables and relations | Done    | `packages/database/drizzle/0005_phase8_lawyer_case_management.sql`, `packages/database/src/schema/core.ts`       |
+| API             | Case CRUD and workflow procedures    | Done    | `packages/trpc/src/routers/cases.ts`, `packages/trpc/src/routers/practice.ts`                                    |
+| API             | Lawyer practice composition router   | Done    | `packages/trpc/src/routers/practice.ts`                                                                          |
+| Web             | Practice case list/new/detail pages  | Done    | `apps/web/src/app/[locale]/app/practice/cases/page.tsx`, `.../cases/new/page.tsx`, `.../cases/[caseId]/page.tsx` |
+| Web             | Practice app shell entry points      | Done    | `apps/web/src/app/[locale]/app/practice/page.tsx`                                                                |
+| NJDG sync depth | External court tracker automation    | Partial | Case-tracker support is available and expanded in Phase 11                                                       |
 
 ## Architecture notes
 

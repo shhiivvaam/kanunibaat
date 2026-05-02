@@ -83,7 +83,7 @@ const comparisons = [
 const faqs = [
   {
     q: 'Is the free plan really free forever?',
-    a: "Yes. You can use KanooniBaat's free tier with 3 legal questions and 1 document review per month, forever — no credit card required.",
+    a: "Yes. You can use Jurisly's free tier with 3 legal questions and 1 document review per month, forever — no credit card required.",
   },
   {
     q: 'What payment methods do you accept?',
@@ -95,7 +95,7 @@ const faqs = [
   },
   {
     q: 'Are the lawyers on the platform verified?',
-    a: 'Yes. Every lawyer on KanooniBaat is verified through Bar Council registration, identity verification, and a minimum of 3 peer reviews before listing.',
+    a: 'Yes. Every lawyer on Jurisly is verified through Bar Council registration, identity verification, and a minimum of 3 peer reviews before listing.',
   },
   {
     q: 'Is my legal information kept private?',
@@ -116,16 +116,27 @@ export function PricingPage() {
     <div className="min-h-screen bg-[#FAFAF9]">
       <div className="border-b border-[#E7E5E4] bg-[#FFF7ED] px-6 py-16 text-center">
         <div className="mx-auto max-w-[640px]">
-          <p className="mb-3 text-sm uppercase tracking-widest text-[#C2410C]" style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}>
+          <p
+            className="mb-3 text-sm uppercase tracking-widest text-[#C2410C]"
+            style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}
+          >
             Pricing
           </p>
           <h1
             className="mb-4 text-[#1C1917]"
-            style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(32px, 5vw, 52px)', lineHeight: 1.1 }}
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontWeight: 700,
+              fontSize: 'clamp(32px, 5vw, 52px)',
+              lineHeight: 1.1,
+            }}
           >
             Simple, honest pricing.
           </h1>
-          <p className="text-[#78716C]" style={{ fontFamily: 'var(--font-body)', fontSize: '17px', lineHeight: 1.7 }}>
+          <p
+            className="text-[#78716C]"
+            style={{ fontFamily: 'var(--font-body)', fontSize: '17px', lineHeight: 1.7 }}
+          >
             Start free. Upgrade when you need more. No hidden fees, no surprise charges.
           </p>
         </div>
@@ -152,7 +163,10 @@ export function PricingPage() {
                 </div>
               )}
 
-              <h2 className="mb-1 text-[#1C1917]" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '22px' }}>
+              <h2
+                className="mb-1 text-[#1C1917]"
+                style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '22px' }}
+              >
                 {plan.name}
               </h2>
               <p className="mb-6 text-sm text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
@@ -187,7 +201,10 @@ export function PricingPage() {
                     }}
                   >
                     {f.included ? (
-                      <Check size={14} style={{ color: plan.id === 'pro' ? '#C2410C' : '#15803D', flexShrink: 0 }} />
+                      <Check
+                        size={14}
+                        style={{ color: plan.id === 'pro' ? '#C2410C' : '#15803D', flexShrink: 0 }}
+                      />
                     ) : (
                       <XIcon size={14} style={{ color: '#E7E5E4', flexShrink: 0 }} />
                     )}
@@ -231,7 +248,10 @@ export function PricingPage() {
 
         <div className="mb-16">
           <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-[#1C1917]" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '24px' }}>
+            <h2
+              className="text-[#1C1917]"
+              style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '24px' }}
+            >
               Feature Comparison
             </h2>
             <button
@@ -246,19 +266,32 @@ export function PricingPage() {
 
           <div className="overflow-hidden rounded-[20px] border border-[#E7E5E4] bg-white">
             <div className="grid grid-cols-4 border-b border-[#E7E5E4] bg-[#FAFAF9]">
-              <div className="px-5 py-4 text-sm text-[#78716C]" style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}>
+              <div
+                className="px-5 py-4 text-sm text-[#78716C]"
+                style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}
+              >
                 Feature
               </div>
               {['Naagrik Free', 'Naagrik Pro', 'Naagrik Plus'].map((p) => (
-                <div key={p} className="px-5 py-4 text-center text-sm text-[#1C1917]" style={{ fontFamily: 'var(--font-body)', fontWeight: 700 }}>
+                <div
+                  key={p}
+                  className="px-5 py-4 text-center text-sm text-[#1C1917]"
+                  style={{ fontFamily: 'var(--font-body)', fontWeight: 700 }}
+                >
                   {p}
                 </div>
               ))}
             </div>
 
             {(showAllFeatures ? comparisons : comparisons.slice(0, 5)).map((row, i) => (
-              <div key={row.feature} className={`grid grid-cols-4 ${i > 0 ? 'border-t border-[#E7E5E4]' : ''}`}>
-                <div className="px-5 py-4 text-sm text-[#1C1917]" style={{ fontFamily: 'var(--font-body)' }}>
+              <div
+                key={row.feature}
+                className={`grid grid-cols-4 ${i > 0 ? 'border-t border-[#E7E5E4]' : ''}`}
+              >
+                <div
+                  className="px-5 py-4 text-sm text-[#1C1917]"
+                  style={{ fontFamily: 'var(--font-body)' }}
+                >
                   {row.feature}
                 </div>
                 {[row.free, row.pro, row.lawyer].map((val, j) => (
@@ -270,7 +303,10 @@ export function PricingPage() {
                         <XIcon size={16} className="text-[#E7E5E4]" />
                       )
                     ) : (
-                      <span className="text-center text-sm text-[#1C1917]" style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}>
+                      <span
+                        className="text-center text-sm text-[#1C1917]"
+                        style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
+                      >
                         {val}
                       </span>
                     )}
@@ -282,19 +318,28 @@ export function PricingPage() {
         </div>
 
         <div>
-          <h2 className="mb-8 text-center text-[#1C1917]" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '28px' }}>
+          <h2
+            className="mb-8 text-center text-[#1C1917]"
+            style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '28px' }}
+          >
             Frequently Asked Questions
           </h2>
 
           <div className="space-y-3">
             {faqs.map((faq, i) => (
-              <div key={faq.q} className="overflow-hidden rounded-[16px] border border-[#E7E5E4] bg-white">
+              <div
+                key={faq.q}
+                className="overflow-hidden rounded-[16px] border border-[#E7E5E4] bg-white"
+              >
                 <button
                   type="button"
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   className="flex w-full items-center justify-between px-6 py-5 text-left"
                 >
-                  <span className="pr-4 text-[#1C1917]" style={{ fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: '15px' }}>
+                  <span
+                    className="pr-4 text-[#1C1917]"
+                    style={{ fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: '15px' }}
+                  >
                     {faq.q}
                   </span>
                   <ChevronDown
@@ -304,8 +349,14 @@ export function PricingPage() {
                   />
                 </button>
                 {openFaq === i && (
-                  <div className="px-6 pb-5" style={{ animation: 'kb-marketing-panel-reveal 250ms ease-out' }}>
-                    <p className="leading-relaxed text-[#78716C]" style={{ fontFamily: 'var(--font-body)', fontSize: '15px', lineHeight: 1.7 }}>
+                  <div
+                    className="px-6 pb-5"
+                    style={{ animation: 'kb-marketing-panel-reveal 250ms ease-out' }}
+                  >
+                    <p
+                      className="leading-relaxed text-[#78716C]"
+                      style={{ fontFamily: 'var(--font-body)', fontSize: '15px', lineHeight: 1.7 }}
+                    >
                       {faq.a}
                     </p>
                   </div>
@@ -316,12 +367,18 @@ export function PricingPage() {
         </div>
 
         <div className="mt-16 rounded-[24px] border border-[#E7E5E4] bg-white p-8 text-center md:p-10">
-          <h3 className="mb-2 text-[#1C1917]" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '22px' }}>
+          <h3
+            className="mb-2 text-[#1C1917]"
+            style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '22px' }}
+          >
             Advocates: separate plans
           </h3>
-          <p className="mx-auto mb-5 max-w-lg text-[#78716C]" style={{ fontFamily: 'var(--font-body)', fontSize: '15px', lineHeight: 1.6 }}>
-            Vakil Basic, Pro, Premium, and SME packages are built for practice management — see full detail on For
-            Lawyers.
+          <p
+            className="mx-auto mb-5 max-w-lg text-[#78716C]"
+            style={{ fontFamily: 'var(--font-body)', fontSize: '15px', lineHeight: 1.6 }}
+          >
+            Vakil Basic, Pro, Premium, and SME packages are built for practice management — see full
+            detail on For Lawyers.
           </p>
           <Link
             href="/for-lawyers"
@@ -333,10 +390,16 @@ export function PricingPage() {
         </div>
 
         <div className="mt-8 rounded-[24px] border border-[#FED7AA] bg-[#FFF7ED] p-10 text-center">
-          <h3 className="mb-3 text-[#1C1917]" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '24px' }}>
+          <h3
+            className="mb-3 text-[#1C1917]"
+            style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '24px' }}
+          >
             Still not sure? Start free or join the waitlist.
           </h3>
-          <p className="mx-auto mb-6 max-w-sm text-[#78716C]" style={{ fontFamily: 'var(--font-body)', fontSize: '15px', lineHeight: 1.6 }}>
+          <p
+            className="mx-auto mb-6 max-w-sm text-[#78716C]"
+            style={{ fontFamily: 'var(--font-body)', fontSize: '15px', lineHeight: 1.6 }}
+          >
             Naagrik Free is forever free. Pro and Plus are rolling out — reserve your spot.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
@@ -358,7 +421,6 @@ export function PricingPage() {
           </div>
         </div>
       </div>
-
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { Link } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 const STATUSES = [
   'intake',
@@ -32,15 +32,20 @@ export default function PracticeCasesScreen() {
 
       <View style={styles.filterRow}>
         <Text style={styles.filterLabel}>Status</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
-          <Text
-            style={[styles.chip, !status && styles.chipOn]}
-            onPress={() => setStatus('')}
-          >
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.chips}
+        >
+          <Text style={[styles.chip, !status && styles.chipOn]} onPress={() => setStatus('')}>
             All
           </Text>
           {STATUSES.map((s) => (
-            <Text key={s} style={[styles.chip, status === s && styles.chipOn]} onPress={() => setStatus(s)}>
+            <Text
+              key={s}
+              style={[styles.chip, status === s && styles.chipOn]}
+              onPress={() => setStatus(s)}
+            >
               {s}
             </Text>
           ))}
@@ -70,7 +75,12 @@ export default function PracticeCasesScreen() {
 
 const styles = StyleSheet.create({
   container: { padding: 20, paddingBottom: 40 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
   back: {},
   backText: { color: '#C2410C', fontWeight: '600' },
   newLink: {

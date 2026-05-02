@@ -1,11 +1,18 @@
 import * as DocumentPicker from 'expo-document-picker';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+} from 'react-native';
 
-import { trpc } from '@kb/api-client';
-import { MAX_VAULT_OBJECT_BYTES } from '@kb/storage';
-import { encryptVaultPayload } from '@kb/vault-crypto';
+import { trpc } from '@jurisly/api-client';
+import { MAX_VAULT_OBJECT_BYTES } from '@jurisly/storage';
+import { encryptVaultPayload } from '@jurisly/vault-crypto';
 
 export default function VaultUploadScreen() {
   const router = useRouter();
@@ -35,7 +42,10 @@ export default function VaultUploadScreen() {
       const fileRes = await fetch(uri);
       const plain = new Uint8Array(await fileRes.arrayBuffer());
 
-      const { ciphertext, wrappedDekBase64, keyWrapSaltBase64 } = await encryptVaultPayload(plain, passphrase);
+      const { ciphertext, wrappedDekBase64, keyWrapSaltBase64 } = await encryptVaultPayload(
+        plain,
+        passphrase,
+      );
       if (ciphertext.byteLength > MAX_VAULT_OBJECT_BYTES) {
         throw new Error(`Encrypted file exceeds ${MAX_VAULT_OBJECT_BYTES} bytes.`);
       }
@@ -47,6 +57,7 @@ export default function VaultUploadScreen() {
         tags: [],
         expiresAt: null,
         byteSize: ciphertext.byteLength,
+        contentType: 'application/octet-stream',
       });
 
       const put = await fetch(requested.uploadUrl, {
@@ -78,14 +89,23 @@ export default function VaultUploadScreen() {
       <TextInput style={styles.input} value={displayName} onChangeText={setDisplayName} />
 
       <Text style={[styles.label, { marginTop: 12 }]}>Vault passphrase</Text>
-      <TextInput style={styles.input} value={passphrase} onChangeText={setPassphrase} secureTextEntry />
+      <TextInput
+        style={styles.input}
+        value={passphrase}
+        onChangeText={setPassphrase}
+        secureTextEntry
+      />
 
       <Text style={styles.hint}>Pick any file — it will be encrypted on-device before upload.</Text>
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
       <Pressable style={styles.btn} onPress={() => void pickAndUpload()} disabled={busy}>
-        {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>Choose file & upload</Text>}
+        {busy ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.btnText}>Choose file & upload</Text>
+        )}
       </Pressable>
     </ScrollView>
   );

@@ -1,22 +1,22 @@
 # Phase 3 — Lawyer verification + marketplace
 
-**Goal (from [KanuniBaat.md](../KanuniBaat.md) §6 Phase 3):** Lawyers can complete onboarding (including **required documents**), pass admin verification, and be discovered via **Meilisearch with mandatory Postgres fallback** if the index is down or unset.
+**Goal (from [Jurisly.md](../Jurisly.md) §6 Phase 3):** Lawyers can complete onboarding (including **required documents**), pass admin verification, and be discovered via **Meilisearch with mandatory Postgres fallback** if the index is down or unset.
 
 Phase 2 left **`lawyer_profile`** as draft-oriented and admin stubs without marketplace UI. This phase completes the vertical slice: **Postgres source of truth**, **S3-backed document keys** (presigned upload; AWS env when you enable it), **Meili as an acceleration layer**, **never optional search**.
 
 ## Blueprint features → repo checklist
 
-| Area | Task | Status | Notes / where |
-|------|------|--------|----------------|
-| Schema | `lawyer_document` table (required), availability, extended `lawyer_profile` | Done | [`packages/database/src/schema/core.ts`](../packages/database/src/schema/core.ts); migration [`0001_phase3_marketplace.sql`](../packages/database/drizzle/0001_phase3_marketplace.sql) |
-| Storage | S3 presign package; validate AWS env at upload time | Done | [`packages/storage`](../packages/storage); `lawyer.requestDocumentUpload` |
-| Onboarding | Multi-step flow + document upload step | Done | `lawyer.*` tRPC; web [`/app/lawyer/onboarding`](../apps/web/src/app/app/lawyer/onboarding/page.tsx) |
-| Verification | Required docs before `submitForReview`; admin sees doc metadata | Done | [`lawyer-documents.ts`](../packages/trpc/src/lawyer-documents.ts); `admin.pendingLawyers` |
-| Admin workflow | Queue + approve/reject + view pending docs | Done | `admin.*`; web [`/app/admin`](../apps/web/src/app/app/admin/page.tsx) + RSC layout gate |
-| Public profile | Page by `slug`, SEO | Done | [`(marketing)/lawyers/[slug]`](../apps/web/src/app/(marketing)/lawyers/[slug]/page.tsx) |
-| Search | Meilisearch index + sync + **Postgres fallback (same DTO)** | Done | [`packages/search`](../packages/search) (`meili-http` + `postgres-search`); `marketplace.searchLawyers` |
-| Discovery | Web + mobile list/detail | Done | `marketplace.*`; web `/lawyers`; mobile `(tabs)/lawyers` |
-| Availability | Table + API | Done | `lawyer.listAvailability` / `lawyer.setAvailability` |
+| Area           | Task                                                                        | Status | Notes / where                                                                                                                                                                          |
+| -------------- | --------------------------------------------------------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Schema         | `lawyer_document` table (required), availability, extended `lawyer_profile` | Done   | [`packages/database/src/schema/core.ts`](../packages/database/src/schema/core.ts); migration [`0001_phase3_marketplace.sql`](../packages/database/drizzle/0001_phase3_marketplace.sql) |
+| Storage        | S3 presign package; validate AWS env at upload time                         | Done   | [`packages/storage`](../packages/storage); `lawyer.requestDocumentUpload`                                                                                                              |
+| Onboarding     | Multi-step flow + document upload step                                      | Done   | `lawyer.*` tRPC; web [`/app/lawyer/onboarding`](../apps/web/src/app/[locale]/app/lawyer/onboarding/page.tsx)                                                                           |
+| Verification   | Required docs before `submitForReview`; admin sees doc metadata             | Done   | [`lawyer-documents.ts`](../packages/trpc/src/lawyer-documents.ts); `admin.pendingLawyers`                                                                                              |
+| Admin workflow | Queue + approve/reject + view pending docs                                  | Done   | `admin.*`; web [`/app/admin`](../apps/web/src/app/[locale]/app/admin/page.tsx) + RSC layout gate                                                                                       |
+| Public profile | Page by `slug`, SEO                                                         | Done   | [`[locale]/(marketing)/lawyers/[slug]`](../apps/web/src/app/[locale]/(marketing)/lawyers/[slug]/page.tsx)                                                                             |
+| Search         | Meilisearch index + sync + **Postgres fallback (same DTO)**                 | Done   | [`packages/search`](../packages/search) (`meili-http` + `postgres-search`); `marketplace.searchLawyers`                                                                                |
+| Discovery      | Web + mobile list/detail                                                    | Done   | `marketplace.*`; web `/lawyers`; mobile `(tabs)/lawyers`                                                                                                                               |
+| Availability   | Table + API                                                                 | Done   | `lawyer.listAvailability` / `lawyer.setAvailability`                                                                                                                                   |
 
 ## Architecture notes
 
@@ -27,7 +27,7 @@ Phase 2 left **`lawyer_profile`** as draft-oriented and admin stubs without mark
 
 ## Runbook
 
-1. Apply DB migration: `pnpm --filter @kb/database db:migrate` (requires `DATABASE_URL`).
+1. Apply DB migration: `pnpm --filter @jurisly/database db:migrate` (requires `DATABASE_URL`).
 2. Optional Meili: set `MEILISEARCH_URL` (+ `MEILISEARCH_MASTER_KEY` if required); optional `MEILISEARCH_INDEX_LAWYERS` (default `lawyers`). Create the index in Meili or let first upsert run; configure **searchable** attributes as needed for your Meili version.
 3. Optional uploads: set `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `AWS_S3_BUCKET`.
 

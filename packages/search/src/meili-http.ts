@@ -81,7 +81,11 @@ export async function upsertLawyersMeili(
   }
 }
 
-export async function deleteLawyerMeili(conn: MeiliConnection, indexName: string, userId: string): Promise<void> {
+export async function deleteLawyerMeili(
+  conn: MeiliConnection,
+  indexName: string,
+  userId: string,
+): Promise<void> {
   const url = `${baseUrl(conn.host)}/indexes/${encodeURIComponent(indexName)}/documents/${encodeURIComponent(userId)}`;
   const res = await fetch(url, {
     method: 'DELETE',

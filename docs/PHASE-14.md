@@ -1,17 +1,17 @@
 # Phase 14 — i18n + Vernacular
 
-**Goal (from [KanuniBaat.md](../KanuniBaat.md) §6 Phase 14):** Make the platform locale-first with consistent language routing and message catalogs for priority Indian languages.
+**Goal (from [Jurisly.md](../Jurisly.md) §6 Phase 14):** Make the platform locale-first with consistent language routing and message catalogs for priority Indian languages.
 
 ## Blueprint features -> repo checklist
 
-| Area | Task | Status | Notes / where |
-|------|------|--------|----------------|
-| Locale routing | Route-level locale segmenting | Done | `apps/web/src/app/[locale]/...` route tree |
-| Config | Locale registry + default and RTL toggles | Done | `apps/web/src/i18n/routing.ts` |
-| Messages | Message catalogs for priority languages | Done | `apps/web/src/messages/en.json`, `hi.json`, `ta.json`, `te.json`, `kn.json`, `mr.json`, `gu.json`, `bn.json` |
-| Runtime | Request-time locale message loading | Done | `apps/web/src/i18n/request.ts` |
-| Coverage | Marketing + app pages under locale scope | Done | Major marketing/app pages now live under `[locale]` |
-| RTL productization | Full RTL QA and visual support rollout | Partial | Runtime toggle exists; full UI-level RTL pass is optional/flagged |
+| Area               | Task                                      | Status  | Notes / where                                                                                                |
+| ------------------ | ----------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------ |
+| Locale routing     | Route-level locale segmenting             | Done    | `apps/web/src/app/[locale]/...` route tree                                                                   |
+| Config             | Locale registry + default and RTL toggles | Done    | `apps/web/src/i18n/routing.ts`                                                                               |
+| Messages           | Message catalogs for priority languages   | Done    | `apps/web/src/messages/en.json`, `hi.json`, `ta.json`, `te.json`, `kn.json`, `mr.json`, `gu.json`, `bn.json` |
+| Runtime            | Request-time locale message loading       | Done    | `apps/web/src/i18n/request.ts`                                                                               |
+| Coverage           | Marketing + app pages under locale scope  | Done    | Major marketing/app pages now live under `[locale]`                                                          |
+| RTL productization | Full RTL QA and visual support rollout    | Partial | Runtime toggle exists; full UI-level RTL pass is optional/flagged                                            |
 
 ## Architecture notes
 

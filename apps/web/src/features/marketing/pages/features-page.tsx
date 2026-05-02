@@ -1,21 +1,14 @@
 'use client';
 
-import {
-  BookOpen,
-  Brain,
-  FolderLock,
-  Gavel,
-  Scale,
-  ScanLine,
-  Users,
-} from 'lucide-react';
+import { BookOpen, Brain, FolderLock, Gavel, Scale, ScanLine, Users } from 'lucide-react';
 import Link from 'next/link';
 
 const features = [
   {
     icon: ScanLine,
     title: 'Notice Scanner',
-    summary: 'Upload a photo or PDF of any legal notice — get plain-language summary, deadlines, and next steps.',
+    summary:
+      'Upload a photo or PDF of any legal notice — get plain-language summary, deadlines, and next steps.',
     details: [
       'OCR + AI identifies notice type (summons, demand letter, eviction, tax, and more).',
       'Flags deadlines and amounts so you do not miss critical dates.',
@@ -25,7 +18,8 @@ const features = [
   {
     icon: Brain,
     title: 'Emergency Legal Guide (“Kya Karein?”)',
-    summary: 'Step-by-step guidance for stressful situations — what to do in the first hour, your rights, and when to call a lawyer.',
+    summary:
+      'Step-by-step guidance for stressful situations — what to do in the first hour, your rights, and when to call a lawyer.',
     details: [
       'Curated scenarios reviewed by lawyers, personalised by AI for your state and facts.',
       'Clear “do / don’t” lists and document checklists.',
@@ -35,7 +29,8 @@ const features = [
   {
     icon: Users,
     title: 'Lawyer Marketplace',
-    summary: 'Find verified advocates by practice area, language, location, and fee — book chat, audio, or video consults.',
+    summary:
+      'Find verified advocates by practice area, language, location, and fee — book chat, audio, or video consults.',
     details: [
       'Bar Council verification and ongoing quality checks — no anonymous listings.',
       'Transparent fees and consultation modes; you choose what works.',
@@ -45,7 +40,8 @@ const features = [
   {
     icon: FolderLock,
     title: 'Document Vault',
-    summary: 'Private, encrypted storage for contracts, notices, and evidence — organised and searchable.',
+    summary:
+      'Private, encrypted storage for contracts, notices, and evidence — organised and searchable.',
     details: [
       'Designed for DPDP-aligned handling; you control what is stored.',
       'Share securely with your lawyer when you start a consultation.',
@@ -55,7 +51,8 @@ const features = [
   {
     icon: BookOpen,
     title: 'Know Your Rights & Legal Library',
-    summary: 'Plain-language explainers on consumer, property, employment, family law, and more — in Hindi and English first.',
+    summary:
+      'Plain-language explainers on consumer, property, employment, family law, and more — in Hindi and English first.',
     details: [
       'Structured by life situations, not statute numbers.',
       'Always linked to “talk to a lawyer” when the situation is unique or high-stakes.',
@@ -64,7 +61,8 @@ const features = [
   {
     icon: Gavel,
     title: 'Case Tracker (Pro)',
-    summary: 'Follow hearing dates, filings, and tasks — built for busy individuals, not just enterprises.',
+    summary:
+      'Follow hearing dates, filings, and tasks — built for busy individuals, not just enterprises.',
     details: [
       'Reminders and a simple timeline view.',
       'Optional sharing with your retained lawyer for the same case.',
@@ -104,9 +102,12 @@ export function FeaturesPage() {
           >
             Everything you need to navigate Indian law — calmly.
           </h1>
-          <p className="text-lg text-[#78716C]" style={{ fontFamily: 'var(--font-body)', lineHeight: 1.7 }}>
-            KanooniBaat combines AI-powered information with verified lawyers. We guide; advocates decide. Nothing here
-            replaces professional legal advice.
+          <p
+            className="text-lg text-[#78716C]"
+            style={{ fontFamily: 'var(--font-body)', lineHeight: 1.7 }}
+          >
+            Jurisly combines AI-powered information with verified lawyers. We guide; advocates
+            decide. Nothing here replaces professional legal advice.
           </p>
         </div>
       </section>
@@ -130,7 +131,10 @@ export function FeaturesPage() {
                   >
                     {f.title}
                   </h2>
-                  <p className="mb-5 text-[#44403C]" style={{ fontFamily: 'var(--font-body)', lineHeight: 1.7 }}>
+                  <p
+                    className="mb-5 text-[#44403C]"
+                    style={{ fontFamily: 'var(--font-body)', lineHeight: 1.7 }}
+                  >
                     {f.summary}
                   </p>
                   <ul className="space-y-2">
@@ -140,7 +144,10 @@ export function FeaturesPage() {
                         className="flex gap-2 text-sm text-[#57534E]"
                         style={{ fontFamily: 'var(--font-body)', lineHeight: 1.6 }}
                       >
-                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#C2410C]" aria-hidden />
+                        <span
+                          className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#C2410C]"
+                          aria-hidden
+                        />
                         {d}
                       </li>
                     ))}
@@ -161,10 +168,16 @@ export function FeaturesPage() {
         </div>
 
         <div className="mt-20 rounded-[24px] border border-[#FED7AA] bg-[#FFF7ED] p-10 text-center">
-          <h3 className="mb-3 text-xl text-[#1C1917]" style={{ fontFamily: 'var(--font-display)', fontWeight: 700 }}>
+          <h3
+            className="mb-3 text-xl text-[#1C1917]"
+            style={{ fontFamily: 'var(--font-display)', fontWeight: 700 }}
+          >
             Ready to see pricing?
           </h3>
-          <p className="mx-auto mb-6 max-w-md text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
+          <p
+            className="mx-auto mb-6 max-w-md text-[#78716C]"
+            style={{ fontFamily: 'var(--font-body)' }}
+          >
             Transparent plans for citizens and dedicated tiers for advocates.
           </p>
           <div className="flex flex-wrap justify-center gap-4">

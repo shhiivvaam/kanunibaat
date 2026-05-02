@@ -4,8 +4,8 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-import { trpc } from '@kb/api-client';
-import { decryptVaultPayload } from '@kb/vault-crypto';
+import { trpc } from '@jurisly/api-client';
+import { decryptVaultPayload } from '@jurisly/vault-crypto';
 
 export function VaultDetail() {
   const params = useParams();
@@ -130,7 +130,10 @@ export function VaultDetail() {
     <div className="space-y-6" style={{ fontFamily: 'var(--font-body)' }}>
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+          <h1
+            className="text-xl font-semibold text-[#1C1917]"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
             {doc.displayName}
           </h1>
           <p className="mt-1 text-xs text-[#78716C]">
@@ -185,7 +188,8 @@ export function VaultDetail() {
       <section className="rounded-xl border border-[#E7E5E4] bg-white p-4 shadow-sm">
         <h2 className="text-sm font-semibold text-[#1C1917]">Share with lawyer</h2>
         <p className="mt-2 text-xs text-[#78716C]">
-          Creates a time-limited download link for the ciphertext. Share your passphrase through a separate channel.
+          Creates a time-limited download link for the ciphertext. Share your passphrase through a
+          separate channel.
         </p>
         <label className="mt-3 block text-sm">
           <span className="font-medium text-[#44403C]">Share expires</span>
@@ -204,11 +208,16 @@ export function VaultDetail() {
         >
           Create link
         </button>
-        {shareMessage ? <p className="mt-2 text-xs text-[#57534E] break-all">{shareMessage}</p> : null}
+        {shareMessage ? (
+          <p className="mt-2 text-xs text-[#57534E] break-all">{shareMessage}</p>
+        ) : null}
 
         <ul className="mt-4 space-y-2 text-sm">
           {(shares.data?.shares ?? []).map((s) => (
-            <li key={s.id} className="flex items-center justify-between gap-2 border-t border-[#E7E5E4] pt-2">
+            <li
+              key={s.id}
+              className="flex items-center justify-between gap-2 border-t border-[#E7E5E4] pt-2"
+            >
               <span className="text-xs text-[#78716C]">
                 token …{s.accessToken.slice(0, 8)} · expires {s.expiresAt.toLocaleString()}
                 {s.revokedAt ? ' · revoked' : ''}

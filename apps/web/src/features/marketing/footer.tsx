@@ -25,7 +25,90 @@ function InstagramIcon({ className }: { className?: string }) {
   );
 }
 
-export function Footer() {
+export function Footer({ variant = 'full' }: { variant?: 'full' | 'waitlist' }) {
+  if (variant === 'waitlist') {
+    return (
+      <footer className="border-t border-[#E7E5E4] bg-white">
+        <div className="mx-auto max-w-[1200px] px-6 py-12">
+          <div className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
+            <div className="max-w-md space-y-3">
+              <Link href="/" className="flex items-center gap-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#C2410C]">
+                  <Scale size={16} color="white" />
+                </div>
+                <span
+                  className="text-[#1C1917]"
+                  style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '18px' }}
+                >
+                  Jurisly
+                </span>
+              </Link>
+              <p
+                className="text-sm leading-relaxed text-[#78716C]"
+                style={{ fontFamily: 'var(--font-body)' }}
+              >
+                Legal clarity for India — in plain language, with privacy and real advocates when
+                you need them.
+              </p>
+            </div>
+            <div>
+              <h4
+                className="mb-3 text-xs uppercase tracking-wider text-[#78716C]"
+                style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}
+              >
+                Contact
+              </h4>
+              <a
+                href="mailto:hello@tryjurisly.com"
+                className="text-sm text-[#1C1917] transition-colors hover:text-[#C2410C]"
+                style={{ fontFamily: 'var(--font-body)' }}
+              >
+                hello@tryjurisly.com
+              </a>
+            </div>
+          </div>
+        </div>
+        <div className="border-t border-[#E7E5E4]">
+          <div className="mx-auto flex max-w-[1200px] flex-col items-center justify-between gap-3 px-6 py-4 sm:flex-row">
+            <p className="text-xs text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
+              © 2026 Jurisly. All rights reserved.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+              <Link
+                href="/privacy"
+                className="text-xs text-[#78716C] transition-colors hover:text-[#C2410C]"
+                style={{ fontFamily: 'var(--font-body)' }}
+              >
+                Privacy Policy
+              </Link>
+              <Link
+                href="/terms"
+                className="text-xs text-[#78716C] transition-colors hover:text-[#C2410C]"
+                style={{ fontFamily: 'var(--font-body)' }}
+              >
+                Terms of Service
+              </Link>
+              <Link
+                href="/privacy-charter"
+                className="text-xs text-[#78716C] transition-colors hover:text-[#C2410C]"
+                style={{ fontFamily: 'var(--font-body)' }}
+              >
+                Privacy Charter
+              </Link>
+              <Link
+                href="/privacy#cookies"
+                className="text-xs text-[#78716C] transition-colors hover:text-[#C2410C]"
+                style={{ fontFamily: 'var(--font-body)' }}
+              >
+                Cookie Policy
+              </Link>
+            </div>
+          </div>
+        </div>
+      </footer>
+    );
+  }
+
   return (
     <footer className="border-t border-[#E7E5E4] bg-white">
       <div className="mx-auto max-w-[1200px] px-6 py-16">
@@ -39,11 +122,15 @@ export function Footer() {
                 className="text-[#1C1917]"
                 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '18px' }}
               >
-                KanooniBaat
+                Jurisly
               </span>
             </Link>
-            <p className="text-sm leading-relaxed text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
-              Making Indian law accessible to every citizen — in plain language, whenever you need it.
+            <p
+              className="text-sm leading-relaxed text-[#78716C]"
+              style={{ fontFamily: 'var(--font-body)' }}
+            >
+              Making Indian law accessible to every citizen — in plain language, whenever you need
+              it.
             </p>
             <div className="flex items-center gap-3 pt-2">
               <a
@@ -147,11 +234,11 @@ export function Footer() {
             <ul className="space-y-3">
               <li>
                 <a
-                  href="mailto:hello@kanoonibaat.in"
+                  href="mailto:hello@tryjurisly.com"
                   className="text-sm text-[#1C1917] transition-colors hover:text-[#C2410C]"
                   style={{ fontFamily: 'var(--font-body)' }}
                 >
-                  hello@kanoonibaat.in
+                  hello@tryjurisly.com
                 </a>
               </li>
               <li>
@@ -166,7 +253,10 @@ export function Footer() {
               </li>
             </ul>
             <div className="mt-5 rounded-xl border border-[#FED7AA] bg-[#FFF7ED] p-3">
-              <p className="text-xs text-[#C2410C]" style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}>
+              <p
+                className="text-xs text-[#C2410C]"
+                style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}
+              >
                 Proudly made in India
               </p>
             </div>
@@ -177,7 +267,7 @@ export function Footer() {
       <div className="border-t border-[#E7E5E4]">
         <div className="mx-auto flex max-w-[1200px] flex-col items-center justify-between gap-3 px-6 py-4 sm:flex-row">
           <p className="text-xs text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
-            © 2026 KanooniBaat. All rights reserved.
+            © 2026 Jurisly. All rights reserved.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
             <Link

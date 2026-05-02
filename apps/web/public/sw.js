@@ -6,7 +6,7 @@ self.addEventListener('push', (event) => {
     data = {};
   }
 
-  const title = data.title || 'KanuniBaat';
+  const title = data.title || 'Jurisly';
   const body = data.body || '';
   const url = data.url || (data.data && data.data.url) || '/app';
 
@@ -20,7 +20,8 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const url = (event.notification && event.notification.data && event.notification.data.url) || '/app';
+  const url =
+    (event.notification && event.notification.data && event.notification.data.url) || '/app';
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientsArr) => {
       for (const client of clientsArr) {
@@ -31,4 +32,3 @@ self.addEventListener('notificationclick', (event) => {
     }),
   );
 });
-

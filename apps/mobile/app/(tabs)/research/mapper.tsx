@@ -1,8 +1,16 @@
 import { Link } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export default function ResearchMapperScreen() {
   const [source, setSource] = useState('IPC');
@@ -65,7 +73,13 @@ const styles = StyleSheet.create({
   btn: { backgroundColor: '#C2410C', padding: 12, borderRadius: 12, alignItems: 'center' },
   btnText: { color: '#fff', fontWeight: '700' },
   err: { color: '#b91c1c' },
-  card: { padding: 12, borderRadius: 12, borderWidth: 1, borderColor: '#E7E5E4', backgroundColor: '#fff' },
+  card: {
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E7E5E4',
+    backgroundColor: '#fff',
+  },
   cardTitle: { fontWeight: '700', fontSize: 14, color: '#1C1917' },
   cardMeta: { marginTop: 4, fontSize: 12, color: '#57534E' },
 });

@@ -36,6 +36,10 @@ export async function upsertLawyersMeili(
   return upsertHttp(conn, indexName, documents);
 }
 
-export async function deleteLawyerMeili(conn: MeiliConnection, indexName: string, userId: string): Promise<void> {
+export async function deleteLawyerMeili(
+  conn: MeiliConnection,
+  indexName: string,
+  userId: string,
+): Promise<void> {
   return deleteHttp(conn, indexName, userId);
 }

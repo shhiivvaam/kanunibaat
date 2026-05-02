@@ -1,2 +1,9 @@
-export { default } from '../../../(marketing)/rights/page';
+import { RightsList } from '@/features/content/rights-list';
 
+export default function RightsPage() {
+  return (
+    <div className="mx-auto w-full max-w-3xl px-4 py-10">
+      <RightsList />
+    </div>
+  );
+}

@@ -2,10 +2,12 @@
 
 import { ChevronDown, Menu, Scale, X } from 'lucide-react';
 import Link from 'next/link';
+import { useLocale } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
 import { LanguageSwitcher } from '@/components/language-switcher';
+import { useOpenAuth } from '@/features/marketing/open-auth-context';
 
 const services = [
   { name: 'Legal Q&A', href: '/legal-qa', desc: 'Ask any legal question' },
@@ -16,11 +18,13 @@ const services = [
   { name: 'Know Your Rights', href: '/know-your-rights', desc: 'Understand your legal rights' },
 ];
 
-export function Navbar() {
+export function Navbar({ variant = 'full' }: { variant?: 'full' | 'waitlist' }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [servicesOpen, setServicesOpen] = useState(false);
   const pathname = usePathname();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const locale = useLocale();
+  const openAuth = useOpenAuth();
 
   useEffect(() => {
     let cancelled = false;
@@ -46,6 +50,147 @@ export function Navbar() {
   }, []);
 
   const isActive = (path: string) => pathname === path;
+  const earlyAccessHref = `/${locale}#waitlist-form`;
+
+  if (variant === 'waitlist') {
+    return (
+      <>
+        <nav
+          className="sticky top-0 z-40 w-full border-b border-[#E7E5E4] bg-white"
+          style={{ height: '64px' }}
+        >
+          <div className="mx-auto flex h-full max-w-[1200px] items-center justify-between px-6">
+            <Link href={`/${locale}`} className="flex shrink-0 items-center gap-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#C2410C]">
+                <Scale size={16} color="white" />
+              </div>
+              <span
+                className="text-[#1C1917]"
+                style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '20px' }}
+              >
+                Jurisly
+              </span>
+            </Link>
+
+            <div className="hidden items-center gap-4 md:flex lg:gap-6">
+              <LanguageSwitcher compact />
+              <Link
+                href="/privacy"
+                className="text-sm text-[#78716C] transition-colors hover:text-[#C2410C]"
+                style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
+              >
+                Privacy
+              </Link>
+              <Link
+                href="/terms"
+                className="text-sm text-[#78716C] transition-colors hover:text-[#C2410C]"
+                style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
+              >
+                Terms
+              </Link>
+              <button
+                type="button"
+                onClick={() => openAuth('login')}
+                className="text-sm text-[#78716C] transition-colors hover:text-[#C2410C]"
+                style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
+              >
+                Log in
+              </button>
+              <Link
+                href="/waitlist/lawyer"
+                className="text-sm font-medium text-[#57534E] transition-colors hover:text-[#C2410C]"
+                style={{ fontFamily: 'var(--font-body)' }}
+              >
+                For advocates
+              </Link>
+              <Link
+                href={earlyAccessHref}
+                className="h-11 rounded-[16px] bg-[#C2410C] px-5 text-sm leading-[44px] text-white transition-all duration-150 hover:bg-[#9a3409] active:scale-[0.97]"
+                style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}
+              >
+                Get early access
+              </Link>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="flex h-10 w-10 items-center justify-center rounded-xl text-[#1C1917] transition-colors hover:bg-[#FFF7ED] md:hidden"
+              aria-label="Toggle menu"
+              aria-expanded={mobileOpen}
+            >
+              {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
+          </div>
+        </nav>
+
+        {mobileOpen ? (
+          <div
+            className="fixed inset-0 z-30 bg-white md:hidden"
+            style={{ top: '64px', animation: 'fadeIn 200ms ease-out' }}
+          >
+            <div className="space-y-1 p-6">
+              <div className="pb-4">
+                <LanguageSwitcher />
+              </div>
+              <Link
+                href="/privacy"
+                className="block rounded-xl px-4 py-3 text-base text-[#1C1917] hover:bg-[#FFF7ED]"
+                style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
+              >
+                Privacy
+              </Link>
+              <Link
+                href="/terms"
+                className="block rounded-xl px-4 py-3 text-base text-[#1C1917] hover:bg-[#FFF7ED]"
+                style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
+              >
+                Terms
+              </Link>
+              <Link
+                href="/privacy-charter"
+                className="block rounded-xl px-4 py-3 text-base text-[#1C1917] hover:bg-[#FFF7ED]"
+                style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
+              >
+                Privacy Charter
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileOpen(false);
+                  openAuth('login');
+                }}
+                className="block w-full rounded-xl px-4 py-3 text-left text-base text-[#1C1917] hover:bg-[#FFF7ED]"
+                style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
+              >
+                Log in
+              </button>
+              <Link
+                href="/waitlist/lawyer"
+                onClick={() => setMobileOpen(false)}
+                className="block rounded-xl px-4 py-3 text-base text-[#1C1917] hover:bg-[#FFF7ED]"
+                style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
+              >
+                Advocate waitlist
+              </Link>
+              <Link
+                href={earlyAccessHref}
+                onClick={() => setMobileOpen(false)}
+                className="mt-4 flex h-12 w-full items-center justify-center rounded-[16px] bg-[#C2410C] text-base text-white"
+                style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}
+              >
+                Get early access
+              </Link>
+            </div>
+          </div>
+        ) : null}
+
+        <style>{`
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+      `}</style>
+      </>
+    );
+  }
 
   return (
     <>
@@ -62,7 +207,7 @@ export function Navbar() {
               className="text-[#1C1917]"
               style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '20px' }}
             >
-              KanooniBaat
+              Jurisly
             </span>
           </Link>
 

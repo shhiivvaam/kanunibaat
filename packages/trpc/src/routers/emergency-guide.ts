@@ -11,7 +11,7 @@ import {
   scenarioSummaries,
   stateNameFromCode,
   validatePersonalizeInputAgainstScenario,
-} from '@kb/emergency-guide';
+} from '@jurisly/emergency-guide';
 
 import { personalizeEmergencyGuideWithOpenAI } from '../emergency-guide/openai-personalize';
 import { publicProcedure, router } from '../init';
@@ -22,13 +22,15 @@ export const emergencyGuideRouter = router({
     disclaimer: LEGAL_INFO_DISCLAIMER,
   })),
 
-  bySlug: publicProcedure.input(z.object({ slug: z.string().min(1).max(80) })).query(({ input }) => {
-    const scenario = getScenarioBySlug(input.slug);
-    if (!scenario) {
-      throw new TRPCError({ code: 'NOT_FOUND', message: 'Scenario not found.' });
-    }
-    return { scenario, disclaimer: LEGAL_INFO_DISCLAIMER };
-  }),
+  bySlug: publicProcedure
+    .input(z.object({ slug: z.string().min(1).max(80) }))
+    .query(({ input }) => {
+      const scenario = getScenarioBySlug(input.slug);
+      if (!scenario) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Scenario not found.' });
+      }
+      return { scenario, disclaimer: LEGAL_INFO_DISCLAIMER };
+    }),
 
   personalize: publicProcedure.input(personalizeInputSchema).mutation(async ({ ctx, input }) => {
     const scenario = getScenarioBySlug(input.slug);
@@ -55,13 +57,19 @@ export const emergencyGuideRouter = router({
       return {
         mode: 'fallback' as const,
         guide: guideFromBase(scenario.base),
-        notice: 'AI personalisation is not configured. Showing the general guide for your scenario.',
+        notice:
+          'AI personalisation is not configured. Showing the general guide for your scenario.',
         disclaimer: LEGAL_INFO_DISCLAIMER,
       };
     }
 
     try {
-      const guide = await personalizeEmergencyGuideWithOpenAI(apiKey, scenario, stateName, input.answers);
+      const guide = await personalizeEmergencyGuideWithOpenAI(
+        apiKey,
+        scenario,
+        stateName,
+        input.answers,
+      );
       return {
         mode: 'ai' as const,
         guide,

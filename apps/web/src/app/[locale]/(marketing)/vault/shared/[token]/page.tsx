@@ -1,2 +1,5 @@
-export { default } from '../../../../../(marketing)/vault/shared/[token]/page';
+import { VaultSharedViewer } from '@/features/vault/vault-shared-viewer';
 
+export default function VaultSharedPage() {
+  return <VaultSharedViewer />;
+}

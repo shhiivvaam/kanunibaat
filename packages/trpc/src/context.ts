@@ -1,13 +1,15 @@
 import type { CreateExpressContextOptions } from '@trpc/server/adapters/express';
 import { eq } from 'drizzle-orm';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
-import type * as DbSchema from '@kb/database/schema';
-import { userRole } from '@kb/database/schema';
-import type { MeiliConnection } from '@kb/search';
-import type { S3DocumentsConfig } from '@kb/storage';
-import type { WaitlistEnv } from '@kb/waitlist';
+import type * as DbSchema from '@jurisly/database/schema';
+import { userRole } from '@jurisly/database/schema';
+import type { MeiliConnection } from '@jurisly/search';
+import type { S3DocumentsConfig } from '@jurisly/storage';
+import type { WaitlistEnv } from '@jurisly/waitlist';
 
 import { extractSessionTokenFromRequest, resolveUserIdFromSessionToken } from './session-resolve';
+import type { TrpcStructuredLogger } from './lib/trpc-structured-logger';
+import { noopStructuredLogger } from './lib/trpc-structured-logger';
 
 export type KbRole = (typeof userRole.$inferSelect)['role'];
 
@@ -15,6 +17,11 @@ export interface TrpcContext {
   db: PostgresJsDatabase<typeof DbSchema>;
   authUserId: string | null;
   roles: readonly KbRole[];
+  /** Echo of `x-request-id` / `x-correlation-id` when present (log correlation). */
+  correlationId: string | null;
+  logger: TrpcStructuredLogger;
+  /** Optional fan-out when consultation chat messages are inserted (SSE subscribers). */
+  notifyConsultationChatSubscribers?: (consultationId: string) => void;
   waitlistEnv: WaitlistEnv;
   meili: MeiliConnection | null;
   meiliIndexName: string;
@@ -36,6 +43,8 @@ export interface TrpcContext {
 
 export interface TrpcContextDeps {
   db: PostgresJsDatabase<typeof DbSchema>;
+  logger?: TrpcStructuredLogger;
+  notifyConsultationChatSubscribers?: (consultationId: string) => void;
   waitlistEnv: WaitlistEnv;
   meili: MeiliConnection | null;
   meiliIndexName: string;
@@ -56,12 +65,19 @@ async function loadRoles(
   db: PostgresJsDatabase<typeof DbSchema>,
   userId: string,
 ): Promise<KbRole[]> {
-  const rows = await db.select({ role: userRole.role }).from(userRole).where(eq(userRole.userId, userId));
+  const rows = await db
+    .select({ role: userRole.role })
+    .from(userRole)
+    .where(eq(userRole.userId, userId));
   return rows.map((r) => r.role);
 }
 
 /**
  * Factory so Nest can inject DB and env at bootstrap without mutable module state.
+ *
+ * **Auth**: {@link extractSessionTokenFromRequest} accepts `Authorization: Bearer` (mobile) and Better
+ * Auth cookies (browser → Next `/api/trpc` proxy forwards `Cookie`). Both resolve to `authUserId` the
+ * same way — see `apps/api/src/session-token.spec.ts` for Bearer vs cookie coverage.
  */
 export function createTrpcContextFactory(deps: TrpcContextDeps) {
   return async function createTrpcContext(opts: CreateExpressContextOptions): Promise<TrpcContext> {
@@ -74,15 +90,22 @@ export function createTrpcContextFactory(deps: TrpcContextDeps) {
     const forwarded = opts.req.headers['x-forwarded-for'];
     const requestIp =
       typeof forwarded === 'string'
-        ? forwarded.split(',')[0]?.trim() ?? null
+        ? (forwarded.split(',')[0]?.trim() ?? null)
         : Array.isArray(forwarded)
-          ? forwarded[0]?.trim() ?? null
+          ? (forwarded[0]?.trim() ?? null)
           : (opts.req.socket?.remoteAddress ?? null);
-    const userAgent = typeof opts.req.headers['user-agent'] === 'string' ? opts.req.headers['user-agent'] : null;
+    const userAgent =
+      typeof opts.req.headers['user-agent'] === 'string' ? opts.req.headers['user-agent'] : null;
+    const rid = opts.req.headers['x-request-id'] ?? opts.req.headers['x-correlation-id'];
+    const correlationId =
+      typeof rid === 'string' && rid.length > 0 && rid.length <= 256 ? rid : null;
     return {
       db: deps.db,
       authUserId,
       roles,
+      correlationId,
+      logger: deps.logger ?? noopStructuredLogger,
+      notifyConsultationChatSubscribers: deps.notifyConsultationChatSubscribers,
       waitlistEnv: deps.waitlistEnv,
       meili: deps.meili,
       meiliIndexName: deps.meiliIndexName,

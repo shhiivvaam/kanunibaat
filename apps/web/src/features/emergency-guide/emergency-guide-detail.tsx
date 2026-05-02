@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
-import { trpc } from '@kb/api-client';
-import { INDIAN_STATES_AND_UTS } from '@kb/utils';
+import { trpc } from '@jurisly/api-client';
+import { INDIAN_STATES_AND_UTS } from '@jurisly/utils';
 
 import { HotlinesBar } from './hotlines-bar';
 import { urgencyBadgeClass, urgencyLabel } from './urgency-styles';
@@ -13,10 +13,16 @@ function Section({ title, items }: { title: string; items: string[] }) {
   if (items.length === 0) return null;
   return (
     <section className="rounded-2xl border border-[#E7E5E4] bg-white p-5 shadow-sm">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-[#78716C]" style={{ fontFamily: 'var(--font-display)' }}>
+      <h2
+        className="text-sm font-semibold uppercase tracking-wide text-[#78716C]"
+        style={{ fontFamily: 'var(--font-display)' }}
+      >
         {title}
       </h2>
-      <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-relaxed text-[#292524]" style={{ fontFamily: 'var(--font-body)' }}>
+      <ol
+        className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-relaxed text-[#292524]"
+        style={{ fontFamily: 'var(--font-body)' }}
+      >
         {items.map((line, i) => (
           <li key={i}>{line}</li>
         ))}
@@ -61,10 +67,15 @@ export function EmergencyGuideDetail({ slug }: { slug: string }) {
       <HotlinesBar />
 
       <header className="space-y-2">
-        <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ${urgencyBadgeClass(scenario.urgency)}`}>
+        <span
+          className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ${urgencyBadgeClass(scenario.urgency)}`}
+        >
           {urgencyLabel(scenario.urgency)}
         </span>
-        <h1 className="text-3xl font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+        <h1
+          className="text-3xl font-semibold text-[#1C1917]"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
           {scenario.titleEn}
         </h1>
         <p className="text-lg text-[#57534E]" style={{ fontFamily: 'var(--font-body)' }}>
@@ -122,12 +133,16 @@ export function EmergencyGuideDetail({ slug }: { slug: string }) {
           >
             {personalize.isPending ? 'Personalising…' : 'Personalise guide'}
           </button>
-          {personalize.isError ? <p className="mt-2 text-sm text-red-700">{personalize.error.message}</p> : null}
+          {personalize.isError ? (
+            <p className="mt-2 text-sm text-red-700">{personalize.error.message}</p>
+          ) : null}
         </div>
       ) : null}
 
       {personalize.data?.notice ? (
-        <p className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-950 ring-1 ring-amber-200">{personalize.data.notice}</p>
+        <p className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-950 ring-1 ring-amber-200">
+          {personalize.data.notice}
+        </p>
       ) : null}
 
       <div className="space-y-4">
@@ -149,7 +164,10 @@ export function EmergencyGuideDetail({ slug }: { slug: string }) {
             <Section title="What not to do" items={[...scenario.base.whatNotToDo]} />
             <Section title="Police / court (general)" items={[...scenario.base.policeOrCourt]} />
             <Section title="Timeline (typical)" items={[...scenario.base.timeline]} />
-            <Section title="Applicable laws (orientation)" items={[...scenario.base.applicableLaws]} />
+            <Section
+              title="Applicable laws (orientation)"
+              items={[...scenario.base.applicableLaws]}
+            />
           </>
         )}
       </div>

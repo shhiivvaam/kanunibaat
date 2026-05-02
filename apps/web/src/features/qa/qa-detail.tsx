@@ -3,12 +3,14 @@
 import Link from 'next/link';
 import { useState } from 'react';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export function QaDetail({ id }: { id: string }) {
   const q = trpc.qa.question.byId.useQuery({ id }, { enabled: Boolean(id) });
   const me = trpc.profile.me.useQuery(undefined, { staleTime: 60_000 });
-  const canAnswer = (me.data?.roles.includes('lawyer') ?? false) && (me.data?.lawyer?.verificationStatus === 'verified');
+  const canAnswer =
+    (me.data?.roles.includes('lawyer') ?? false) &&
+    me.data?.lawyer?.verificationStatus === 'verified';
 
   const utils = trpc.useUtils();
   const vote = trpc.qa.vote.set.useMutation({
@@ -47,7 +49,10 @@ export function QaDetail({ id }: { id: string }) {
         <Link href="/legal-qa" className="text-sm text-[#C2410C] hover:underline">
           ← Legal Q&A
         </Link>
-        <h1 className="mt-2 text-2xl font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+        <h1
+          className="mt-2 text-2xl font-semibold text-[#1C1917]"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
           {row?.title ?? 'Question'}
         </h1>
         <p className="mt-1 text-xs text-[#78716C]">{row?.category || 'general'}</p>
@@ -105,7 +110,9 @@ export function QaDetail({ id }: { id: string }) {
               ))}
             </ul>
           ) : null}
-          {aiPreview.disclaimer ? <p className="mt-3 text-xs text-[#7C2D12]">{aiPreview.disclaimer}</p> : null}
+          {aiPreview.disclaimer ? (
+            <p className="mt-3 text-xs text-[#7C2D12]">{aiPreview.disclaimer}</p>
+          ) : null}
         </section>
       ) : null}
 
@@ -123,7 +130,9 @@ export function QaDetail({ id }: { id: string }) {
 
       {canAnswer ? (
         <section className="rounded-xl border border-[#E7E5E4] bg-white p-4 shadow-sm space-y-3">
-          <h2 className="text-sm font-semibold text-[#1C1917]">Post an answer (verified lawyers)</h2>
+          <h2 className="text-sm font-semibold text-[#1C1917]">
+            Post an answer (verified lawyers)
+          </h2>
           <textarea
             className="w-full rounded-lg border border-[#D6D3D1] px-3 py-2 text-sm"
             rows={6}
@@ -144,4 +153,3 @@ export function QaDetail({ id }: { id: string }) {
     </div>
   );
 }
-

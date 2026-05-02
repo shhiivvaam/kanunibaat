@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect } from 'react';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export function RightsDetail({ slug }: { slug: string }) {
   const q = trpc.content.article.bySlug.useQuery({ slug }, { enabled: Boolean(slug) });
@@ -25,7 +25,10 @@ export function RightsDetail({ slug }: { slug: string }) {
         <Link href="/rights" className="text-sm text-[#C2410C] hover:underline">
           ← Rights library
         </Link>
-        <h1 className="mt-2 text-2xl font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+        <h1
+          className="mt-2 text-2xl font-semibold text-[#1C1917]"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
           {title}
         </h1>
         <p className="mt-1 text-xs text-[#78716C]">{a?.category ?? 'general'}</p>
@@ -42,4 +45,3 @@ export function RightsDetail({ slug }: { slug: string }) {
     </div>
   );
 }
-

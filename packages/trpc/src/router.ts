@@ -2,14 +2,14 @@ import { TRPCError } from '@trpc/server';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 
-import { lawyerProfile, user, userProfile } from '@kb/database/schema';
-import { syncLawyerMeiliFromDb } from '@kb/search';
+import { lawyerProfile, user, userProfile } from '@jurisly/database/schema';
+import { syncLawyerMeiliFromDb } from '@jurisly/search';
 import {
   lawyerWaitlistInputSchema,
   submitLawyerWaitlist,
   submitUserWaitlist,
   userWaitlistInputSchema,
-} from '@kb/waitlist';
+} from '@jurisly/waitlist';
 
 import { protectedProcedure, publicProcedure, router } from './init';
 import { allocateLawyerSlug } from './lawyer-slug';
@@ -50,7 +50,7 @@ const createLawyerDraftInputSchema = z.object({
 export const appRouter = router({
   health: publicProcedure.query(() => ({
     ok: true as const,
-    service: 'kanunibaat-api',
+    service: 'jurisly-api',
     ts: new Date().toISOString(),
   })),
 
@@ -81,16 +81,18 @@ export const appRouter = router({
       return { status: 'success' as const, message: result.message };
     }),
 
-    submitLawyer: publicProcedure.input(lawyerWaitlistInputSchema).mutation(async ({ ctx, input }) => {
-      const result = await submitLawyerWaitlist(input, ctx.waitlistEnv);
-      if (!result.ok) {
-        throw new TRPCError({
-          code: 'INTERNAL_SERVER_ERROR',
-          message: result.message,
-        });
-      }
-      return { status: 'success' as const, message: result.message };
-    }),
+    submitLawyer: publicProcedure
+      .input(lawyerWaitlistInputSchema)
+      .mutation(async ({ ctx, input }) => {
+        const result = await submitLawyerWaitlist(input, ctx.waitlistEnv);
+        if (!result.ok) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: result.message,
+          });
+        }
+        return { status: 'success' as const, message: result.message };
+      }),
   }),
 
   profile: router({
@@ -104,7 +106,10 @@ export const appRouter = router({
       await ensureUserProfileRow(ctx.db, userId, u.name);
       const bundle = await loadProfileBundle(ctx.db, userId);
       if (!bundle) {
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Profile bootstrap failed.' });
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: 'Profile bootstrap failed.',
+        });
       }
       return bundle;
     }),
@@ -144,7 +149,11 @@ export const appRouter = router({
         await ensureUserProfileRow(ctx.db, userId, u.name);
         await ensureLawyerRole(ctx.db, userId);
 
-        const [p] = await ctx.db.select().from(userProfile).where(eq(userProfile.userId, userId)).limit(1);
+        const [p] = await ctx.db
+          .select()
+          .from(userProfile)
+          .where(eq(userProfile.userId, userId))
+          .limit(1);
         const [existing] = await ctx.db
           .select()
           .from(lawyerProfile)

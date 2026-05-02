@@ -1,8 +1,8 @@
 import { desc, ilike, or } from 'drizzle-orm';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 
-import type * as DbSchema from '@kb/database/schema';
-import { researchJudgment } from '@kb/database/schema';
+import type * as DbSchema from '@jurisly/database/schema';
+import { researchJudgment } from '@jurisly/database/schema';
 
 import type { JudgmentSearchHit } from './judgment-types';
 
@@ -29,7 +29,11 @@ export async function searchJudgmentsPostgres(
 ): Promise<JudgmentSearchHit[]> {
   const q = query.trim();
   if (q.length === 0) {
-    const rows = await db.select().from(researchJudgment).orderBy(desc(researchJudgment.updatedAt)).limit(limit);
+    const rows = await db
+      .select()
+      .from(researchJudgment)
+      .orderBy(desc(researchJudgment.updatedAt))
+      .limit(limit);
     return rows.map(rowToHit);
   }
   const term = `%${escapeLikePattern(q)}%`;

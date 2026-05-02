@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export function LawyersDirectory() {
   const searchParams = useSearchParams();
@@ -43,8 +43,8 @@ export function LawyersDirectory() {
         />
         {query.data ? (
           <p className="mt-2 text-xs text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
-            Results via {query.data.source === 'meilisearch' ? 'Meilisearch' : 'database'} (always consistent
-            listing).
+            Results via {query.data.source === 'meilisearch' ? 'Meilisearch' : 'database'} (always
+            consistent listing).
           </p>
         ) : null}
       </div>
@@ -72,11 +72,17 @@ export function LawyersDirectory() {
                   {h.displayName ?? 'Verified lawyer'}
                 </h2>
                 {h.headline ? (
-                  <p className="mt-1 text-sm text-[#57534E]" style={{ fontFamily: 'var(--font-body)' }}>
+                  <p
+                    className="mt-1 text-sm text-[#57534E]"
+                    style={{ fontFamily: 'var(--font-body)' }}
+                  >
                     {h.headline}
                   </p>
                 ) : null}
-                <dl className="mt-3 space-y-1 text-xs text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
+                <dl
+                  className="mt-3 space-y-1 text-xs text-[#78716C]"
+                  style={{ fontFamily: 'var(--font-body)' }}
+                >
                   {h.city ? (
                     <div>
                       <dt className="inline font-medium text-[#44403C]">City: </dt>

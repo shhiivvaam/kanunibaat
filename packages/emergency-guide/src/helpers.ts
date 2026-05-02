@@ -15,7 +15,9 @@ export function stateNameFromCode(code: string): string | null {
   return row?.name ?? null;
 }
 
-export function scenarioSummaries(scenarios: readonly EmergencyScenario[]): EmergencyScenarioSummary[] {
+export function scenarioSummaries(
+  scenarios: readonly EmergencyScenario[],
+): EmergencyScenarioSummary[] {
   return scenarios.map((s) => ({
     slug: s.slug,
     urgency: s.urgency,

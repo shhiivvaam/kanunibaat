@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export default function CaseTrackerScreen() {
   const [cnr, setCnr] = useState('');
@@ -49,8 +49,19 @@ const styles = StyleSheet.create({
   err: { fontSize: 14, color: '#b91c1c' },
   row: { flexDirection: 'row', gap: 8, alignItems: 'center' },
   input: { flex: 1, borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 10 },
-  button: { paddingHorizontal: 12, paddingVertical: 10, backgroundColor: '#C2410C', color: 'white', borderRadius: 10 },
-  card: { borderWidth: 1, borderColor: '#eee', borderRadius: 12, padding: 12, backgroundColor: '#fff' },
+  button: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: '#C2410C',
+    color: 'white',
+    borderRadius: 10,
+  },
+  card: {
+    borderWidth: 1,
+    borderColor: '#eee',
+    borderRadius: 12,
+    padding: 12,
+    backgroundColor: '#fff',
+  },
   json: { marginTop: 10, fontSize: 12, fontFamily: 'SpaceMono', color: '#111' },
 });
-

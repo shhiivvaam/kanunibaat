@@ -3,11 +3,7 @@ import { createCipheriv, createDecipheriv, createHash, createHmac, randomBytes }
 import { TRPCError } from '@trpc/server';
 
 function base64UrlEncode(buf: Buffer): string {
-  return buf
-    .toString('base64')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/g, '');
+  return buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
 }
 
 function base64UrlDecode(s: string): Buffer {
@@ -37,7 +33,9 @@ export function requireDigiLockerEnabled(): {
     throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'DigiLocker is not enabled.' });
   }
 
-  const baseUrl = (process.env.DIGILOCKER_BASE_URL ?? 'https://betaapi.digitallocker.gov.in/public').trim();
+  const baseUrl = (
+    process.env.DIGILOCKER_BASE_URL ?? 'https://betaapi.digitallocker.gov.in/public'
+  ).trim();
   const clientId = process.env.DIGILOCKER_CLIENT_ID?.trim();
   const clientSecret = process.env.DIGILOCKER_CLIENT_SECRET?.trim();
   const redirectUrl = process.env.DIGILOCKER_REDIRECT_URL?.trim();
@@ -60,7 +58,11 @@ interface StatePayload {
   iat: number;
 }
 
-export function mintDigiLockerState(opts: { userId: string; stateSecret: string; codeVerifier: string }): string {
+export function mintDigiLockerState(opts: {
+  userId: string;
+  stateSecret: string;
+  codeVerifier: string;
+}): string {
   const payload: StatePayload = {
     u: opts.userId,
     n: base64UrlEncode(randomBytes(12)),
@@ -160,10 +162,17 @@ export async function digilockerToken(opts: {
   });
   if (opts.codeVerifier) body.set('code_verifier', opts.codeVerifier);
 
-  const res = await fetch(url, { method: 'POST', body, headers: { 'content-type': 'application/x-www-form-urlencoded' } });
+  const res = await fetch(url, {
+    method: 'POST',
+    body,
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+  });
   if (!res.ok) {
     const text = await res.text().catch(() => '');
-    throw new TRPCError({ code: 'BAD_REQUEST', message: `DigiLocker token failed (${res.status}): ${text}` });
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: `DigiLocker token failed (${res.status}): ${text}`,
+    });
   }
   return (await res.json()) as DigiLockerTokenResponse;
 }
@@ -181,10 +190,17 @@ export async function digilockerRefresh(opts: {
     client_id: opts.clientId,
     client_secret: opts.clientSecret,
   });
-  const res = await fetch(url, { method: 'POST', body, headers: { 'content-type': 'application/x-www-form-urlencoded' } });
+  const res = await fetch(url, {
+    method: 'POST',
+    body,
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+  });
   if (!res.ok) {
     const text = await res.text().catch(() => '');
-    throw new TRPCError({ code: 'BAD_REQUEST', message: `DigiLocker refresh failed (${res.status}): ${text}` });
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: `DigiLocker refresh failed (${res.status}): ${text}`,
+    });
   }
   return (await res.json()) as DigiLockerTokenResponse;
 }
@@ -207,16 +223,25 @@ function pickArrayField(obj: unknown, key: string): unknown[] | null {
   return Array.isArray(v) ? v : null;
 }
 
-export async function digilockerListFiles(opts: { baseUrl: string; accessToken: string }): Promise<DigiLockerFileItem[]> {
+export async function digilockerListFiles(opts: {
+  baseUrl: string;
+  accessToken: string;
+}): Promise<DigiLockerFileItem[]> {
   const url = `${opts.baseUrl.replace(/\/$/, '')}/oauth2/1/files/`;
   const res = await fetch(url, { headers: { Authorization: `Bearer ${opts.accessToken}` } });
   if (!res.ok) {
     const text = await res.text().catch(() => '');
-    throw new TRPCError({ code: 'BAD_REQUEST', message: `DigiLocker list failed (${res.status}): ${text}` });
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: `DigiLocker list failed (${res.status}): ${text}`,
+    });
   }
   const json = (await res.json()) as unknown;
   const items =
-    pickArrayField(json, 'items') ?? pickArrayField(json, 'files') ?? pickArrayField(json, 'response') ?? [];
+    pickArrayField(json, 'items') ??
+    pickArrayField(json, 'files') ??
+    pickArrayField(json, 'response') ??
+    [];
   return items as DigiLockerFileItem[];
 }
 
@@ -231,12 +256,17 @@ export async function digilockerDownload(opts: {
   const res = await fetch(url, { headers: { Authorization: `Bearer ${opts.accessToken}` } });
   if (!res.ok) {
     const text = await res.text().catch(() => '');
-    throw new TRPCError({ code: 'BAD_REQUEST', message: `DigiLocker download failed (${res.status}): ${text}` });
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: `DigiLocker download failed (${res.status}): ${text}`,
+    });
   }
   const buf = new Uint8Array(await res.arrayBuffer());
   if (buf.byteLength > opts.maxBytes) {
-    throw new TRPCError({ code: 'PAYLOAD_TOO_LARGE', message: 'Document too large to import via web.' });
+    throw new TRPCError({
+      code: 'PAYLOAD_TOO_LARGE',
+      message: 'Document too large to import via web.',
+    });
   }
   return { bytes: buf, contentType: res.headers.get('content-type') };
 }
-

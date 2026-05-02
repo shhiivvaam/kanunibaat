@@ -2,7 +2,7 @@ import { TRPCError } from '@trpc/server';
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 
-import { notificationJob, pushDestination } from '@kb/database/schema';
+import { notificationJob, pushDestination } from '@jurisly/database/schema';
 
 import { protectedProcedure, router } from '../init';
 
@@ -49,7 +49,12 @@ export const notificationsRouter = router({
     }),
 
   registerWebPushSubscription: protectedProcedure
-    .input(z.object({ subscription: webPushSubscriptionSchema, deviceLabel: z.string().max(120).optional() }))
+    .input(
+      z.object({
+        subscription: webPushSubscriptionSchema,
+        deviceLabel: z.string().max(120).optional(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       const now = new Date();
       await ctx.db
@@ -122,4 +127,3 @@ export const notificationsRouter = router({
       return { ok: true as const };
     }),
 });
-

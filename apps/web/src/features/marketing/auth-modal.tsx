@@ -65,7 +65,12 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'login' }: AuthModalPr
   }, [onClose, router]);
 
   const mapErr = (e: unknown): string => {
-    if (e && typeof e === 'object' && 'message' in e && typeof (e as { message: unknown }).message === 'string') {
+    if (
+      e &&
+      typeof e === 'object' &&
+      'message' in e &&
+      typeof (e as { message: unknown }).message === 'string'
+    ) {
       return (e as { message: string }).message;
     }
     return 'Something went wrong. Try again.';
@@ -220,7 +225,7 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'login' }: AuthModalPr
                 className="text-[#1C1917]"
                 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '18px' }}
               >
-                Sign in to KanuniBaat
+                Sign in to Jurisly
               </span>
             </div>
             <button
@@ -273,7 +278,11 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'login' }: AuthModalPr
                   fontWeight: mode === m ? 600 : 400,
                 }}
               >
-                {m === 'password' ? 'Email & password' : m === 'email-otp' ? 'Email code' : 'Phone code'}
+                {m === 'password'
+                  ? 'Email & password'
+                  : m === 'email-otp'
+                    ? 'Email code'
+                    : 'Phone code'}
               </button>
             ))}
           </div>
@@ -281,7 +290,12 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'login' }: AuthModalPr
 
         <div className="space-y-4 px-8 py-6">
           {error ? (
-            <p id={errorId} className="text-sm text-red-700" role="alert" style={{ fontFamily: 'var(--font-body)' }}>
+            <p
+              id={errorId}
+              className="text-sm text-red-700"
+              role="alert"
+              style={{ fontFamily: 'var(--font-body)' }}
+            >
               {error}
             </p>
           ) : null}
@@ -290,7 +304,10 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'login' }: AuthModalPr
             <form className="space-y-3" onSubmit={onPasswordSubmit}>
               {tab === 'signup' ? (
                 <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-[#57534E]" style={{ fontFamily: 'var(--font-body)' }}>
+                  <span
+                    className="mb-1 block text-xs font-medium text-[#57534E]"
+                    style={{ fontFamily: 'var(--font-body)' }}
+                  >
                     Name
                   </span>
                   <input
@@ -303,7 +320,10 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'login' }: AuthModalPr
                 </label>
               ) : null}
               <label className="block">
-                <span className="mb-1 block text-xs font-medium text-[#57534E]" style={{ fontFamily: 'var(--font-body)' }}>
+                <span
+                  className="mb-1 block text-xs font-medium text-[#57534E]"
+                  style={{ fontFamily: 'var(--font-body)' }}
+                >
                   Email
                 </span>
                 <input
@@ -316,7 +336,10 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'login' }: AuthModalPr
                 />
               </label>
               <label className="block">
-                <span className="mb-1 block text-xs font-medium text-[#57534E]" style={{ fontFamily: 'var(--font-body)' }}>
+                <span
+                  className="mb-1 block text-xs font-medium text-[#57534E]"
+                  style={{ fontFamily: 'var(--font-body)' }}
+                >
                   Password
                 </span>
                 <input
@@ -344,7 +367,10 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'login' }: AuthModalPr
             <div className="space-y-4">
               {tab === 'signup' ? (
                 <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-[#57534E]" style={{ fontFamily: 'var(--font-body)' }}>
+                  <span
+                    className="mb-1 block text-xs font-medium text-[#57534E]"
+                    style={{ fontFamily: 'var(--font-body)' }}
+                  >
                     Name (for new accounts)
                   </span>
                   <input
@@ -357,7 +383,10 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'login' }: AuthModalPr
               ) : null}
               <form className="space-y-3" onSubmit={onSendEmailOtp}>
                 <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-[#57534E]" style={{ fontFamily: 'var(--font-body)' }}>
+                  <span
+                    className="mb-1 block text-xs font-medium text-[#57534E]"
+                    style={{ fontFamily: 'var(--font-body)' }}
+                  >
                     Email
                   </span>
                   <input
@@ -379,7 +408,10 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'login' }: AuthModalPr
               </form>
               <form className="space-y-3" onSubmit={onVerifyEmailOtp}>
                 <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-[#57534E]" style={{ fontFamily: 'var(--font-body)' }}>
+                  <span
+                    className="mb-1 block text-xs font-medium text-[#57534E]"
+                    style={{ fontFamily: 'var(--font-body)' }}
+                  >
                     Verification code
                   </span>
                   <input
@@ -405,12 +437,19 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'login' }: AuthModalPr
 
           {mode === 'phone-otp' ? (
             <div className="space-y-4">
-              <p className="text-xs text-[#78716C]" style={{ fontFamily: 'var(--font-body)', lineHeight: 1.5 }}>
-                Use your full number with country code (for example +9198…). SMS is sent via MSG91 when configured.
+              <p
+                className="text-xs text-[#78716C]"
+                style={{ fontFamily: 'var(--font-body)', lineHeight: 1.5 }}
+              >
+                Use your full number with country code (for example +9198…). SMS is sent via MSG91
+                when configured.
               </p>
               <form className="space-y-3" onSubmit={onSendPhoneOtp}>
                 <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-[#57534E]" style={{ fontFamily: 'var(--font-body)' }}>
+                  <span
+                    className="mb-1 block text-xs font-medium text-[#57534E]"
+                    style={{ fontFamily: 'var(--font-body)' }}
+                  >
                     Phone
                   </span>
                   <input
@@ -433,7 +472,10 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'login' }: AuthModalPr
               </form>
               <form className="space-y-3" onSubmit={onVerifyPhoneOtp}>
                 <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-[#57534E]" style={{ fontFamily: 'var(--font-body)' }}>
+                  <span
+                    className="mb-1 block text-xs font-medium text-[#57534E]"
+                    style={{ fontFamily: 'var(--font-body)' }}
+                  >
                     SMS code
                   </span>
                   <input
@@ -458,15 +500,25 @@ export function AuthModal({ isOpen, onClose, defaultTab = 'login' }: AuthModalPr
           ) : null}
 
           {isLawyerTab ? (
-            <p className="text-center text-xs text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
+            <p
+              className="text-center text-xs text-[#78716C]"
+              style={{ fontFamily: 'var(--font-body)' }}
+            >
               Full lawyer verification and workspace live on a separate portal in a later milestone.{' '}
-              <Link href="/waitlist/lawyer" className="text-[#C2410C] hover:underline" onClick={onClose}>
+              <Link
+                href="/waitlist/lawyer"
+                className="text-[#C2410C] hover:underline"
+                onClick={onClose}
+              >
                 Join the lawyer waitlist
               </Link>
             </p>
           ) : null}
 
-          <p className="text-center text-xs text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
+          <p
+            className="text-center text-xs text-[#78716C]"
+            style={{ fontFamily: 'var(--font-body)' }}
+          >
             <Link href="/terms" className="text-[#C2410C] hover:underline" onClick={onClose}>
               Terms of Service
             </Link>

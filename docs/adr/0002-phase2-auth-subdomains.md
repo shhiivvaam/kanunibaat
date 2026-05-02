@@ -6,7 +6,7 @@ Accepted
 
 ## Context
 
-KanuniBaat uses **Better Auth** on **Next.js** (`apps/web`) with credentials stored in **PostgreSQL** via Drizzle (`packages/database`). The **Nest API** (`apps/api`) exposes **tRPC** and must identify the same user without trusting unsigned client claims.
+Jurisly uses **Better Auth** on **Next.js** (`apps/web`) with credentials stored in **PostgreSQL** via Drizzle (`packages/database`). The **Nest API** (`apps/api`) exposes **tRPC** and must identify the same user without trusting unsigned client claims.
 
 Future **admin** and **lawyer** experiences are intended to run on **separate subdomains**, not inside `apps/web`. Phase 2 must define how cookies, CORS, and mobile clients interact with this model.
 
@@ -18,7 +18,7 @@ Future **admin** and **lawyer** experiences are intended to run on **separate su
 2. **Session token transport**
    - **Browser + web app + API on different ports/origins:** The web app calls tRPC through a **same-origin Next.js proxy** (`/api/trpc/*`) so the browser’s **httpOnly** Better Auth cookie is forwarded to the API on the server. The API never needs to share cookie `Domain` with the API host for this path.
    - **Mobile / native:** Use **`Authorization: Bearer <session_token>`**. Better Auth’s **bearer** plugin exposes the session token on auth responses (`set-auth-token`); the mobile app persists it (e.g. Expo SecureStore) and attaches it to tRPC links.
-   - **Future subdomain web apps** (`admin.*`, `lawyer.*`): Use **Bearer** (or enable Better Auth **crossSubDomainCookies** with an explicit cookie `Domain` such as `.kanooni.baat` and aligned `trustedOrigins` / `CORS_ORIGIN`). Prefer Bearer for non-Next clients to avoid fragile cookie rules.
+   - **Future subdomain web apps** (`admin.*`, `lawyer.*`): Use **Bearer** (or enable Better Auth **crossSubDomainCookies** with an explicit cookie `Domain` such as `.tryjurisly.com` and aligned `trustedOrigins` / `CORS_ORIGIN`). Prefer Bearer for non-Next clients to avoid fragile cookie rules.
 
 3. **Cookie names**  
    Better Auth defaults to `better-auth.session_token` over HTTP and `__Secure-better-auth.session_token` on HTTPS with secure cookies. The API accepts both plus optional `BETTER_AUTH_SESSION_COOKIE_NAMES` (comma-separated) for overrides.

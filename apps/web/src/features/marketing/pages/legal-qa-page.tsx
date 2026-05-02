@@ -162,12 +162,18 @@ export function LegalQAPage() {
     <div className="min-h-screen bg-[#FAFAF9]">
       <div className="border-b border-[#E7E5E4] bg-white px-6 py-4">
         <div className="mx-auto max-w-[1200px]">
-          <div className="flex items-center gap-2 text-sm text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
+          <div
+            className="flex items-center gap-2 text-sm text-[#78716C]"
+            style={{ fontFamily: 'var(--font-body)' }}
+          >
             <span>Home</span>
             <span>/</span>
             <span className="text-[#C2410C]">Legal Q&A</span>
           </div>
-          <h1 className="mt-1 text-[#1C1917]" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '28px' }}>
+          <h1
+            className="mt-1 text-[#1C1917]"
+            style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '28px' }}
+          >
             Legal Q&A
           </h1>
         </div>
@@ -178,7 +184,10 @@ export function LegalQAPage() {
           <aside className="shrink-0 lg:w-[280px]">
             <div className="overflow-hidden rounded-[20px] border border-[#E7E5E4] bg-white">
               <div className="border-b border-[#E7E5E4] px-5 py-4">
-                <p className="text-sm text-[#1C1917]" style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}>
+                <p
+                  className="text-sm text-[#1C1917]"
+                  style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}
+                >
                   Browse by Category
                 </p>
               </div>
@@ -193,7 +202,8 @@ export function LegalQAPage() {
                     fontWeight: activeCategory === cat.id ? 600 : 400,
                     color: activeCategory === cat.id ? '#C2410C' : '#1C1917',
                     background: activeCategory === cat.id ? '#FFF7ED' : 'white',
-                    borderLeft: activeCategory === cat.id ? '3px solid #C2410C' : '3px solid transparent',
+                    borderLeft:
+                      activeCategory === cat.id ? '3px solid #C2410C' : '3px solid transparent',
                   }}
                 >
                   <span className="mr-2">{cat.icon}</span>
@@ -236,7 +246,10 @@ export function LegalQAPage() {
 
               <div className="flex gap-3">
                 <div className="relative flex-1">
-                  <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#78716C]" />
+                  <Search
+                    size={16}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-[#78716C]"
+                  />
                   <input
                     type="text"
                     value={question}
@@ -270,7 +283,10 @@ export function LegalQAPage() {
               </div>
 
               <div className="mt-4">
-                <p className="mb-2.5 text-xs text-[#78716C]" style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}>
+                <p
+                  className="mb-2.5 text-xs text-[#78716C]"
+                  style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
+                >
                   Popular questions:
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -293,7 +309,11 @@ export function LegalQAPage() {
               <div className="rounded-[20px] border border-[#E7E5E4] bg-white p-6">
                 <div className="space-y-3">
                   {[100, 75, 85, 60].map((w, i) => (
-                    <div key={i} className="h-4 animate-pulse rounded-full bg-[#E7E5E4]" style={{ width: `${w}%` }} />
+                    <div
+                      key={i}
+                      className="h-4 animate-pulse rounded-full bg-[#E7E5E4]"
+                      style={{ width: `${w}%` }}
+                    />
                   ))}
                 </div>
               </div>
@@ -316,8 +336,11 @@ export function LegalQAPage() {
                           K
                         </span>
                       </div>
-                      <span className="text-sm text-[#1C1917]" style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}>
-                        KanooniBaat Answer
+                      <span
+                        className="text-sm text-[#1C1917]"
+                        style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}
+                      >
+                        Jurisly Answer
                       </span>
                     </div>
                     <button
@@ -351,16 +374,20 @@ export function LegalQAPage() {
 
                   <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-[#E7E5E4] pt-5">
                     <div className="flex items-center gap-3">
-                      <span className="text-sm text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
+                      <span
+                        className="text-sm text-[#78716C]"
+                        style={{ fontFamily: 'var(--font-body)' }}
+                      >
                         Was this helpful?
                       </span>
                       <button
                         type="button"
                         onClick={() => setHelpfulVote('up')}
-                        className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-all ${helpfulVote === 'up'
-                          ? 'border-[#15803D] bg-[#15803D] text-white'
-                          : 'border-[#E7E5E4] text-[#78716C] hover:border-[#15803D] hover:text-[#15803D]'
-                          }`}
+                        className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-all ${
+                          helpfulVote === 'up'
+                            ? 'border-[#15803D] bg-[#15803D] text-white'
+                            : 'border-[#E7E5E4] text-[#78716C] hover:border-[#15803D] hover:text-[#15803D]'
+                        }`}
                         aria-label="Helpful"
                       >
                         <ThumbsUp size={15} />
@@ -368,10 +395,11 @@ export function LegalQAPage() {
                       <button
                         type="button"
                         onClick={() => setHelpfulVote('down')}
-                        className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-all ${helpfulVote === 'down'
-                          ? 'border-[#DC2626] bg-[#DC2626] text-white'
-                          : 'border-[#E7E5E4] text-[#78716C] hover:border-[#DC2626] hover:text-[#DC2626]'
-                          }`}
+                        className={`flex h-9 w-9 items-center justify-center rounded-lg border transition-all ${
+                          helpfulVote === 'down'
+                            ? 'border-[#DC2626] bg-[#DC2626] text-white'
+                            : 'border-[#E7E5E4] text-[#78716C] hover:border-[#DC2626] hover:text-[#DC2626]'
+                        }`}
                         aria-label="Not helpful"
                       >
                         <ThumbsDown size={15} />
@@ -390,10 +418,16 @@ export function LegalQAPage() {
 
                 <div className="mx-6 mb-6 flex flex-wrap items-center justify-between gap-3 rounded-[16px] border border-[#FED7AA] bg-[#FFF7ED] p-4">
                   <div>
-                    <p className="text-sm text-[#1C1917]" style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}>
+                    <p
+                      className="text-sm text-[#1C1917]"
+                      style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}
+                    >
                       Want advice for your specific situation?
                     </p>
-                    <p className="mt-0.5 text-xs text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
+                    <p
+                      className="mt-0.5 text-xs text-[#78716C]"
+                      style={{ fontFamily: 'var(--font-body)' }}
+                    >
                       Talk to a verified lawyer — starting ₹299
                     </p>
                   </div>

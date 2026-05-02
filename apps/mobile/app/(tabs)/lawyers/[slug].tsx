@@ -2,11 +2,14 @@ import * as WebBrowser from 'expo-web-browser';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export default function LawyerDetailScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
-  const q = trpc.marketplace.lawyerBySlug.useQuery({ slug: slug ?? '' }, { enabled: Boolean(slug) });
+  const q = trpc.marketplace.lawyerBySlug.useQuery(
+    { slug: slug ?? '' },
+    { enabled: Boolean(slug) },
+  );
   const lawyer = q.data?.lawyer ?? null;
 
   return (
@@ -26,6 +29,16 @@ export default function LawyerDetailScreen() {
             <Text style={styles.meta}>
               {[lawyer.city, lawyer.barState].filter(Boolean).join(' · ')}
             </Text>
+            {lawyer.avgRating != null && lawyer.reviewCount > 0 ? (
+              <Text style={styles.meta}>
+                Rating: {lawyer.avgRating.toFixed(1)} / 5 ({lawyer.reviewCount} verified)
+              </Text>
+            ) : null}
+            {lawyer.avgFirstReplyMinutes != null ? (
+              <Text style={styles.meta}>
+                Typical first reply: ~{lawyer.avgFirstReplyMinutes} min
+              </Text>
+            ) : null}
             <Pressable
               onPress={() =>
                 WebBrowser.openBrowserAsync(
@@ -39,6 +52,28 @@ export default function LawyerDetailScreen() {
               <Text style={styles.bookButtonText}>Book consultation (web)</Text>
             </Pressable>
             {lawyer.bio ? <Text style={styles.bio}>{lawyer.bio}</Text> : null}
+            {lawyer.recentReviews?.length ? (
+              <View style={{ marginTop: 16 }}>
+                <Text style={[styles.section, { marginTop: 0 }]}>Recent reviews</Text>
+                {lawyer.recentReviews.map((r, idx) => (
+                  <View
+                    key={`rev-${idx}`}
+                    style={{
+                      marginTop: 10,
+                      padding: 10,
+                      borderRadius: 12,
+                      backgroundColor: '#FAFAF9',
+                    }}
+                  >
+                    <Text style={{ fontWeight: '700', color: '#1C1917' }}>{r.rating} / 5</Text>
+                    {r.reviewText ? <Text style={styles.tags}>{r.reviewText}</Text> : null}
+                    <Text style={styles.timestamp}>
+                      {new Date(r.createdAt).toLocaleDateString()}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            ) : null}
             {lawyer.practiceAreas.length > 0 ? (
               <Text style={styles.tags}>Practice: {lawyer.practiceAreas.join(', ')}</Text>
             ) : null}
@@ -56,6 +91,13 @@ const styles = StyleSheet.create({
   meta: { fontSize: 14, color: '#78716C', marginTop: 8 },
   bio: { fontSize: 15, color: '#292524', marginTop: 16, lineHeight: 22 },
   tags: { fontSize: 14, color: '#57534E', marginTop: 16 },
+  section: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#78716C',
+    textTransform: 'uppercase',
+  },
+  timestamp: { fontSize: 11, color: '#A8A29E', marginTop: 8 },
   bookButton: {
     marginTop: 14,
     alignSelf: 'flex-start',

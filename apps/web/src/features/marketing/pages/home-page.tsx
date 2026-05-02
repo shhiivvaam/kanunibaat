@@ -21,11 +21,11 @@ const homeFaqs = [
     a: 'We design for the Digital Personal Data Protection Act: minimal collection, encryption in transit, and clear retention rules. Read our Privacy Policy and Privacy Charter for details.',
   },
   {
-    q: 'Are the lawyers on KanooniBaat real and verified?',
+    q: 'Are the lawyers on Jurisly real and verified?',
     a: 'Yes. Advocates go through Bar Council enrollment checks and manual review before they receive a verified badge. We do not list anonymous or unverified “experts”.',
   },
   {
-    q: 'Is KanooniBaat giving me legal advice?',
+    q: 'Is Jurisly giving me legal advice?',
     a: 'No. AI and articles provide general information. For your specific matter you should consult a qualified lawyer — we help you find one.',
   },
   {
@@ -38,7 +38,7 @@ const homeFaqs = [
   },
   {
     q: 'Can I use this in an emergency?',
-    a: 'For police detention, violence, or immediate danger, call emergency services and a lawyer. KanooniBaat guides education and next steps — it is not a substitute for emergency response.',
+    a: 'For police detention, violence, or immediate danger, call emergency services and a lawyer. Jurisly guides education and next steps — it is not a substitute for emergency response.',
   },
   {
     q: 'What if the AI makes a mistake?',
@@ -46,7 +46,7 @@ const homeFaqs = [
   },
   {
     q: 'How do I delete my account or data?',
-    a: 'Once accounts are live, you can request deletion from settings or email privacy@kanoonibaat.in. We respond under DPDP timelines.',
+    a: 'Once accounts are live, you can request deletion from settings or email privacy@tryjurisly.com. We respond under DPDP timelines.',
   },
 ] as const;
 
@@ -58,7 +58,7 @@ const testimonials = [
     initial: 'P',
     color: '#C2410C',
     quote:
-      'I was dealing with a wrongful eviction. KanooniBaat explained the Rent Control Act to me in Tamil Nadu context — clearly, without jargon. I knew exactly what to do next.',
+      'I was dealing with a wrongful eviction. Jurisly explained the Rent Control Act to me in Tamil Nadu context — clearly, without jargon. I knew exactly what to do next.',
     rating: 5,
   },
   {
@@ -210,8 +210,8 @@ export function HomePage() {
                 className="mx-auto mb-8 max-w-xl text-[#78716C] lg:mx-0"
                 style={{ fontFamily: 'var(--font-body)', fontSize: '18px', lineHeight: 1.7 }}
               >
-                KanooniBaat makes Indian law understandable for everyone. Ask questions, review documents, and
-                connect with lawyers — starting at ₹0.
+                Jurisly makes Indian law understandable for everyone. Ask questions, review
+                documents, and connect with lawyers — starting at ₹0.
               </p>
 
               <div className="flex flex-col justify-center gap-3 sm:flex-row lg:justify-start">
@@ -243,7 +243,9 @@ export function HomePage() {
                 <span className="mx-2 hidden text-[#D6D3D1] sm:inline" aria-hidden>
                   |
                 </span>
-                <span className="mt-1 block text-[#C2410C] sm:mt-0 sm:inline">Your legal partner is here</span>
+                <span className="mt-1 block text-[#C2410C] sm:mt-0 sm:inline">
+                  Your legal partner is here
+                </span>
               </div>
               <div className="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-2 lg:justify-start">
                 {[
@@ -275,7 +277,7 @@ export function HomePage() {
                     <div className="h-3 w-3 rounded-full bg-[#FED7AA]" />
                   </div>
                   <div className="mx-3 flex h-6 flex-1 items-center rounded-lg bg-[#E7E5E4]/60 px-3">
-                    <span className="text-[10px] text-[#78716C]">kanoonibaat.in/legal-qa</span>
+                    <span className="text-[10px] text-[#78716C]">tryjurisly.com/legal-qa</span>
                   </div>
                 </div>
 
@@ -285,7 +287,8 @@ export function HomePage() {
                       className="max-w-[85%] rounded-[16px] rounded-tr-sm bg-[#C2410C] px-4 py-3 text-sm leading-relaxed text-white"
                       style={{ fontFamily: 'var(--font-body)' }}
                     >
-                      My landlord is refusing to return my security deposit after I moved out 2 months ago.
+                      My landlord is refusing to return my security deposit after I moved out 2
+                      months ago.
                     </div>
                   </div>
 
@@ -307,8 +310,9 @@ export function HomePage() {
                         className="mb-2 text-sm leading-relaxed text-[#1C1917]"
                         style={{ fontFamily: 'var(--font-body)' }}
                       >
-                        Under the <strong>Transfer of Property Act</strong>, your landlord must return the deposit
-                        within 30 days of vacating. Since it&apos;s been 2 months, you can:
+                        Under the <strong>Transfer of Property Act</strong>, your landlord must
+                        return the deposit within 30 days of vacating. Since it&apos;s been 2
+                        months, you can:
                       </p>
                       <ul className="space-y-1">
                         {[
@@ -408,7 +412,10 @@ export function HomePage() {
                 >
                   {p.problem}
                 </h3>
-                <p className="leading-relaxed text-[#78716C]" style={{ fontFamily: 'var(--font-body)', fontSize: '15px' }}>
+                <p
+                  className="leading-relaxed text-[#78716C]"
+                  style={{ fontFamily: 'var(--font-body)', fontSize: '15px' }}
+                >
                   {p.detail}
                 </p>
               </div>
@@ -456,7 +463,7 @@ export function HomePage() {
               {
                 num: '03',
                 title: 'Act with confidence',
-                desc: 'Need personal advice? Book a consultation with a verified lawyer directly through KanooniBaat.',
+                desc: 'Need personal advice? Book a consultation with a verified lawyer directly through Jurisly.',
               },
             ].map((step) => (
               <div key={step.num} className="flex flex-col items-start">
@@ -478,7 +485,10 @@ export function HomePage() {
                 >
                   {step.title}
                 </h3>
-                <p className="leading-relaxed text-[#78716C]" style={{ fontFamily: 'var(--font-body)', fontSize: '15px' }}>
+                <p
+                  className="leading-relaxed text-[#78716C]"
+                  style={{ fontFamily: 'var(--font-body)', fontSize: '15px' }}
+                >
                   {step.desc}
                 </p>
               </div>
@@ -536,7 +546,10 @@ export function HomePage() {
                   >
                     {s.name}
                   </h3>
-                  <p className="leading-relaxed text-[#78716C]" style={{ fontFamily: 'var(--font-body)', fontSize: '15px' }}>
+                  <p
+                    className="leading-relaxed text-[#78716C]"
+                    style={{ fontFamily: 'var(--font-body)', fontSize: '15px' }}
+                  >
                     {s.desc}
                   </p>
                 </div>
@@ -561,7 +574,10 @@ export function HomePage() {
                 .map((_, i) => (
                   <Star key={i} size={16} fill="#C2410C" color="#C2410C" />
                 ))}
-              <span className="ml-2 text-sm text-[#78716C]" style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}>
+              <span
+                className="ml-2 text-sm text-[#78716C]"
+                style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
+              >
                 4.8/5 from 800+ reviews
               </span>
             </div>
@@ -580,7 +596,10 @@ export function HomePage() {
 
           <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3">
             {testimonials.map((t) => (
-              <div key={t.id} className="flex flex-col gap-4 rounded-[20px] border border-[#E7E5E4] bg-white p-6">
+              <div
+                key={t.id}
+                className="flex flex-col gap-4 rounded-[20px] border border-[#E7E5E4] bg-white p-6"
+              >
                 <div className="flex items-center gap-1">
                   {Array(t.rating)
                     .fill(0)
@@ -602,15 +621,26 @@ export function HomePage() {
                 <div className="flex items-center gap-3 border-t border-[#E7E5E4] pt-2">
                   <div
                     className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white"
-                    style={{ background: t.color, fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '16px' }}
+                    style={{
+                      background: t.color,
+                      fontFamily: 'var(--font-display)',
+                      fontWeight: 700,
+                      fontSize: '16px',
+                    }}
                   >
                     {t.initial}
                   </div>
                   <div>
-                    <p className="text-sm text-[#1C1917]" style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}>
+                    <p
+                      className="text-sm text-[#1C1917]"
+                      style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}
+                    >
                       {t.name}
                     </p>
-                    <p className="text-xs text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
+                    <p
+                      className="text-xs text-[#78716C]"
+                      style={{ fontFamily: 'var(--font-body)' }}
+                    >
                       {t.city}
                     </p>
                   </div>
@@ -645,14 +675,31 @@ export function HomePage() {
 
           <div className="mx-auto grid max-w-2xl grid-cols-1 gap-6 md:grid-cols-2">
             <div className="rounded-[24px] border border-[#E7E5E4] bg-white p-8">
-              <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '22px', color: '#1C1917' }}>
+              <h3
+                style={{
+                  fontFamily: 'var(--font-display)',
+                  fontWeight: 700,
+                  fontSize: '22px',
+                  color: '#1C1917',
+                }}
+              >
                 Naagrik Free
               </h3>
-              <p className="mb-6 mt-1 text-sm text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
+              <p
+                className="mb-6 mt-1 text-sm text-[#78716C]"
+                style={{ fontFamily: 'var(--font-body)' }}
+              >
                 Notice scans, guides, and discovery
               </p>
               <div className="mb-8 flex items-baseline gap-1">
-                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '40px', color: '#1C1917' }}>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    fontWeight: 700,
+                    fontSize: '40px',
+                    color: '#1C1917',
+                  }}
+                >
                   ₹0
                 </span>
                 <span className="text-sm text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
@@ -692,14 +739,31 @@ export function HomePage() {
               >
                 Most Popular
               </div>
-              <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '22px', color: '#1C1917' }}>
+              <h3
+                style={{
+                  fontFamily: 'var(--font-display)',
+                  fontWeight: 700,
+                  fontSize: '22px',
+                  color: '#1C1917',
+                }}
+              >
                 Naagrik Pro
               </h3>
-              <p className="mb-6 mt-1 text-sm text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
+              <p
+                className="mb-6 mt-1 text-sm text-[#78716C]"
+                style={{ fontFamily: 'var(--font-body)' }}
+              >
                 Unlimited scans & priority matching
               </p>
               <div className="mb-8 flex items-baseline gap-1">
-                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '40px', color: '#C2410C' }}>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    fontWeight: 700,
+                    fontSize: '40px',
+                    color: '#C2410C',
+                  }}
+                >
                   ₹199
                 </span>
                 <span className="text-sm text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
@@ -761,13 +825,19 @@ export function HomePage() {
           </h2>
           <div className="space-y-3">
             {homeFaqs.map((faq, i) => (
-              <div key={faq.q} className="overflow-hidden rounded-[16px] border border-[#E7E5E4] bg-white">
+              <div
+                key={faq.q}
+                className="overflow-hidden rounded-[16px] border border-[#E7E5E4] bg-white"
+              >
                 <button
                   type="button"
                   onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   className="flex w-full items-center justify-between px-6 py-5 text-left"
                 >
-                  <span className="pr-4 text-[#1C1917]" style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}>
+                  <span
+                    className="pr-4 text-[#1C1917]"
+                    style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}
+                  >
                     {faq.q}
                   </span>
                   <ChevronDown
@@ -777,8 +847,14 @@ export function HomePage() {
                   />
                 </button>
                 {openFaq === i ? (
-                  <div className="px-6 pb-5" style={{ animation: 'kb-marketing-panel-reveal 250ms ease-out' }}>
-                    <p className="leading-relaxed text-[#78716C]" style={{ fontFamily: 'var(--font-body)', fontSize: '15px' }}>
+                  <div
+                    className="px-6 pb-5"
+                    style={{ animation: 'kb-marketing-panel-reveal 250ms ease-out' }}
+                  >
+                    <p
+                      className="leading-relaxed text-[#78716C]"
+                      style={{ fontFamily: 'var(--font-body)', fontSize: '15px' }}
+                    >
                       {faq.a}
                     </p>
                   </div>
@@ -806,7 +882,7 @@ export function HomePage() {
             className="mx-auto mb-8 max-w-xl text-[#FED7AA]"
             style={{ fontFamily: 'var(--font-body)', fontSize: '17px', lineHeight: 1.6 }}
           >
-            Join 2,000+ citizens who already use KanooniBaat to navigate Indian law with confidence.
+            Join 2,000+ citizens who already use Jurisly to navigate Indian law with confidence.
           </p>
           <Link
             href="/waitlist"

@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 import { getRazorpayCtor, loadRazorpayCheckoutScript } from './razorpay';
 
@@ -36,13 +36,18 @@ export function ConsultationBooking() {
   const verify = trpc.consultations.verifyPayment.useMutation();
 
   const canSubmit = useMemo(() => {
-    return lawyerUserId.length > 0 && scheduledAtLocal.length > 0 && issueSummary.trim().length >= 10;
+    return (
+      lawyerUserId.length > 0 && scheduledAtLocal.length > 0 && issueSummary.trim().length >= 10
+    );
   }, [issueSummary, lawyerUserId, scheduledAtLocal]);
 
   return (
     <div className="space-y-6">
       <header className="space-y-2">
-        <h1 className="text-2xl font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+        <h1
+          className="text-2xl font-semibold text-[#1C1917]"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
           Book consultation
         </h1>
         <p className="text-sm text-[#57534E]" style={{ fontFamily: 'var(--font-body)' }}>
@@ -57,21 +62,30 @@ export function ConsultationBooking() {
       ) : (availability.data?.availability?.length ?? 0) === 0 ? (
         <div className="rounded-2xl border border-[#E7E5E4] bg-white p-5 shadow-sm">
           <p className="text-sm text-[#57534E]" style={{ fontFamily: 'var(--font-body)' }}>
-            This lawyer has not set availability yet. You can still pick a time, but booking may fail validation.
+            This lawyer has not set availability yet. You can still pick a time, but booking may
+            fail validation.
           </p>
         </div>
       ) : (
         <div className="rounded-2xl border border-[#E7E5E4] bg-white p-5 shadow-sm">
-          <p className="text-sm font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+          <p
+            className="text-sm font-semibold text-[#1C1917]"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
             Availability (weekly)
           </p>
-          <ul className="mt-3 grid gap-2 text-sm text-[#44403C]" style={{ fontFamily: 'var(--font-body)' }}>
+          <ul
+            className="mt-3 grid gap-2 text-sm text-[#44403C]"
+            style={{ fontFamily: 'var(--font-body)' }}
+          >
             {availability.data.availability.map((a) => (
               <li key={a.id} className="rounded-xl bg-[#FAFAF9] px-3 py-2 ring-1 ring-[#E7E5E4]">
-                Day {a.dayOfWeek} · {Math.floor(a.startMinute / 60)
+                Day {a.dayOfWeek} ·{' '}
+                {Math.floor(a.startMinute / 60)
                   .toString()
                   .padStart(2, '0')}
-                :{(a.startMinute % 60).toString().padStart(2, '0')}–{Math.floor(a.endMinute / 60)
+                :{(a.startMinute % 60).toString().padStart(2, '0')}–
+                {Math.floor(a.endMinute / 60)
                   .toString()
                   .padStart(2, '0')}
                 :{(a.endMinute % 60).toString().padStart(2, '0')} ({a.timezone})
@@ -105,7 +119,7 @@ export function ConsultationBooking() {
               amount: ord.amountPaise,
               currency: ord.currency,
               order_id: ord.orderId,
-              name: 'KanuniBaat',
+              name: 'Jurisly',
               description: 'Consultation booking',
               handler: async (response: RazorpayHandlerResponse) => {
                 await verify.mutateAsync({
@@ -129,7 +143,10 @@ export function ConsultationBooking() {
       >
         <div className="grid gap-4">
           <label className="grid gap-2">
-            <span className="text-sm font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+            <span
+              className="text-sm font-semibold text-[#1C1917]"
+              style={{ fontFamily: 'var(--font-display)' }}
+            >
               Mode
             </span>
             <select
@@ -145,7 +162,10 @@ export function ConsultationBooking() {
           </label>
 
           <label className="grid gap-2">
-            <span className="text-sm font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+            <span
+              className="text-sm font-semibold text-[#1C1917]"
+              style={{ fontFamily: 'var(--font-display)' }}
+            >
               Time ({tz})
             </span>
             <input
@@ -158,7 +178,10 @@ export function ConsultationBooking() {
           </label>
 
           <label className="grid gap-2">
-            <span className="text-sm font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+            <span
+              className="text-sm font-semibold text-[#1C1917]"
+              style={{ fontFamily: 'var(--font-display)' }}
+            >
               Issue summary
             </span>
             <textarea
@@ -172,7 +195,9 @@ export function ConsultationBooking() {
           </label>
 
           {create.isError ? <p className="text-sm text-red-700">{create.error.message}</p> : null}
-          {createOrder.isError ? <p className="text-sm text-red-700">{createOrder.error.message}</p> : null}
+          {createOrder.isError ? (
+            <p className="text-sm text-red-700">{createOrder.error.message}</p>
+          ) : null}
           {verify.isError ? <p className="text-sm text-red-700">{verify.error.message}</p> : null}
 
           <button
@@ -188,4 +213,3 @@ export function ConsultationBooking() {
     </div>
   );
 }
-

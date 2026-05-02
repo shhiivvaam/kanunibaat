@@ -93,12 +93,8 @@
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -168,12 +164,8 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -183,9 +175,7 @@
         "session_token_unique": {
           "name": "session_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -260,16 +250,12 @@
         "user_email_unique": {
           "name": "user_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         },
         "user_phone_number_unique": {
           "name": "user_phone_number_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "phone_number"
-          ]
+          "columns": ["phone_number"]
         }
       },
       "policies": {},
@@ -381,12 +367,8 @@
           "name": "lawyer_availability_user_id_user_id_fk",
           "tableFrom": "lawyer_availability",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -465,12 +447,8 @@
           "name": "lawyer_document_user_id_user_id_fk",
           "tableFrom": "lawyer_document",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -584,12 +562,8 @@
           "name": "lawyer_profile_user_id_user_id_fk",
           "tableFrom": "lawyer_profile",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -599,9 +573,7 @@
         "lawyer_profile_slug_unique": {
           "name": "lawyer_profile_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "policies": {},
@@ -752,12 +724,8 @@
           "name": "notice_scan_user_id_user_id_fk",
           "tableFrom": "notice_scan",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -818,12 +786,8 @@
           "name": "user_profile_user_id_user_id_fk",
           "tableFrom": "user_profile",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -858,12 +822,8 @@
           "name": "user_role_user_id_user_id_fk",
           "tableFrom": "user_role",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -871,10 +831,7 @@
       "compositePrimaryKeys": {
         "user_role_user_id_role_pk": {
           "name": "user_role_user_id_role_pk",
-          "columns": [
-            "user_id",
-            "role"
-          ]
+          "columns": ["user_id", "role"]
         }
       },
       "uniqueConstraints": {},
@@ -887,39 +844,22 @@
     "public.kb_user_role": {
       "name": "kb_user_role",
       "schema": "public",
-      "values": [
-        "user",
-        "lawyer",
-        "admin"
-      ]
+      "values": ["user", "lawyer", "admin"]
     },
     "public.lawyer_document_kind": {
       "name": "lawyer_document_kind",
       "schema": "public",
-      "values": [
-        "enrollment_certificate",
-        "government_id"
-      ]
+      "values": ["enrollment_certificate", "government_id"]
     },
     "public.lawyer_verification_status": {
       "name": "lawyer_verification_status",
       "schema": "public",
-      "values": [
-        "draft",
-        "pending",
-        "verified",
-        "rejected"
-      ]
+      "values": ["draft", "pending", "verified", "rejected"]
     },
     "public.notice_scan_status": {
       "name": "notice_scan_status",
       "schema": "public",
-      "values": [
-        "uploaded",
-        "processing",
-        "completed",
-        "failed"
-      ]
+      "values": ["uploaded", "processing", "completed", "failed"]
     }
   },
   "schemas": {},

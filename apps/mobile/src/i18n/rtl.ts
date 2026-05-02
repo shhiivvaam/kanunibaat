@@ -16,4 +16,3 @@ export function maybeEnableRtl(opts: { locale: string; enabled: boolean }) {
   I18nManager.allowRTL(true);
   I18nManager.forceRTL(shouldRtl);
 }
-

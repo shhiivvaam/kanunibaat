@@ -3,14 +3,18 @@
  */
 import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
 
-const base = (process.env.SMOKE_API_URL ?? 'http://127.0.0.1:4000').replace(/\/$/, '');
+const base = (process.env.SMOKE_API_URL ?? 'http://127.0.0.1:4000').replace(
+  /\/$/,
+  '',
+);
 const url = `${base}/trpc`;
 
 const client = createTRPCProxyClient({
   links: [
     httpBatchLink({
       url,
-      fetch: (input, init) => fetch(input, { ...init, signal: AbortSignal.timeout(15_000) }),
+      fetch: (input, init) =>
+        fetch(input, { ...init, signal: AbortSignal.timeout(15_000) }),
     }),
   ],
 });

@@ -51,7 +51,8 @@ const smePlan = {
   name: 'SME Legal',
   price: 4999,
   period: '/month',
-  description: 'Business legal package — multiple seats, document workflows, and dedicated onboarding.',
+  description:
+    'Business legal package — multiple seats, document workflows, and dedicated onboarding.',
 };
 
 const faqs = [
@@ -60,7 +61,7 @@ const faqs = [
     a: 'You complete phone and email verification, submit Bar Council enrollment details and documents, and our team reviews within 48 hours (target SLA). Only then does the verified badge appear on your profile.',
   },
   {
-    q: 'Is KanooniBaat trying to replace lawyers?',
+    q: 'Is Jurisly trying to replace lawyers?',
     a: 'No. We build tools so you spend less time on admin and research and more on clients and courts. AI assists; you remain the professional giving advice.',
   },
   {
@@ -93,9 +94,12 @@ export function ForLawyersPage() {
           >
             Grow your practice. Manage cases. Research in seconds.
           </h1>
-          <p className="text-lg text-stone-300" style={{ fontFamily: 'var(--font-body)', lineHeight: 1.7 }}>
-            KanooniBaat is the operating system for modern Indian advocates — client discovery, encrypted consults,
-            case files, and AI that cites sources so you stay in control.
+          <p
+            className="text-lg text-stone-300"
+            style={{ fontFamily: 'var(--font-body)', lineHeight: 1.7 }}
+          >
+            Jurisly is the operating system for modern Indian advocates — client discovery,
+            encrypted consults, case files, and AI that cites sources so you stay in control.
           </p>
           <div className="mt-10 flex flex-wrap justify-center gap-4">
             <Link
@@ -123,9 +127,12 @@ export function ForLawyersPage() {
         >
           Built for your workflow
         </h2>
-        <p className="mx-auto mb-12 max-w-[640px] text-center text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
-          Public profile and trust signals, encrypted in-app chat and calls, document collaboration, and research that
-          respects lawyer dignity — no race-to-the-bottom ratings.
+        <p
+          className="mx-auto mb-12 max-w-[640px] text-center text-[#78716C]"
+          style={{ fontFamily: 'var(--font-body)' }}
+        >
+          Public profile and trust signals, encrypted in-app chat and calls, document collaboration,
+          and research that respects lawyer dignity — no race-to-the-bottom ratings.
         </p>
         <div className="grid gap-6 md:grid-cols-3">
           {[
@@ -143,10 +150,16 @@ export function ForLawyersPage() {
             },
           ].map((card) => (
             <div key={card.title} className="rounded-[20px] border border-[#E7E5E4] bg-white p-6">
-              <h3 className="mb-2 text-lg font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+              <h3
+                className="mb-2 text-lg font-semibold text-[#1C1917]"
+                style={{ fontFamily: 'var(--font-display)' }}
+              >
                 {card.title}
               </h3>
-              <p className="text-sm text-[#57534E]" style={{ fontFamily: 'var(--font-body)', lineHeight: 1.65 }}>
+              <p
+                className="text-sm text-[#57534E]"
+                style={{ fontFamily: 'var(--font-body)', lineHeight: 1.65 }}
+              >
                 {card.body}
               </p>
             </div>
@@ -183,10 +196,16 @@ export function ForLawyersPage() {
                 ) : (
                   <span className="mb-4 h-6" aria-hidden />
                 )}
-                <h3 className="text-xl font-bold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+                <h3
+                  className="text-xl font-bold text-[#1C1917]"
+                  style={{ fontFamily: 'var(--font-display)' }}
+                >
                   {plan.name}
                 </h3>
-                <p className="mt-1 text-sm text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
+                <p
+                  className="mt-1 text-sm text-[#78716C]"
+                  style={{ fontFamily: 'var(--font-body)' }}
+                >
                   {plan.tagline}
                 </p>
                 <div className="my-6 flex items-baseline gap-1">
@@ -196,13 +215,20 @@ export function ForLawyersPage() {
                   >
                     ₹{plan.price}
                   </span>
-                  <span className="text-sm text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
+                  <span
+                    className="text-sm text-[#78716C]"
+                    style={{ fontFamily: 'var(--font-body)' }}
+                  >
                     {plan.period}
                   </span>
                 </div>
                 <ul className="mb-8 flex-1 space-y-3">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex gap-2 text-sm text-[#44403C]" style={{ fontFamily: 'var(--font-body)' }}>
+                    <li
+                      key={f}
+                      className="flex gap-2 text-sm text-[#44403C]"
+                      style={{ fontFamily: 'var(--font-body)' }}
+                    >
                       <Check className="mt-0.5 shrink-0 text-[#15803D]" size={16} />
                       {f}
                     </li>
@@ -225,17 +251,29 @@ export function ForLawyersPage() {
 
           <div className="mt-8 rounded-[20px] border border-[#E7E5E4] bg-[#FAFAF9] p-8 md:flex md:items-center md:justify-between md:gap-8">
             <div>
-              <h3 className="text-xl font-bold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+              <h3
+                className="text-xl font-bold text-[#1C1917]"
+                style={{ fontFamily: 'var(--font-display)' }}
+              >
                 {smePlan.name}
               </h3>
-              <p className="mt-2 max-w-xl text-sm text-[#57534E]" style={{ fontFamily: 'var(--font-body)', lineHeight: 1.65 }}>
+              <p
+                className="mt-2 max-w-xl text-sm text-[#57534E]"
+                style={{ fontFamily: 'var(--font-body)', lineHeight: 1.65 }}
+              >
                 {smePlan.description}
               </p>
             </div>
             <div className="mt-6 flex shrink-0 flex-col items-start gap-3 md:mt-0 md:items-end">
-              <p className="text-3xl font-bold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+              <p
+                className="text-3xl font-bold text-[#1C1917]"
+                style={{ fontFamily: 'var(--font-display)' }}
+              >
                 ₹{smePlan.price}
-                <span className="text-base font-normal text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
+                <span
+                  className="text-base font-normal text-[#78716C]"
+                  style={{ fontFamily: 'var(--font-body)' }}
+                >
                   {smePlan.period}
                 </span>
               </p>
@@ -260,13 +298,19 @@ export function ForLawyersPage() {
         </h2>
         <div className="space-y-3">
           {faqs.map((faq, i) => (
-            <div key={faq.q} className="overflow-hidden rounded-[16px] border border-[#E7E5E4] bg-white">
+            <div
+              key={faq.q}
+              className="overflow-hidden rounded-[16px] border border-[#E7E5E4] bg-white"
+            >
               <button
                 type="button"
                 onClick={() => setOpenFaq(openFaq === i ? null : i)}
                 className="flex w-full items-center justify-between px-6 py-5 text-left"
               >
-                <span className="pr-4 text-[#1C1917]" style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}>
+                <span
+                  className="pr-4 text-[#1C1917]"
+                  style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}
+                >
                   {faq.q}
                 </span>
                 <ChevronDown
@@ -277,7 +321,10 @@ export function ForLawyersPage() {
               </button>
               {openFaq === i ? (
                 <div className="px-6 pb-5">
-                  <p className="text-sm leading-relaxed text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
+                  <p
+                    className="text-sm leading-relaxed text-[#78716C]"
+                    style={{ fontFamily: 'var(--font-body)' }}
+                  >
                     {faq.a}
                   </p>
                 </div>

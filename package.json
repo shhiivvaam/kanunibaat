@@ -1,21 +1,27 @@
 {
-  "name": "kanunibaat",
+  "name": "jurisly",
   "private": true,
   "packageManager": "pnpm@10.33.0",
   "engines": {
     "node": ">=22.0.0"
   },
   "scripts": {
-    "prepare": "turbo run build --filter=./packages/*",
+    "prepare": "turbo run build --filter=./packages/* && husky",
     "dev": "turbo dev",
     "build": "turbo build",
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
     "test": "turbo test",
     "format": "prettier -w .",
-    "format:check": "prettier -c ."
+    "format:check": "prettier -c .",
+    "verify": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm --filter api test:e2e && pnpm --filter mobile run expo-doctor && pnpm --filter mobile test && pnpm build:verify",
+    "build:verify": "turbo build"
   },
   "pnpm": {
+    "overrides": {
+      "react": "19.1.0",
+      "react-dom": "19.1.0"
+    },
     "onlyBuiltDependencies": [
       "@nestjs/core",
       "@sentry/cli",
@@ -39,6 +45,8 @@
     "eslint": "^9.39.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
+    "husky": "9.1.7",
+    "pnpm": "10.33.0",
     "prettier": "^3.6.2",
     "turbo": "^2.5.6",
     "typescript": "^5.9.2",

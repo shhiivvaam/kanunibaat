@@ -4,11 +4,22 @@ import { TRPCError } from '@trpc/server';
 import { and, desc, eq, gte } from 'drizzle-orm';
 import { z } from 'zod';
 
-import { noticeScan } from '@kb/database/schema';
-import { fetchObjectBytes, noticeScanObjectKey, presignPutNoticeObject, StorageNotConfiguredError } from '@kb/storage';
+import { noticeScan } from '@jurisly/database/schema';
+import {
+  fetchObjectBytes,
+  noticeScanObjectKey,
+  presignPutNoticeObject,
+  StorageNotConfiguredError,
+} from '@jurisly/storage';
 
 import { publicProcedure, router } from '../init';
-import { computeEntitlementsForUser, incrementUsageMeter, monthStartUtc } from '../billing/entitlements';
+import {
+  computeEntitlementsForUser,
+  incrementUsageMeter,
+  monthStartUtc,
+} from '../billing/entitlements';
+import { logExternalApiCall } from '../lib/external-api-logger';
+import { emitUsageMetric } from '../lib/usage-metrics';
 import { ocrWithGoogleVision } from '../notices/google-vision';
 import { analyzeNoticeWithOpenAI } from '../notices/openai-analyze';
 
@@ -61,7 +72,10 @@ export const noticesRouter = router({
       const ent = await computeEntitlementsForUser({ db: ctx.db, userId, now });
       const limit = ent.limits.noticeScansPerMonth;
       if (limit != null && ent.usage.noticeScansThisPeriod >= limit) {
-        throw new TRPCError({ code: 'TOO_MANY_REQUESTS', message: `Monthly limit reached (${limit} scans). Upgrade for unlimited.` });
+        throw new TRPCError({
+          code: 'TOO_MANY_REQUESTS',
+          message: `Monthly limit reached (${limit} scans). Upgrade for unlimited.`,
+        });
       }
     } else if (anonKey) {
       const rows = await ctx.db
@@ -70,7 +84,10 @@ export const noticesRouter = router({
         .where(and(eq(noticeScan.anonKey, anonKey), gte(noticeScan.createdAt, start)))
         .limit(3);
       if (rows.length >= 2) {
-        throw new TRPCError({ code: 'TOO_MANY_REQUESTS', message: 'Free tier limit reached (2 scans/month). Sign in and upgrade for more.' });
+        throw new TRPCError({
+          code: 'TOO_MANY_REQUESTS',
+          message: 'Free tier limit reached (2 scans/month). Sign in and upgrade for more.',
+        });
       }
     }
 
@@ -96,10 +113,6 @@ export const noticesRouter = router({
       createdAt: now,
       updatedAt: now,
     });
-
-    if (userId) {
-      await incrementUsageMeter({ db: ctx.db, userId, meterKey: 'notice_scans', periodStartAt: start });
-    }
 
     const { url } = await presignPutNoticeObject(ctx.s3Documents, {
       key,
@@ -143,20 +156,33 @@ export const noticesRouter = router({
 
     try {
       const { bytes } = await fetchObjectBytes(ctx.s3Documents, row.storageKey, MAX_SCAN_BYTES);
-      const ocr = await ocrWithGoogleVision(ctx.googleVisionApiKey, bytes);
+      const v0 = Date.now();
+      let visionOk = false;
+      let ocr: { text: string };
+      try {
+        ocr = await ocrWithGoogleVision(ctx.googleVisionApiKey, bytes);
+        visionOk = true;
+      } finally {
+        logExternalApiCall({
+          logger: ctx.logger,
+          provider: 'google_vision',
+          operation: 'DOCUMENT_TEXT_DETECTION',
+          startTime: v0,
+          success: visionOk,
+          metadata: { scan_id: row.id },
+        });
+      }
 
-      let analysis:
-        | {
-          notice_type: string;
-          issuing_authority?: string | null;
-          is_likely_genuine?: boolean | null;
-          plain_summary: string;
-          recommended_actions: string[];
-          recommended_lawyer_type: string;
-          deadline_date_iso?: string | null;
-          amount_inr?: number | null;
-        }
-        | null = null;
+      let analysis: {
+        notice_type: string;
+        issuing_authority?: string | null;
+        is_likely_genuine?: boolean | null;
+        plain_summary: string;
+        recommended_actions: string[];
+        recommended_lawyer_type: string;
+        deadline_date_iso?: string | null;
+        amount_inr?: number | null;
+      } | null = null;
 
       if (ctx.openaiApiKey) {
         analysis = await analyzeNoticeWithOpenAI(ctx.openaiApiKey, ocr.text, row.locale);
@@ -185,6 +211,24 @@ export const noticesRouter = router({
           updatedAt: new Date(),
         })
         .where(eq(noticeScan.id, row.id));
+
+      if (row.userId) {
+        const now = new Date();
+        const start = monthStartUtc(now);
+        await incrementUsageMeter({
+          db: ctx.db,
+          userId: row.userId,
+          meterKey: 'notice_scans',
+          periodStartAt: start,
+        });
+        emitUsageMetric({
+          logger: ctx.logger,
+          userId: row.userId,
+          meterKey: 'notice_scans',
+          value: 1,
+          metadata: { scan_id: row.id },
+        });
+      }
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Processing failed.';
       await ctx.db
@@ -194,11 +238,7 @@ export const noticesRouter = router({
       throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: msg });
     }
 
-    const [out] = await ctx.db
-      .select()
-      .from(noticeScan)
-      .where(eq(noticeScan.id, row.id))
-      .limit(1);
+    const [out] = await ctx.db.select().from(noticeScan).where(eq(noticeScan.id, row.id)).limit(1);
     return { scan: out ?? null };
   }),
 
@@ -225,4 +265,3 @@ export const noticesRouter = router({
     return { scans: rows };
   }),
 });
-

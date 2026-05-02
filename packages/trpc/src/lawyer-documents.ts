@@ -1,8 +1,8 @@
 import { and, eq, inArray, isNotNull } from 'drizzle-orm';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 
-import type * as DbSchema from '@kb/database/schema';
-import { lawyerDocument } from '@kb/database/schema';
+import type * as DbSchema from '@jurisly/database/schema';
+import { lawyerDocument } from '@jurisly/database/schema';
 
 /** Must be present and fully uploaded before `submitForReview`. */
 export const REQUIRED_DOCUMENT_KINDS = ['enrollment_certificate', 'government_id'] as const;

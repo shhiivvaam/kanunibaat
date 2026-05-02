@@ -2,8 +2,12 @@ import { TRPCError } from '@trpc/server';
 import { and, asc, eq, ilike, or } from 'drizzle-orm';
 import { z } from 'zod';
 
-import { researchCentralAct, researchJudgment, researchStatuteCrosswalk } from '@kb/database/schema';
-import { searchJudgmentsWithFallback } from '@kb/search';
+import {
+  researchCentralAct,
+  researchJudgment,
+  researchStatuteCrosswalk,
+} from '@jurisly/database/schema';
+import { searchJudgmentsWithFallback } from '@jurisly/search';
 
 import { suggestCitationChainWithOpenAI } from '../research/openai-citation-chain';
 import { fillDraftTemplateWithOpenAI } from '../research/openai-draft-template';
@@ -12,7 +16,11 @@ import { summarizeJudgmentWithOpenAI } from '../research/openai-judgment-summary
 import { computeEntitlementsForUser } from '../billing/entitlements';
 import { lawyerProcedure, router } from '../init';
 
-const draftTemplateKeySchema = z.enum(['legal_notice_reply', 'bail_application_outline', 'written_statement_outline']);
+const draftTemplateKeySchema = z.enum([
+  'legal_notice_reply',
+  'bail_application_outline',
+  'written_statement_outline',
+]);
 
 function escapeLikePattern(s: string): string {
   return s.replaceAll('\\', '\\\\').replaceAll('%', '\\%').replaceAll('_', '\\_');
@@ -29,7 +37,11 @@ export const researchRouter = router({
         }),
       )
       .query(async ({ ctx, input }) => {
-        const ent = await computeEntitlementsForUser({ db: ctx.db, userId: ctx.authUserId, now: new Date() });
+        const ent = await computeEntitlementsForUser({
+          db: ctx.db,
+          userId: ctx.authUserId,
+          now: new Date(),
+        });
         let q = input.query.trim();
         if (input.expandQuery) {
           if (!ent.limits.aiEnabled) {
@@ -56,39 +68,55 @@ export const researchRouter = router({
         );
       }),
 
-    byId: lawyerProcedure.input(z.object({ id: z.string().uuid() })).query(async ({ ctx, input }) => {
-      const [row] = await ctx.db.select().from(researchJudgment).where(eq(researchJudgment.id, input.id)).limit(1);
-      if (!row) {
-        throw new TRPCError({ code: 'NOT_FOUND', message: 'Judgment not found.' });
-      }
-      return { judgment: row };
-    }),
+    byId: lawyerProcedure
+      .input(z.object({ id: z.string().uuid() }))
+      .query(async ({ ctx, input }) => {
+        const [row] = await ctx.db
+          .select()
+          .from(researchJudgment)
+          .where(eq(researchJudgment.id, input.id))
+          .limit(1);
+        if (!row) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Judgment not found.' });
+        }
+        return { judgment: row };
+      }),
 
-    summarize: lawyerProcedure.input(z.object({ id: z.string().uuid() })).mutation(async ({ ctx, input }) => {
-      const ent = await computeEntitlementsForUser({ db: ctx.db, userId: ctx.authUserId, now: new Date() });
-      if (!ent.limits.aiEnabled) {
-        throw new TRPCError({ code: 'FORBIDDEN', message: 'AI insights require a paid plan.' });
-      }
-      const key = ctx.openaiApiKey?.trim();
-      if (!key) {
-        throw new TRPCError({
-          code: 'PRECONDITION_FAILED',
-          message: 'Judgment summarization requires OPENAI_API_KEY on the API.',
+    summarize: lawyerProcedure
+      .input(z.object({ id: z.string().uuid() }))
+      .mutation(async ({ ctx, input }) => {
+        const ent = await computeEntitlementsForUser({
+          db: ctx.db,
+          userId: ctx.authUserId,
+          now: new Date(),
         });
-      }
-      const [row] = await ctx.db.select().from(researchJudgment).where(eq(researchJudgment.id, input.id)).limit(1);
-      if (!row) {
-        throw new TRPCError({ code: 'NOT_FOUND', message: 'Judgment not found.' });
-      }
-      const excerpt = [row.summaryExcerpt, row.bodyForSearch].filter(Boolean).join('\n\n');
-      const summary = await summarizeJudgmentWithOpenAI(key, {
-        title: row.title,
-        court: row.court,
-        citation: row.citation,
-        excerpt,
-      });
-      return { judgmentId: row.id, summary };
-    }),
+        if (!ent.limits.aiEnabled) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'AI insights require a paid plan.' });
+        }
+        const key = ctx.openaiApiKey?.trim();
+        if (!key) {
+          throw new TRPCError({
+            code: 'PRECONDITION_FAILED',
+            message: 'Judgment summarization requires OPENAI_API_KEY on the API.',
+          });
+        }
+        const [row] = await ctx.db
+          .select()
+          .from(researchJudgment)
+          .where(eq(researchJudgment.id, input.id))
+          .limit(1);
+        if (!row) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Judgment not found.' });
+        }
+        const excerpt = [row.summaryExcerpt, row.bodyForSearch].filter(Boolean).join('\n\n');
+        const summary = await summarizeJudgmentWithOpenAI(key, {
+          title: row.title,
+          court: row.court,
+          citation: row.citation,
+          excerpt,
+        });
+        return { judgmentId: row.id, summary };
+      }),
   }),
 
   citations: router({
@@ -100,7 +128,11 @@ export const researchRouter = router({
         }),
       )
       .mutation(async ({ ctx, input }) => {
-        const ent = await computeEntitlementsForUser({ db: ctx.db, userId: ctx.authUserId, now: new Date() });
+        const ent = await computeEntitlementsForUser({
+          db: ctx.db,
+          userId: ctx.authUserId,
+          now: new Date(),
+        });
         if (!ent.limits.aiEnabled) {
           throw new TRPCError({ code: 'FORBIDDEN', message: 'AI insights require a paid plan.' });
         }
@@ -159,7 +191,10 @@ export const researchRouter = router({
           };
         }
         return {
-          acts: await ctx.db.select().from(researchCentralAct).orderBy(asc(researchCentralAct.shortTitle)),
+          acts: await ctx.db
+            .select()
+            .from(researchCentralAct)
+            .orderBy(asc(researchCentralAct.shortTitle)),
         };
       }),
 
@@ -184,7 +219,10 @@ export const researchRouter = router({
             };
           }
           return {
-            acts: await ctx.db.select().from(researchCentralAct).orderBy(asc(researchCentralAct.shortTitle)),
+            acts: await ctx.db
+              .select()
+              .from(researchCentralAct)
+              .orderBy(asc(researchCentralAct.shortTitle)),
           };
         }
         const term = `%${escapeLikePattern(q)}%`;
@@ -193,17 +231,17 @@ export const researchRouter = router({
         const orExpr = or(titleMatch, descMatch)!;
         const rows = cat
           ? await ctx.db
-            .select()
-            .from(researchCentralAct)
-            .where(and(eq(researchCentralAct.category, cat), orExpr))
-            .orderBy(asc(researchCentralAct.shortTitle))
-            .limit(40)
+              .select()
+              .from(researchCentralAct)
+              .where(and(eq(researchCentralAct.category, cat), orExpr))
+              .orderBy(asc(researchCentralAct.shortTitle))
+              .limit(40)
           : await ctx.db
-            .select()
-            .from(researchCentralAct)
-            .where(orExpr)
-            .orderBy(asc(researchCentralAct.shortTitle))
-            .limit(40);
+              .select()
+              .from(researchCentralAct)
+              .where(orExpr)
+              .orderBy(asc(researchCentralAct.shortTitle))
+              .limit(40);
         return { acts: rows };
       }),
   }),
@@ -219,7 +257,11 @@ export const researchRouter = router({
         }),
       )
       .mutation(async ({ ctx, input }) => {
-        const ent = await computeEntitlementsForUser({ db: ctx.db, userId: ctx.authUserId, now: new Date() });
+        const ent = await computeEntitlementsForUser({
+          db: ctx.db,
+          userId: ctx.authUserId,
+          now: new Date(),
+        });
         if (!ent.limits.aiEnabled) {
           throw new TRPCError({ code: 'FORBIDDEN', message: 'AI insights require a paid plan.' });
         }

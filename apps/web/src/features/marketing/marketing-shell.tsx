@@ -5,12 +5,15 @@ import { useCallback, useState } from 'react';
 import { AuthModal } from '@/features/marketing/auth-modal';
 import { Footer } from '@/features/marketing/footer';
 import { Navbar } from '@/features/marketing/navbar';
-import {
-  OpenAuthContextProvider,
-  type AuthTab,
-} from '@/features/marketing/open-auth-context';
+import { OpenAuthContextProvider, type AuthTab } from '@/features/marketing/open-auth-context';
 
-export function MarketingShell({ children }: { children: React.ReactNode }) {
+export function MarketingShell({
+  children,
+  variant = 'full',
+}: {
+  children: React.ReactNode;
+  variant?: 'full' | 'waitlist';
+}) {
   const [authOpen, setAuthOpen] = useState(false);
   const [authTab, setAuthTab] = useState<AuthTab>('login');
 
@@ -22,9 +25,9 @@ export function MarketingShell({ children }: { children: React.ReactNode }) {
   return (
     <OpenAuthContextProvider value={openAuth}>
       <div className="flex min-h-screen flex-col bg-[#FAFAF9]">
-        <Navbar />
+        <Navbar variant={variant} />
         <main className="flex-1">{children}</main>
-        <Footer />
+        <Footer variant={variant} />
         <AuthModal
           key={`${authOpen}-${authTab}`}
           isOpen={authOpen}

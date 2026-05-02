@@ -1,2 +1,5 @@
-export { default } from '../../../app/vault/page';
+import { VaultList } from '@/features/vault/vault-list';
 
+export default function VaultPage() {
+  return <VaultList />;
+}

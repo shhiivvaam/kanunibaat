@@ -2,7 +2,7 @@ import { TRPCError } from '@trpc/server';
 import { and, desc, eq, ilike, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
-import { contentArticle } from '@kb/database/schema';
+import { contentArticle } from '@jurisly/database/schema';
 
 import { publicProcedure, router } from '../init';
 
@@ -69,4 +69,3 @@ export const contentRouter = router({
       }),
   }),
 });
-

@@ -1,5 +1,5 @@
 {
-  "name": "@kb/vault-crypto",
+  "name": "@jurisly/vault-crypto",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -15,7 +15,7 @@
     "build": "tsc -b",
     "typecheck": "tsc -b",
     "lint": "eslint .",
-    "test": "node -e \"console.log('no tests')\""
+    "test": "pnpm run build && node --test dist/codec.test.js dist/payload.test.js"
   },
   "devDependencies": {
     "typescript": "^5.9.2"

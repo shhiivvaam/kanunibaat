@@ -3,7 +3,7 @@ import 'server-only';
 import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
 import { headers } from 'next/headers';
 
-import type { AppRouter } from '@kb/api-client';
+import type { AppRouter } from '@jurisly/api-client';
 
 function internalApiBaseUrl(): string {
   return (
@@ -16,7 +16,9 @@ function internalApiBaseUrl(): string {
 /**
  * Server-side tRPC client (forwards cookies). Used for RSC role gates and SEO metadata.
  */
-export async function createServerTrpc(): Promise<ReturnType<typeof createTRPCProxyClient<AppRouter>>> {
+export async function createServerTrpc(): Promise<
+  ReturnType<typeof createTRPCProxyClient<AppRouter>>
+> {
   const h = await headers();
   return createTRPCProxyClient<AppRouter>({
     links: [

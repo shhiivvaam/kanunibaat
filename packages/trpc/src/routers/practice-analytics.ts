@@ -1,5 +1,17 @@
 import { TRPCError } from '@trpc/server';
-import { and, count, desc, eq, gte, inArray, isNotNull, lte, notInArray, sql, sum } from 'drizzle-orm';
+import {
+  and,
+  count,
+  desc,
+  eq,
+  gte,
+  inArray,
+  isNotNull,
+  lte,
+  notInArray,
+  sql,
+  sum,
+} from 'drizzle-orm';
 import { z } from 'zod';
 
 import {
@@ -9,7 +21,7 @@ import {
   lawyerInvoice,
   lawyerInvoicePayment,
   lawyerTimeEntry,
-} from '@kb/database/schema';
+} from '@jurisly/database/schema';
 
 import { lawyerProcedure, router } from '../init';
 
@@ -45,7 +57,10 @@ export const practiceAnalyticsRouter = router({
       .select({ c: count() })
       .from(lawyerCase)
       .where(
-        and(eq(lawyerCase.lawyerUserId, lawyerUserId), inArray(lawyerCase.status, ['closed', 'appealed'])),
+        and(
+          eq(lawyerCase.lawyerUserId, lawyerUserId),
+          inArray(lawyerCase.status, ['closed', 'appealed']),
+        ),
       );
 
     const [hearingsRow] = await ctx.db

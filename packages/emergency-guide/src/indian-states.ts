@@ -1,5 +1,5 @@
 /**
- * Copy of state/UT list (keep in sync with @kb/utils `INDIAN_STATES_AND_UTS`) for CJS-safe validation in this package.
+ * Copy of state/UT list (keep in sync with @jurisly/utils `INDIAN_STATES_AND_UTS`) for CJS-safe validation in this package.
  */
 export const INDIAN_STATES_AND_UTS: readonly { code: string; name: string }[] = [
   { code: 'AN', name: 'Andaman and Nicobar Islands' },

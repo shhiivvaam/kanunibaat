@@ -8,7 +8,7 @@ const MAX_PER_WINDOW = 5;
  * common patterns use `var` or `OTP` — adjust in the MSG91 dashboard to match.
  */
 export async function sendMsg91Otp(phoneNumber: string, otp: string): Promise<void> {
-  assertOtpRateLimit(`msg91:${phoneNumber}`, { max: MAX_PER_WINDOW, windowMs: WINDOW_MS });
+  await assertOtpRateLimit(`msg91:${phoneNumber}`, { max: MAX_PER_WINDOW, windowMs: WINDOW_MS });
 
   const authkey = process.env.MSG91_API_KEY?.trim();
   const templateId = process.env.MSG91_TEMPLATE_ID_OTP?.trim();

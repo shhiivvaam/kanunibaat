@@ -20,10 +20,22 @@ export function aggregateInvoiceTax(
     taxSum += lineTaxAmount(l);
   }
   if (supplyType === 'interstate') {
-    return { taxableInr: taxable, cgstInr: 0, sgstInr: 0, igstInr: taxSum, totalInr: taxable + taxSum };
+    return {
+      taxableInr: taxable,
+      cgstInr: 0,
+      sgstInr: 0,
+      igstInr: taxSum,
+      totalInr: taxable + taxSum,
+    };
   }
   const half = Math.floor(taxSum / 2);
   const cgst = half;
   const sgst = taxSum - half;
-  return { taxableInr: taxable, cgstInr: cgst, sgstInr: sgst, igstInr: 0, totalInr: taxable + taxSum };
+  return {
+    taxableInr: taxable,
+    cgstInr: cgst,
+    sgstInr: sgst,
+    igstInr: 0,
+    totalInr: taxable + taxSum,
+  };
 }

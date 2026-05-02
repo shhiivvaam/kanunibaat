@@ -1,2 +1,5 @@
-export { default } from '../../../../app/research/mapper/page';
+import { ResearchMapper } from '@/features/research/research-mapper';
 
+export default function ResearchMapperPage() {
+  return <ResearchMapper />;
+}

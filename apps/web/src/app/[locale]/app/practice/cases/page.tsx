@@ -1,2 +1,5 @@
-export { default } from '../../../../app/practice/cases/page';
+import { PracticeCasesList } from '@/features/practice/practice-cases-list';
 
+export default function PracticeCasesPage() {
+  return <PracticeCasesList />;
+}

@@ -3,8 +3,8 @@ import { and, eq, gt } from 'drizzle-orm';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import type { Request } from 'express';
 
-import type * as DbSchema from '@kb/database/schema';
-import { session } from '@kb/database/schema';
+import type * as DbSchema from '@jurisly/database/schema';
+import { session } from '@jurisly/database/schema';
 
 export const DEFAULT_SESSION_COOKIE_NAMES = [
   'better-auth.session_token',
@@ -41,6 +41,14 @@ function configuredCookieNames(): string[] {
     .filter(Boolean);
 }
 
+/** Session token sent as query param when EventSource/mobile cannot attach headers (HTTPS only). */
+export function extractAccessTokenQuery(req: Pick<Request, 'query'>): string | null {
+  const raw = req.query?.access_token;
+  if (typeof raw !== 'string' || raw.length === 0) return null;
+  if (raw.length > 8192) return null;
+  return raw;
+}
+
 /**
  * Extracts the Better Auth session token from `Authorization: Bearer` or session cookies.
  * The raw value matches `session.token` in Postgres (see Better Auth bearer + cookie naming).
@@ -59,6 +67,15 @@ export function extractSessionTokenFromRequest(req: Pick<Request, 'headers'>): s
     if (v) return v;
   }
   return null;
+}
+
+/** Same as {@link extractSessionTokenFromRequest} plus `access_token` query for SSE/EventSource/mobile. */
+export function extractSessionTokenForStreaming(
+  req: Pick<Request, 'headers' | 'query'>,
+): string | null {
+  const primary = extractSessionTokenFromRequest(req);
+  if (primary) return primary;
+  return extractAccessTokenQuery(req);
 }
 
 function tryDecodeCookieValue(str: string): string {

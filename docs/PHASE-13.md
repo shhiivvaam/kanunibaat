@@ -1,17 +1,17 @@
 # Phase 13 — Subscriptions + Monetization
 
-**Goal (from [KanuniBaat.md](../KanuniBaat.md) §6 Phase 13):** Introduce subscription plan tracking and monetization primitives across user and lawyer experiences.
+**Goal (from [Jurisly.md](../Jurisly.md) §6 Phase 13):** Introduce subscription plan tracking and monetization primitives across user and lawyer experiences.
 
 ## Blueprint features -> repo checklist
 
-| Area | Task | Status | Notes / where |
-|------|------|--------|----------------|
-| Schema | Subscription and plan state persistence | Done | `packages/database/drizzle/0011_phase13_subscriptions.sql`, `packages/database/src/schema/core.ts` |
-| API | Billing + subscription-aware procedures | Done | `packages/trpc/src/routers/billing.ts`, `packages/trpc/src/routers/practice-billing.ts` |
-| Web | Billing app surface for users | Done | `apps/web/src/app/[locale]/app/billing/page.tsx` |
-| Web | Lawyer invoice/billing settings flows | Done | `apps/web/src/app/[locale]/app/practice/invoices/page.tsx`, `.../billing-settings/page.tsx` |
-| Integrations | Razorpay subscription integration foundation | Done | API env wiring and billing routes + phase-15 webhook hardening work |
-| KPI depth | MRR/churn/LTV reporting completeness | Partial | Subscription primitives are in place; deeper finance analytics can iterate |
+| Area         | Task                                         | Status  | Notes / where                                                                                      |
+| ------------ | -------------------------------------------- | ------- | -------------------------------------------------------------------------------------------------- |
+| Schema       | Subscription and plan state persistence      | Done    | `packages/database/drizzle/0011_phase13_subscriptions.sql`, `packages/database/src/schema/core.ts` |
+| API          | Billing + subscription-aware procedures      | Done    | `packages/trpc/src/routers/billing.ts`, `packages/trpc/src/routers/practice-billing.ts`            |
+| Web          | Billing app surface for users                | Done    | `apps/web/src/app/[locale]/app/billing/page.tsx`                                                   |
+| Web          | Lawyer invoice/billing settings flows        | Done    | `apps/web/src/app/[locale]/app/practice/invoices/page.tsx`, `.../billing-settings/page.tsx`        |
+| Integrations | Razorpay subscription integration foundation | Done    | API env wiring and billing routes + phase-15 webhook hardening work                                |
+| KPI depth    | MRR/churn/LTV reporting completeness         | Partial | Subscription primitives are in place; deeper finance analytics can iterate                         |
 
 ## Architecture notes
 

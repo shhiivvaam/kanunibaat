@@ -27,8 +27,8 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
   title: {
-    default: 'KanooniBaat',
-    template: '%s | KanooniBaat',
+    default: 'Jurisly',
+    template: '%s | Jurisly',
   },
   description:
     'Legal help in plain language for India — ask questions, review documents, and connect with verified lawyers.',
@@ -36,21 +36,21 @@ export const metadata: Metadata = {
     'legal help India',
     'find lawyer online India',
     'legal notice',
-    'KanooniBaat',
+    'Jurisly',
     'vakil',
     'legal advice Hindi',
   ],
   openGraph: {
     type: 'website',
     locale: 'en_IN',
-    siteName: 'KanooniBaat',
-    title: 'KanooniBaat — Legal help in plain language',
+    siteName: 'Jurisly',
+    title: 'Jurisly — Legal help in plain language',
     description:
       'Ask questions, understand notices, and connect with verified lawyers — built for India, in English and Hindi.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'KanooniBaat',
+    title: 'Jurisly',
     description: 'Legal help in plain language for India.',
   },
 };
@@ -77,4 +77,3 @@ export default async function LocaleLayout(props: {
     </html>
   );
 }
-

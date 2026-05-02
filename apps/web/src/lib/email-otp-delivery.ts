@@ -11,7 +11,10 @@ export async function sendEmailVerificationOtp(payload: {
   type: 'sign-in' | 'email-verification' | 'forget-password' | 'change-email';
 }): Promise<void> {
   try {
-    assertOtpRateLimit(`email-otp:${payload.email}`, { max: MAX_PER_WINDOW, windowMs: WINDOW_MS });
+    await assertOtpRateLimit(`email-otp:${payload.email}`, {
+      max: MAX_PER_WINDOW,
+      windowMs: WINDOW_MS,
+    });
   } catch (e) {
     if (e instanceof OtpRateLimitError) throw e;
     throw e;
@@ -28,9 +31,7 @@ export async function sendEmailVerificationOtp(payload: {
 
   const resend = new Resend(apiKey);
   const subject =
-    payload.type === 'sign-in'
-      ? 'Your KanuniBaat sign-in code'
-      : 'Your KanuniBaat verification code';
+    payload.type === 'sign-in' ? 'Your Jurisly sign-in code' : 'Your Jurisly verification code';
 
   const { error } = await resend.emails.send({
     from,

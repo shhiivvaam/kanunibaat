@@ -2,7 +2,21 @@ import { initTRPC, TRPCError } from '@trpc/server';
 
 import type { TrpcContext } from './context';
 
-const t = initTRPC.context<TrpcContext>().create();
+const t = initTRPC.context<TrpcContext>().create({
+  errorFormatter({ shape, error }) {
+    if (shape.data.code === 'INTERNAL_SERVER_ERROR' && error.code === 'INTERNAL_SERVER_ERROR') {
+      return {
+        ...shape,
+        message: 'An internal error occurred. Please try again.',
+        data: {
+          ...shape.data,
+          // Remove internal error details from client response
+        },
+      };
+    }
+    return shape;
+  },
+});
 
 export const router = t.router;
 export const publicProcedure = t.procedure;

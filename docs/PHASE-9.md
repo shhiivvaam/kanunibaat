@@ -1,17 +1,17 @@
 # Phase 9 — AI Legal Research Engine
 
-**Goal (from [KanuniBaat.md](../KanuniBaat.md) §6 Phase 9):** Enable legal research and drafting-assist workflows for lawyers through structured API and app routes.
+**Goal (from [Jurisly.md](../Jurisly.md) §6 Phase 9):** Enable legal research and drafting-assist workflows for lawyers through structured API and app routes.
 
 ## Blueprint features -> repo checklist
 
-| Area | Task | Status | Notes / where |
-|------|------|--------|----------------|
-| Schema | Research-oriented persistence tables | Done | `packages/database/drizzle/0006_phase9_ai_legal_research.sql`, `packages/database/src/schema/core.ts` |
-| API | Research router and query workflows | Done | `packages/trpc/src/routers/research.ts` |
-| Web | Research home and judgments routes | Done | `apps/web/src/app/[locale]/app/research/page.tsx`, `.../research/judgments/page.tsx`, `.../research/judgments/[judgmentId]/page.tsx` |
-| Web | Drafting and mapper routes | Done | `.../research/drafting/page.tsx`, `.../research/mapper/page.tsx`, `.../research/library/page.tsx` |
-| Integration | Shared search + AI service collaboration | Done | `@kb/search` usage in API/trpc stack |
-| Corpus maturity | Full external corpus and citation-graph depth | Partial | Core routing and data model are shipped; corpus expansion remains ongoing |
+| Area            | Task                                          | Status  | Notes / where                                                                                                                        |
+| --------------- | --------------------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Schema          | Research-oriented persistence tables          | Done    | `packages/database/drizzle/0006_phase9_ai_legal_research.sql`, `packages/database/src/schema/core.ts`                                |
+| API             | Research router and query workflows           | Done    | `packages/trpc/src/routers/research.ts`                                                                                              |
+| Web             | Research home and judgments routes            | Done    | `apps/web/src/app/[locale]/app/research/page.tsx`, `.../research/judgments/page.tsx`, `.../research/judgments/[judgmentId]/page.tsx` |
+| Web             | Drafting and mapper routes                    | Done    | `.../research/drafting/page.tsx`, `.../research/mapper/page.tsx`, `.../research/library/page.tsx`                                    |
+| Integration     | Shared search + AI service collaboration      | Done    | `@jurisly/search` usage in API/trpc stack                                                                                            |
+| Corpus maturity | Full external corpus and citation-graph depth | Partial | Core routing and data model are shipped; corpus expansion remains ongoing                                                            |
 
 ## Architecture notes
 

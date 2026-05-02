@@ -8,4 +8,3 @@ export interface NotificationPayload {
 export function makeDedupeKey(parts: (string | number)[]): string {
   return parts.join(':');
 }
-

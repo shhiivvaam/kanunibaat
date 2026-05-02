@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 const STATUSES = [
   'intake',
@@ -43,7 +43,10 @@ export function PracticeCaseNew() {
   return (
     <div className="space-y-6" style={{ fontFamily: 'var(--font-body)' }}>
       <div className="flex items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+        <h1
+          className="text-xl font-semibold text-[#1C1917]"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
           New case
         </h1>
         <Link href="/app/practice/cases" className="text-sm text-[#C2410C] hover:underline">

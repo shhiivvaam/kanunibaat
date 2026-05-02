@@ -1,4 +1,4 @@
-import type { UrgencyTier } from '@kb/emergency-guide';
+import type { UrgencyTier } from '@jurisly/emergency-guide';
 
 export function urgencyBadgeClass(tier: UrgencyTier): string {
   if (tier === 'urgent') return 'bg-red-100 text-red-900 ring-red-200';

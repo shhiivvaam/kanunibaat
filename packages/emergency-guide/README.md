@@ -1,6 +1,6 @@
-# @kb/emergency-guide
+# @jurisly/emergency-guide
 
-Curated **Kya Karein?** (Legal Emergency Guide) scenarios for KanuniBaat Phase 6.
+Curated **Kya Karein?** (Legal Emergency Guide) scenarios for Jurisly Phase 6.
 
 ## Editing scenarios
 
@@ -10,6 +10,6 @@ Curated **Kya Karein?** (Legal Emergency Guide) scenarios for KanuniBaat Phase 6
 
 ## Build
 
-This package is consumed by `@kb/trpc`. Run `pnpm --filter @kb/emergency-guide build` (or root `pnpm build`) after edits.
+This package is consumed by `@jurisly/trpc`. Run `pnpm --filter @jurisly/emergency-guide build` (or root `pnpm build`) after edits.
 
-`src/indian-states.ts` duplicates `@kb/utils` state codes to avoid CJS/ESM interop in the build graph; keep it aligned when the master list changes.
+`src/indian-states.ts` duplicates `@jurisly/utils` state codes to avoid CJS/ESM interop in the build graph; keep it aligned when the master list changes.

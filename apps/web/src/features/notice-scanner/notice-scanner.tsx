@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 type ScanState =
   | { kind: 'idle' }
@@ -25,7 +25,10 @@ export function NoticeScanner() {
 
   const scanQuery = trpc.notices.get.useQuery(
     scanId && accessToken ? { scanId, accessToken } : (undefined as never),
-    { enabled: Boolean(scanId && accessToken), refetchInterval: state.kind === 'processing' ? 1500 : false },
+    {
+      enabled: Boolean(scanId && accessToken),
+      refetchInterval: state.kind === 'processing' ? 1500 : false,
+    },
   );
 
   const shareUrl = useMemo(() => {
@@ -52,13 +55,26 @@ export function NoticeScanner() {
       });
       if (!put.ok) throw new Error(`Upload failed (${put.status}).`);
 
-      await confirmUpload.mutateAsync({ scanId: requested.scanId, accessToken: requested.accessToken });
-      setState({ kind: 'processing', scanId: requested.scanId, accessToken: requested.accessToken });
+      await confirmUpload.mutateAsync({
+        scanId: requested.scanId,
+        accessToken: requested.accessToken,
+      });
+      setState({
+        kind: 'processing',
+        scanId: requested.scanId,
+        accessToken: requested.accessToken,
+      });
 
-      await processScan.mutateAsync({ scanId: requested.scanId, accessToken: requested.accessToken });
+      await processScan.mutateAsync({
+        scanId: requested.scanId,
+        accessToken: requested.accessToken,
+      });
       setState({ kind: 'done', scanId: requested.scanId, accessToken: requested.accessToken });
     } catch (e) {
-      setState({ kind: 'error', message: e instanceof Error ? e.message : 'Something went wrong.' });
+      setState({
+        kind: 'error',
+        message: e instanceof Error ? e.message : 'Something went wrong.',
+      });
     }
   }
 
@@ -69,8 +85,8 @@ export function NoticeScanner() {
       <section className="rounded-2xl border border-[#E7E5E4] bg-white p-6 shadow-sm">
         <h2 className="text-sm font-semibold text-[#1C1917]">Upload a notice</h2>
         <p className="mt-2 text-sm text-[#57534E]">
-          Upload a PDF or photo. We’ll extract text (OCR) and generate a plain-language explanation. This is general
-          information, not legal advice.
+          Upload a PDF or photo. We’ll extract text (OCR) and generate a plain-language explanation.
+          This is general information, not legal advice.
         </p>
         <input
           className="mt-4 block w-full text-sm"
@@ -81,23 +97,33 @@ export function NoticeScanner() {
         <button
           type="button"
           onClick={() => void onRun()}
-          disabled={!file || requestUpload.isPending || confirmUpload.isPending || processScan.isPending}
+          disabled={
+            !file || requestUpload.isPending || confirmUpload.isPending || processScan.isPending
+          }
           className="mt-4 rounded-xl bg-[#C2410C] px-4 py-2 text-sm font-semibold text-white hover:bg-[#9a3409] disabled:opacity-50"
         >
           {state.kind === 'processing' ? 'Processing…' : 'Scan notice'}
         </button>
 
-        {state.kind === 'error' ? <p className="mt-3 text-sm text-red-700">{state.message}</p> : null}
-        {requestUpload.error ? <p className="mt-3 text-sm text-red-700">{requestUpload.error.message}</p> : null}
+        {state.kind === 'error' ? (
+          <p className="mt-3 text-sm text-red-700">{state.message}</p>
+        ) : null}
+        {requestUpload.error ? (
+          <p className="mt-3 text-sm text-red-700">{requestUpload.error.message}</p>
+        ) : null}
       </section>
 
       {scan ? (
         <section className="rounded-2xl border border-[#E7E5E4] bg-white p-6 shadow-sm">
           <h2 className="text-sm font-semibold text-[#1C1917]">Result</h2>
           <p className="mt-2 text-xs text-[#78716C]">Status: {scan.status}</p>
-          {scan.failureReason ? <p className="mt-2 text-sm text-red-700">{scan.failureReason}</p> : null}
+          {scan.failureReason ? (
+            <p className="mt-2 text-sm text-red-700">{scan.failureReason}</p>
+          ) : null}
           {scan.aiSummary ? (
-            <p className="mt-4 whitespace-pre-wrap text-sm leading-relaxed text-[#44403C]">{scan.aiSummary}</p>
+            <p className="mt-4 whitespace-pre-wrap text-sm leading-relaxed text-[#44403C]">
+              {scan.aiSummary}
+            </p>
           ) : null}
           {Array.isArray(scan.recommendedActions) && scan.recommendedActions.length > 0 ? (
             <ol className="mt-4 list-decimal space-y-2 pl-5 text-sm text-[#44403C]">
@@ -119,4 +145,3 @@ export function NoticeScanner() {
     </div>
   );
 }
-

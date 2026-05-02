@@ -9,7 +9,9 @@ export function loadRazorpayCheckoutScript(): Promise<void> {
       resolve();
       return;
     }
-    const existing = document.querySelector('script[data-razorpay="checkout"]') as HTMLScriptElement | null;
+    const existing = document.querySelector(
+      'script[data-razorpay="checkout"]',
+    ) as HTMLScriptElement | null;
     if (existing) {
       existing.addEventListener('load', () => resolve());
       existing.addEventListener('error', () => reject(new Error('Failed to load Razorpay.')));
@@ -33,4 +35,3 @@ export function getRazorpayCtor(): RazorpayCheckoutCtor {
   if (!ctor) throw new Error('Razorpay is not available.');
   return ctor;
 }
-

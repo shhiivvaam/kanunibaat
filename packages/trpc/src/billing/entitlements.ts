@@ -3,8 +3,8 @@ import { and, desc, eq, sql } from 'drizzle-orm';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { z } from 'zod';
 
-import type * as DbSchema from '@kb/database/schema';
-import { kbPlan, kbSubscription, kbUsageMeter } from '@kb/database/schema';
+import type * as DbSchema from '@jurisly/database/schema';
+import { kbPlan, kbSubscription, kbUsageMeter } from '@jurisly/database/schema';
 
 export const PLAN_KEYS = ['free', 'pro', 'plus'] as const;
 export type PlanKey = (typeof PLAN_KEYS)[number];
@@ -23,7 +23,7 @@ export type PlanLimits = z.infer<typeof limitsSchema>;
 export interface Entitlements {
   planKey: PlanKey;
   limits: Required<Pick<PlanLimits, 'caseTrackerEnabled' | 'aiEnabled' | 'priorityMatching'>> &
-  Pick<PlanLimits, 'noticeScansPerMonth' | 'vaultDocsMax' | 'vaultStorageBytesMax'>;
+    Pick<PlanLimits, 'noticeScansPerMonth' | 'vaultDocsMax' | 'vaultStorageBytesMax'>;
   usage: {
     noticeScansThisPeriod: number;
     noticeScansRemaining: number | null;
@@ -85,7 +85,7 @@ export async function ensureDefaultPlans(db: PostgresJsDatabase<typeof DbSchema>
 async function loadPlanByKey(
   db: PostgresJsDatabase<typeof DbSchema>,
   key: PlanKey,
-): Promise<(typeof kbPlan.$inferSelect) | null> {
+): Promise<typeof kbPlan.$inferSelect | null> {
   const [row] = await db.select().from(kbPlan).where(eq(kbPlan.key, key)).limit(1);
   return row ?? null;
 }
@@ -118,7 +118,13 @@ async function loadUsageCount(
   const [row] = await db
     .select({ count: kbUsageMeter.count })
     .from(kbUsageMeter)
-    .where(and(eq(kbUsageMeter.userId, userId), eq(kbUsageMeter.meterKey, meterKey), eq(kbUsageMeter.periodStartAt, periodStartAt)))
+    .where(
+      and(
+        eq(kbUsageMeter.userId, userId),
+        eq(kbUsageMeter.meterKey, meterKey),
+        eq(kbUsageMeter.periodStartAt, periodStartAt),
+      ),
+    )
     .limit(1);
   return row?.count ?? 0;
 }
@@ -129,7 +135,7 @@ export async function computeEntitlementsForUser(opts: {
   now: Date;
 }): Promise<Entitlements> {
   let planKey: PlanKey = 'free';
-  let plan: (typeof kbPlan.$inferSelect) | null = null;
+  let plan: typeof kbPlan.$inferSelect | null = null;
   try {
     await ensureDefaultPlans(opts.db);
     planKey = await loadEffectivePlanKeyForUser(opts.db, opts.userId);
@@ -143,23 +149,34 @@ export async function computeEntitlementsForUser(opts: {
   const parsed = limitsSchema.safeParse(plan?.limitsJson ?? DEFAULT_LIMITS[planKey]);
   const limitsRaw = parsed.success ? parsed.data : DEFAULT_LIMITS[planKey];
   const limits = {
-    noticeScansPerMonth: limitsRaw.noticeScansPerMonth ?? DEFAULT_LIMITS[planKey].noticeScansPerMonth ?? null,
+    noticeScansPerMonth:
+      limitsRaw.noticeScansPerMonth ?? DEFAULT_LIMITS[planKey].noticeScansPerMonth ?? null,
     vaultDocsMax: limitsRaw.vaultDocsMax ?? DEFAULT_LIMITS[planKey].vaultDocsMax ?? null,
-    vaultStorageBytesMax: limitsRaw.vaultStorageBytesMax ?? DEFAULT_LIMITS[planKey].vaultStorageBytesMax ?? null,
-    caseTrackerEnabled: limitsRaw.caseTrackerEnabled ?? DEFAULT_LIMITS[planKey].caseTrackerEnabled ?? false,
+    vaultStorageBytesMax:
+      limitsRaw.vaultStorageBytesMax ?? DEFAULT_LIMITS[planKey].vaultStorageBytesMax ?? null,
+    caseTrackerEnabled:
+      limitsRaw.caseTrackerEnabled ?? DEFAULT_LIMITS[planKey].caseTrackerEnabled ?? false,
     aiEnabled: limitsRaw.aiEnabled ?? DEFAULT_LIMITS[planKey].aiEnabled ?? false,
-    priorityMatching: limitsRaw.priorityMatching ?? DEFAULT_LIMITS[planKey].priorityMatching ?? false,
+    priorityMatching:
+      limitsRaw.priorityMatching ?? DEFAULT_LIMITS[planKey].priorityMatching ?? false,
   };
 
   const periodStartAt = monthStartUtc(opts.now);
   let noticeScansThisPeriod = 0;
   try {
-    noticeScansThisPeriod = await loadUsageCount(opts.db, opts.userId, 'notice_scans', periodStartAt);
+    noticeScansThisPeriod = await loadUsageCount(
+      opts.db,
+      opts.userId,
+      'notice_scans',
+      periodStartAt,
+    );
   } catch {
     noticeScansThisPeriod = 0;
   }
   const noticeScansRemaining =
-    limits.noticeScansPerMonth == null ? null : Math.max(0, limits.noticeScansPerMonth - noticeScansThisPeriod);
+    limits.noticeScansPerMonth == null
+      ? null
+      : Math.max(0, limits.noticeScansPerMonth - noticeScansThisPeriod);
 
   return {
     planKey,
@@ -195,4 +212,3 @@ export async function incrementUsageMeter(opts: {
 export function assertEntitlement(opts: { ok: boolean; message: string }) {
   if (!opts.ok) throw new TRPCError({ code: 'FORBIDDEN', message: opts.message });
 }
-

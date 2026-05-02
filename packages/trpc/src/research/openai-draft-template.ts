@@ -1,6 +1,10 @@
 import { z } from 'zod';
 
-export const DRAFT_TEMPLATE_KEYS = ['legal_notice_reply', 'bail_application_outline', 'written_statement_outline'] as const;
+export const DRAFT_TEMPLATE_KEYS = [
+  'legal_notice_reply',
+  'bail_application_outline',
+  'written_statement_outline',
+] as const;
 export type DraftTemplateKey = (typeof DRAFT_TEMPLATE_KEYS)[number];
 
 const draftSchema = z.object({

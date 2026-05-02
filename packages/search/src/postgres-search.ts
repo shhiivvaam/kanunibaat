@@ -1,8 +1,8 @@
 import { and, desc, eq, ilike, or, sql } from 'drizzle-orm';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 
-import type * as DbSchema from '@kb/database/schema';
-import { lawyerProfile, userProfile } from '@kb/database/schema';
+import type * as DbSchema from '@jurisly/database/schema';
+import { lawyerProfile, userProfile } from '@jurisly/database/schema';
 
 import type { MarketplaceLawyerHit } from './types';
 
@@ -25,16 +25,16 @@ export async function searchLawyersPostgres(
     q.length === 0
       ? undefined
       : (() => {
-        const term = `%${escapeIlikePattern(q)}%`;
-        return or(
-          ilike(userProfile.displayName, term),
-          ilike(lawyerProfile.headline, term),
-          ilike(lawyerProfile.city, term),
-          ilike(lawyerProfile.barState, term),
-          sql`(${lawyerProfile.practiceAreas})::text ILIKE ${term}`,
-          sql`(${lawyerProfile.languages})::text ILIKE ${term}`,
-        );
-      })();
+          const term = `%${escapeIlikePattern(q)}%`;
+          return or(
+            ilike(userProfile.displayName, term),
+            ilike(lawyerProfile.headline, term),
+            ilike(lawyerProfile.city, term),
+            ilike(lawyerProfile.barState, term),
+            sql`(${lawyerProfile.practiceAreas})::text ILIKE ${term}`,
+            sql`(${lawyerProfile.languages})::text ILIKE ${term}`,
+          );
+        })();
 
   const rows = await db
     .select({

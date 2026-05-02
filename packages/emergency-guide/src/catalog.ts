@@ -16,13 +16,18 @@ export function isKnownScenarioSlug(slug: string): boolean {
 export const personalizeInputSchema = z
   .object({
     slug: z.string().min(1).max(80),
-    stateCode: z.string().length(2).transform((c) => c.toUpperCase()),
-    answers: z.record(z.string().min(1).max(64), z.string().max(2000)).superRefine((answers, ctx) => {
-      const keys = Object.keys(answers);
-      if (keys.length > 32) {
-        ctx.addIssue({ code: 'custom', message: 'Too many answer fields.' });
-      }
-    }),
+    stateCode: z
+      .string()
+      .length(2)
+      .transform((c) => c.toUpperCase()),
+    answers: z
+      .record(z.string().min(1).max(64), z.string().max(2000))
+      .superRefine((answers, ctx) => {
+        const keys = Object.keys(answers);
+        if (keys.length > 32) {
+          ctx.addIssue({ code: 'custom', message: 'Too many answer fields.' });
+        }
+      }),
   })
   .superRefine((val, ctx) => {
     if (!SLUG_SET.has(val.slug)) {

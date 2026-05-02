@@ -1,2 +1,13 @@
-export { default } from '../../../../(marketing)/waitlist/lawyer/page';
+import type { Metadata } from 'next';
 
+import { WaitlistLawyerPage } from '@/features/marketing/pages/waitlist-lawyer-page';
+
+export const metadata: Metadata = {
+  title: 'Lawyer waitlist',
+  description: 'Early access for verified advocates — Jurisly lawyer onboarding and verification.',
+  robots: { index: true, follow: true },
+};
+
+export default function Page() {
+  return <WaitlistLawyerPage />;
+}

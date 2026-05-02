@@ -2,7 +2,7 @@ import { useLocalSearchParams } from 'expo-router';
 import { useEffect } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export default function RightsDetailScreen() {
   const params = useLocalSearchParams();
@@ -41,7 +41,12 @@ const styles = StyleSheet.create({
   title: { fontSize: 20, fontWeight: '700' },
   sub: { fontSize: 13, color: '#444' },
   err: { fontSize: 13, color: '#b91c1c' },
-  card: { borderWidth: 1, borderColor: '#eee', borderRadius: 12, padding: 12, backgroundColor: '#fff' },
+  card: {
+    borderWidth: 1,
+    borderColor: '#eee',
+    borderRadius: 12,
+    padding: 12,
+    backgroundColor: '#fff',
+  },
   body: { fontSize: 14, lineHeight: 20, color: '#111' },
 });
-

@@ -4,7 +4,7 @@ import { useLocale } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import { useMemo, useState } from 'react';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 import { defaultLocale, locales, type Locale } from '@/i18n/routing';
 
@@ -75,4 +75,3 @@ export function LanguageSwitcher(props: { compact?: boolean }) {
     </label>
   );
 }
-

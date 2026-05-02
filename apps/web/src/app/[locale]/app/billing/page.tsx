@@ -1,2 +1,5 @@
-export { default } from '../../../app/billing/page';
+import { BillingSettings } from '@/features/billing/billing-settings';
 
+export default function BillingPage() {
+  return <BillingSettings />;
+}

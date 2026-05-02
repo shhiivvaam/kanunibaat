@@ -1,2 +1,5 @@
-export { default } from '../../../../app/research/library/page';
+import { ResearchLibrary } from '@/features/research/research-library';
 
+export default function ResearchLibraryPage() {
+  return <ResearchLibrary />;
+}

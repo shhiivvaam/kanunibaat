@@ -3,8 +3,8 @@
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-import { trpc } from '@kb/api-client';
-import { decryptVaultPayload } from '@kb/vault-crypto';
+import { trpc } from '@jurisly/api-client';
+import { decryptVaultPayload } from '@jurisly/vault-crypto';
 
 function readPassphraseFromHash(): string {
   if (typeof window === 'undefined') return '';
@@ -106,8 +106,14 @@ export function VaultSharedViewer() {
   const d = q.data;
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6 px-4 py-10" style={{ fontFamily: 'var(--font-body)' }}>
-      <h1 className="text-xl font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+    <div
+      className="mx-auto max-w-2xl space-y-6 px-4 py-10"
+      style={{ fontFamily: 'var(--font-body)' }}
+    >
+      <h1
+        className="text-xl font-semibold text-[#1C1917]"
+        style={{ fontFamily: 'var(--font-display)' }}
+      >
         Shared vault document
       </h1>
       <p className="text-sm text-[#57534E]">
@@ -119,8 +125,8 @@ export function VaultSharedViewer() {
         {d.documentExpiresAt ? ` · Document expiry ${d.documentExpiresAt.toLocaleString()}` : ''}
       </p>
       <p className="text-xs text-[#78716C]">
-        Optional: owner can append <code className="rounded bg-[#F5F5F4] px-1">#k=</code> with a URL-encoded
-        passphrase (fragment is not sent to the server).
+        Optional: owner can append <code className="rounded bg-[#F5F5F4] px-1">#k=</code> with a
+        URL-encoded passphrase (fragment is not sent to the server).
       </p>
 
       <label className="block text-sm">

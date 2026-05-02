@@ -3,7 +3,7 @@ import {
   personalizedGuideSchema,
   type EmergencyScenario,
   type PersonalizedGuide,
-} from '@kb/emergency-guide';
+} from '@jurisly/emergency-guide';
 
 export async function personalizeEmergencyGuideWithOpenAI(
   apiKey: string,

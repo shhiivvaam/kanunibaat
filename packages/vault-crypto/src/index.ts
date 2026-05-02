@@ -48,7 +48,9 @@ export function base64ToBytes(b64: string): Uint8Array {
 
 async function importPassphraseKeyMaterial(passphrase: string): Promise<CryptoKey> {
   const enc = new TextEncoder();
-  return requireSubtle().importKey('raw', asBufferSource(enc.encode(passphrase)), 'PBKDF2', false, ['deriveKey']);
+  return requireSubtle().importKey('raw', asBufferSource(enc.encode(passphrase)), 'PBKDF2', false, [
+    'deriveKey',
+  ]);
 }
 
 async function deriveWrappingKey(passphrase: string, salt: Uint8Array): Promise<CryptoKey> {
@@ -68,10 +70,13 @@ async function deriveWrappingKey(passphrase: string, salt: Uint8Array): Promise<
 }
 
 async function importDek(dek: Uint8Array): Promise<CryptoKey> {
-  return requireSubtle().importKey('raw', asBufferSource(dek), { name: 'AES-GCM', length: 256 }, false, [
-    'encrypt',
-    'decrypt',
-  ]);
+  return requireSubtle().importKey(
+    'raw',
+    asBufferSource(dek),
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt', 'decrypt'],
+  );
 }
 
 export interface VaultEncryptResult {
@@ -93,7 +98,11 @@ export async function encryptVaultPayload(
   const dekKey = await importDek(dek);
   const fileIv = randomBytes(FILE_IV_LENGTH);
   const fileCipher = new Uint8Array(
-    await subtle.encrypt({ name: 'AES-GCM', iv: asBufferSource(fileIv) }, dekKey, asBufferSource(plaintext)),
+    await subtle.encrypt(
+      { name: 'AES-GCM', iv: asBufferSource(fileIv) },
+      dekKey,
+      asBufferSource(plaintext),
+    ),
   );
 
   const version = new Uint8Array([VAULT_FILE_FORMAT_VERSION]);
@@ -106,7 +115,11 @@ export async function encryptVaultPayload(
   const wrappingKey = await deriveWrappingKey(passphrase, salt);
   const wrapIv = randomBytes(WRAP_IV_LENGTH);
   const wrapped = new Uint8Array(
-    await subtle.encrypt({ name: 'AES-GCM', iv: asBufferSource(wrapIv) }, wrappingKey, asBufferSource(dek)),
+    await subtle.encrypt(
+      { name: 'AES-GCM', iv: asBufferSource(wrapIv) },
+      wrappingKey,
+      asBufferSource(dek),
+    ),
   );
   const wrappedBlob = new Uint8Array(WRAP_IV_LENGTH + wrapped.length);
   wrappedBlob.set(wrapIv, 0);
@@ -155,6 +168,10 @@ export async function decryptVaultPayload(
   }
   const dekKey = await importDek(dek);
   return new Uint8Array(
-    await subtle.decrypt({ name: 'AES-GCM', iv: asBufferSource(fileIv) }, dekKey, asBufferSource(fileCipher)),
+    await subtle.decrypt(
+      { name: 'AES-GCM', iv: asBufferSource(fileIv) },
+      dekKey,
+      asBufferSource(fileCipher),
+    ),
   );
 }

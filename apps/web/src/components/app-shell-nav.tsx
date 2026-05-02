@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export function AppShellNav() {
   const profile = trpc.profile.me.useQuery(undefined, { staleTime: 60_000 });

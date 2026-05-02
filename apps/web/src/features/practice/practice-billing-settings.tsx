@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import { useState } from 'react';
 
-import { trpc } from '@kb/api-client';
-import type { RouterOutputs } from '@kb/trpc';
+import { trpc } from '@jurisly/api-client';
+import type { RouterOutputs } from '@jurisly/trpc';
 
 type FirmProfileRow = NonNullable<RouterOutputs['practice']['billing']['firm']['get']['profile']>;
 
@@ -170,7 +170,10 @@ export function PracticeBillingSettings() {
         <Link href="/app/practice" className="text-sm text-[#C2410C] hover:underline">
           ← Practice
         </Link>
-        <h1 className="mt-2 text-xl font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+        <h1
+          className="mt-2 text-xl font-semibold text-[#1C1917]"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
           GST & firm details
         </h1>
         <p className="mt-1 text-sm text-[#57534E]">Used on PDF invoices and invoice numbering.</p>

@@ -1,23 +1,31 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { httpBatchLink, loggerLink } from '@trpc/client';
-import Constants from 'expo-constants';
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
-import { Platform } from 'react-native';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 import { getSessionToken, subscribeSessionTokenChanged } from '@/lib/auth-token';
-
-function defaultApiBaseUrl(): string {
-  const fromEnv =
-    (typeof process !== 'undefined' && process.env.EXPO_PUBLIC_API_URL?.replace(/\/$/, '')) ||
-    (Constants.expoConfig?.extra?.apiUrl as string | undefined)?.replace(/\/$/, '');
-  if (fromEnv) return fromEnv;
-  return Platform.OS === 'android' ? 'http://10.0.2.2:4000' : 'http://localhost:4000';
-}
+import { trpcPlatformApiBase } from '@/lib/trpc-url';
 
 export function TrpcProvider({ children }: { children: ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 30_000,
+            gcTime: 5 * 60_000,
+            retry: (failureCount, error) => {
+              const msg =
+                error instanceof Error ? error.message : String(error ?? '');
+              if (msg.includes('UNAUTHORIZED') || msg.includes('FORBIDDEN'))
+                return false;
+              return failureCount < 2;
+            },
+          },
+        },
+      }),
+  );
   const [bearerToken, setBearerToken] = useState<string | null>(null);
 
   useEffect(() => {
@@ -34,7 +42,7 @@ export function TrpcProvider({ children }: { children: ReactNode }) {
         links: [
           loggerLink({ enabled: () => __DEV__ }),
           httpBatchLink({
-            url: `${defaultApiBaseUrl()}/trpc`,
+            url: `${trpcPlatformApiBase()}/trpc`,
             headers: () => {
               if (!bearerToken) return {};
               return { authorization: `Bearer ${bearerToken}` };

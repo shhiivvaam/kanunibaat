@@ -3,9 +3,9 @@
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
-import { trpc } from '@kb/api-client';
-import { MAX_VAULT_OBJECT_BYTES } from '@kb/storage';
-import { encryptVaultPayload } from '@kb/vault-crypto';
+import { trpc } from '@jurisly/api-client';
+import { MAX_VAULT_OBJECT_BYTES } from '@jurisly/storage';
+import { encryptVaultPayload } from '@jurisly/vault-crypto';
 
 const CATEGORIES = [
   'property',
@@ -60,7 +60,10 @@ export function VaultUpload() {
     setBusy(true);
     try {
       const plain = new Uint8Array(await file.arrayBuffer());
-      const { ciphertext, wrappedDekBase64, keyWrapSaltBase64 } = await encryptVaultPayload(plain, passphrase);
+      const { ciphertext, wrappedDekBase64, keyWrapSaltBase64 } = await encryptVaultPayload(
+        plain,
+        passphrase,
+      );
       if (ciphertext.byteLength > MAX_VAULT_OBJECT_BYTES) {
         throw new Error(`Encrypted file exceeds ${MAX_VAULT_OBJECT_BYTES} bytes.`);
       }
@@ -73,6 +76,7 @@ export function VaultUpload() {
         tags: tagList,
         expiresAt: exp && !Number.isNaN(exp.getTime()) ? exp : null,
         byteSize: ciphertext.byteLength,
+        contentType: file.type || 'application/octet-stream',
       });
 
       const body = new Uint8Array(ciphertext.byteLength);
@@ -103,7 +107,10 @@ export function VaultUpload() {
   return (
     <div className="space-y-6" style={{ fontFamily: 'var(--font-body)' }}>
       <div className="flex items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+        <h1
+          className="text-xl font-semibold text-[#1C1917]"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
           Upload to vault
         </h1>
         <Link href="/app/vault" className="text-sm text-[#C2410C] hover:underline">
@@ -112,8 +119,8 @@ export function VaultUpload() {
       </div>
 
       <p className="text-sm text-[#57534E]">
-        Files are encrypted in your browser before upload. Your passphrase is never sent to the server. If you lose
-        it, your documents cannot be recovered.
+        Files are encrypted in your browser before upload. Your passphrase is never sent to the
+        server. If you lose it, your documents cannot be recovered.
       </p>
 
       <div className="space-y-4 rounded-xl border border-[#E7E5E4] bg-white p-6 shadow-sm">
@@ -178,7 +185,11 @@ export function VaultUpload() {
 
         <label className="block text-sm">
           <span className="font-medium text-[#44403C]">File</span>
-          <input className="mt-1 block w-full text-sm" type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+          <input
+            className="mt-1 block w-full text-sm"
+            type="file"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          />
         </label>
 
         <label className="block text-sm">

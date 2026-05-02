@@ -4,8 +4,8 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
 
-import { trpc } from '@kb/api-client';
-import type { RouterOutputs } from '@kb/trpc';
+import { trpc } from '@jurisly/api-client';
+import type { RouterOutputs } from '@jurisly/trpc';
 
 import { getRazorpayCtor, loadRazorpayCheckoutScript } from '@/features/consultations/razorpay';
 type ByIdOutput = RouterOutputs['practice']['billing']['invoice']['byId'];
@@ -102,7 +102,7 @@ function InvoiceDetailBody({
         amount: ord.amountPaise,
         currency: ord.currency,
         order_id: ord.orderId,
-        name: 'KanuniBaat',
+        name: 'Jurisly',
         description: `Invoice ${invoice.invoiceNumber}`,
         handler: async (response: RazorpayHandlerResponse) => {
           await verify.mutateAsync({
@@ -136,7 +136,7 @@ function InvoiceDetailBody({
   }
 
   function shareWhatsapp() {
-    const text = `Invoice ${invoice.invoiceNumber} from KanuniBaat — total ₹${invoice.totalInr}.`;
+    const text = `Invoice ${invoice.invoiceNumber} from Jurisly — total ₹${invoice.totalInr}.`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
   }
 
@@ -149,7 +149,10 @@ function InvoiceDetailBody({
         <Link href="/app/practice/invoices" className="text-sm text-[#C2410C] hover:underline">
           ← Invoices
         </Link>
-        <h1 className="mt-2 text-xl font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+        <h1
+          className="mt-2 text-xl font-semibold text-[#1C1917]"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
           {invoice.invoiceNumber}
         </h1>
         <p className="mt-1 text-xs text-[#78716C]">
@@ -197,7 +200,9 @@ function InvoiceDetailBody({
       {invoice.caseId && canEdit ? (
         <section className="rounded-xl border border-[#E7E5E4] bg-white p-4 shadow-sm">
           <h2 className="text-sm font-semibold text-[#1C1917]">Time entries</h2>
-          <p className="mt-1 text-xs text-[#78716C]">Pull unbilled timer hours onto this invoice as lines.</p>
+          <p className="mt-1 text-xs text-[#78716C]">
+            Pull unbilled timer hours onto this invoice as lines.
+          </p>
           <button
             type="button"
             className="mt-3 rounded-xl border border-[#D6D3D1] bg-white px-4 py-2 text-sm font-semibold text-[#44403C] hover:bg-[#FAFAF9]"
@@ -206,7 +211,9 @@ function InvoiceDetailBody({
           >
             Attach unbilled time
           </button>
-          {attachTime.error ? <p className="mt-2 text-sm text-red-700">{attachTime.error.message}</p> : null}
+          {attachTime.error ? (
+            <p className="mt-2 text-sm text-red-700">{attachTime.error.message}</p>
+          ) : null}
         </section>
       ) : null}
 
@@ -266,7 +273,10 @@ function InvoiceDetailBody({
         <h2 className="text-sm font-semibold text-[#1C1917]">Lines</h2>
         <ul className="mt-3 space-y-2 text-sm">
           {lines.map((l) => (
-            <li key={l.id} className="flex flex-wrap items-center justify-between gap-2 border-b border-[#F5F5F4] py-2 last:border-0">
+            <li
+              key={l.id}
+              className="flex flex-wrap items-center justify-between gap-2 border-b border-[#F5F5F4] py-2 last:border-0"
+            >
               <span className="text-[#44403C]">{l.description}</span>
               <span className="tabular-nums text-[#78716C]">
                 ₹{l.taxableInr} · {l.taxRatePercent}% GST
@@ -353,7 +363,10 @@ export function PracticeInvoiceDetail() {
   const params = useParams();
   const invoiceId = typeof params.invoiceId === 'string' ? params.invoiceId : '';
 
-  const q = trpc.practice.billing.invoice.byId.useQuery({ id: invoiceId }, { enabled: Boolean(invoiceId) });
+  const q = trpc.practice.billing.invoice.byId.useQuery(
+    { id: invoiceId },
+    { enabled: Boolean(invoiceId) },
+  );
   const inv = q.data?.invoice;
   const lines = q.data?.lines ?? [];
   const payments = q.data?.payments ?? [];
@@ -364,6 +377,12 @@ export function PracticeInvoiceDetail() {
   if (!inv) return null;
 
   return (
-    <InvoiceDetailBody key={invoiceId} invoiceId={invoiceId} invoice={inv} lines={lines} payments={payments} />
+    <InvoiceDetailBody
+      key={invoiceId}
+      invoiceId={invoiceId}
+      invoice={inv}
+      lines={lines}
+      payments={payments}
+    />
   );
 }

@@ -1,6 +1,6 @@
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 
-import type * as DbSchema from '@kb/database/schema';
+import type * as DbSchema from '@jurisly/database/schema';
 
 import type { MeiliConnection } from './meili-http';
 import { searchLawyersMeili } from './meili';

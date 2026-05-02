@@ -1,15 +1,26 @@
 import { Link, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export default function PracticeInvoiceDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const invoiceId = typeof id === 'string' ? id : '';
   const utils = trpc.useUtils();
 
-  const q = trpc.practice.billing.invoice.byId.useQuery({ id: invoiceId }, { enabled: Boolean(invoiceId) });
+  const q = trpc.practice.billing.invoice.byId.useQuery(
+    { id: invoiceId },
+    { enabled: Boolean(invoiceId) },
+  );
   const inv = q.data?.invoice;
   const lines = q.data?.lines ?? [];
 
@@ -60,8 +71,19 @@ export default function PracticeInvoiceDetailScreen() {
       {draft ? (
         <>
           <Text style={[styles.section, { marginTop: 16 }]}>Add line</Text>
-          <TextInput style={styles.input} value={lineDesc} onChangeText={setLineDesc} placeholder="Description" />
-          <TextInput style={[styles.input, { marginTop: 8 }]} value={lineRate} onChangeText={setLineRate} keyboardType="number-pad" placeholder="Rate INR" />
+          <TextInput
+            style={styles.input}
+            value={lineDesc}
+            onChangeText={setLineDesc}
+            placeholder="Description"
+          />
+          <TextInput
+            style={[styles.input, { marginTop: 8 }]}
+            value={lineRate}
+            onChangeText={setLineRate}
+            keyboardType="number-pad"
+            placeholder="Rate INR"
+          />
           <Pressable
             style={[styles.btn, { marginTop: 10 }]}
             disabled={addLine.isPending}

@@ -12,7 +12,13 @@ export async function renderInvoicePdfBase64(opts: {
   clientAddress: string;
   clientGstin: string | null;
   placeOfSupply: string;
-  lines: { description: string; quantity: number; unitRateInr: number; taxableInr: number; taxRatePercent: number }[];
+  lines: {
+    description: string;
+    quantity: number;
+    unitRateInr: number;
+    taxableInr: number;
+    taxRatePercent: number;
+  }[];
   taxableInr: number;
   cgstInr: number;
   sgstInr: number;

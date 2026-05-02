@@ -72,4 +72,3 @@ export async function generateQaPreviewWithOpenAI(opts: {
   }
   return parsed.data;
 }
-

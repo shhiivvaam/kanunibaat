@@ -1,9 +1,10 @@
-import crypto from 'node:crypto';
-
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 
-export function requireConfiguredRazorpay(ctx: { razorpayKeyId: string | null; razorpayKeySecret: string | null }) {
+export function requireConfiguredRazorpay(ctx: {
+  razorpayKeyId: string | null;
+  razorpayKeySecret: string | null;
+}) {
   const idRaw = ctx.razorpayKeyId?.trim();
   const secretRaw = ctx.razorpayKeySecret?.trim();
   const id = idRaw && idRaw.length > 0 ? idRaw : null;
@@ -15,11 +16,6 @@ export function requireConfiguredRazorpay(ctx: { razorpayKeyId: string | null; r
     });
   }
   return { id, secret };
-}
-
-export function computeRazorpayClientSignature(opts: { secret: string; orderId: string; paymentId: string }): string {
-  const msg = `${opts.orderId}|${opts.paymentId}`;
-  return crypto.createHmac('sha256', opts.secret).update(msg).digest('hex');
 }
 
 export async function createRazorpayOrder(opts: {

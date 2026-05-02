@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 import { ensureWebPushSubscription } from './web-push';
 
@@ -39,7 +39,10 @@ export function NotificationsSettings() {
   return (
     <div className="space-y-6" style={{ fontFamily: 'var(--font-body)' }}>
       <div>
-        <h1 className="text-xl font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+        <h1
+          className="text-xl font-semibold text-[#1C1917]"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
           Notifications
         </h1>
         <p className="mt-1 text-sm text-[#57534E]">Enable push notifications on this device.</p>
@@ -66,7 +69,8 @@ export function NotificationsSettings() {
             {list.data?.map((d) => (
               <li key={d.id} className="flex items-center justify-between gap-3">
                 <span className="text-[#44403C]">
-                  {d.platform} {d.deviceLabel ? `· ${d.deviceLabel}` : ''} {d.enabled ? '' : '(disabled)'}
+                  {d.platform} {d.deviceLabel ? `· ${d.deviceLabel}` : ''}{' '}
+                  {d.enabled ? '' : '(disabled)'}
                 </span>
                 {d.enabled ? (
                   <button
@@ -89,4 +93,3 @@ export function NotificationsSettings() {
     </div>
   );
 }
-

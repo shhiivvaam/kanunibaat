@@ -1,4 +1,10 @@
-import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  HeadObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import type { Readable } from 'node:stream';
 
@@ -81,7 +87,11 @@ export async function presignPutObject(
   return { url };
 }
 
-export function lawyerDocumentObjectKey(userId: string, documentId: string, fileName: string): string {
+export function lawyerDocumentObjectKey(
+  userId: string,
+  documentId: string,
+  fileName: string,
+): string {
   const safe = safeObjectFileName(fileName);
   return `lawyer-docs/${userId}/${documentId}/${safe}`;
 }
@@ -121,7 +131,10 @@ export async function presignGetCaseDocumentObject(
   return { url };
 }
 
-export async function deleteCaseDocumentObject(config: S3DocumentsConfig, key: string): Promise<void> {
+export async function deleteCaseDocumentObject(
+  config: S3DocumentsConfig,
+  key: string,
+): Promise<void> {
   const client = createClient(config);
   await client.send(
     new DeleteObjectCommand({
@@ -184,6 +197,27 @@ export async function deleteVaultObject(config: S3DocumentsConfig, key: string):
       Key: key,
     }),
   );
+}
+
+/**
+ * Retrieves metadata for a vault object without downloading the full content.
+ * Used for server-side verification of upload size.
+ */
+export async function headVaultObject(
+  config: S3DocumentsConfig,
+  key: string,
+): Promise<{ contentLength: number; contentType: string }> {
+  const client = createClient(config);
+  const res = await client.send(
+    new HeadObjectCommand({
+      Bucket: config.bucket,
+      Key: key,
+    }),
+  );
+  return {
+    contentLength: res.ContentLength ?? 0,
+    contentType: res.ContentType ?? 'application/octet-stream',
+  };
 }
 
 function safeObjectFileName(fileName: string): string {

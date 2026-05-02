@@ -5,22 +5,44 @@ import { and, desc, eq, sql } from 'drizzle-orm';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { z } from 'zod';
 
-import type * as DbSchema from '@kb/database/schema';
-import { vaultDocument, vaultFolder, vaultShare } from '@kb/database/schema';
+import type * as DbSchema from '@jurisly/database/schema';
+import { vaultDocument, vaultFolder, vaultShare } from '@jurisly/database/schema';
 import {
   deleteVaultObject,
+  headVaultObject,
   MAX_VAULT_OBJECT_BYTES,
   presignGetVaultObject,
   presignPutVaultObject,
   StorageNotConfiguredError,
   vaultDocumentObjectKey,
-} from '@kb/storage';
+} from '@jurisly/storage';
 
 import { protectedProcedure, publicProcedure, router } from '../init';
 import { computeEntitlementsForUser } from '../billing/entitlements';
 import { summarizeVaultPlaintextWithOpenAI } from '../vault/openai-summarize';
+import { scanVaultDocument } from '../vault/malware-scan';
 
 const EXPIRING_SOON_DAYS = 30;
+const MAX_EXPIRY_YEARS = 10;
+
+const ALLOWED_MIME_TYPES = [
+  'application/pdf',
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'text/plain',
+  'application/zip',
+  'application/x-zip-compressed',
+  'application/octet-stream',
+] as const;
 
 const vaultCategorySchema = z.enum([
   'property',
@@ -123,37 +145,39 @@ export const vaultRouter = router({
         return { folder: updated };
       }),
 
-    delete: protectedProcedure.input(z.object({ id: z.string().uuid() })).mutation(async ({ ctx, input }) => {
-      const userId = ctx.authUserId;
-      const [child] = await ctx.db
-        .select({ id: vaultFolder.id })
-        .from(vaultFolder)
-        .where(and(eq(vaultFolder.userId, userId), eq(vaultFolder.parentFolderId, input.id)))
-        .limit(1);
-      if (child) {
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: 'Folder is not empty (contains subfolders).',
-        });
-      }
-      const [doc] = await ctx.db
-        .select({ id: vaultDocument.id })
-        .from(vaultDocument)
-        .where(and(eq(vaultDocument.userId, userId), eq(vaultDocument.folderId, input.id)))
-        .limit(1);
-      if (doc) {
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: 'Folder is not empty (contains documents).',
-        });
-      }
-      const [deleted] = await ctx.db
-        .delete(vaultFolder)
-        .where(and(eq(vaultFolder.id, input.id), eq(vaultFolder.userId, userId)))
-        .returning();
-      if (!deleted) throw new TRPCError({ code: 'NOT_FOUND', message: 'Folder not found.' });
-      return { ok: true as const };
-    }),
+    delete: protectedProcedure
+      .input(z.object({ id: z.string().uuid() }))
+      .mutation(async ({ ctx, input }) => {
+        const userId = ctx.authUserId;
+        const [child] = await ctx.db
+          .select({ id: vaultFolder.id })
+          .from(vaultFolder)
+          .where(and(eq(vaultFolder.userId, userId), eq(vaultFolder.parentFolderId, input.id)))
+          .limit(1);
+        if (child) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Folder is not empty (contains subfolders).',
+          });
+        }
+        const [doc] = await ctx.db
+          .select({ id: vaultDocument.id })
+          .from(vaultDocument)
+          .where(and(eq(vaultDocument.userId, userId), eq(vaultDocument.folderId, input.id)))
+          .limit(1);
+        if (doc) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Folder is not empty (contains documents).',
+          });
+        }
+        const [deleted] = await ctx.db
+          .delete(vaultFolder)
+          .where(and(eq(vaultFolder.id, input.id), eq(vaultFolder.userId, userId)))
+          .returning();
+        if (!deleted) throw new TRPCError({ code: 'NOT_FOUND', message: 'Folder not found.' });
+        return { ok: true as const };
+      }),
   }),
 
   document: router({
@@ -166,6 +190,7 @@ export const vaultRouter = router({
           tags: z.array(z.string().min(1).max(64)).max(24).default([]),
           expiresAt: z.coerce.date().nullable().optional(),
           byteSize: z.number().int().positive().max(MAX_VAULT_OBJECT_BYTES),
+          contentType: z.string().min(1).max(120),
         }),
       )
       .mutation(async ({ ctx, input }) => {
@@ -175,6 +200,27 @@ export const vaultRouter = router({
             message: new StorageNotConfiguredError().message,
           });
         }
+
+        if (
+          !ALLOWED_MIME_TYPES.includes(input.contentType as (typeof ALLOWED_MIME_TYPES)[number])
+        ) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: `File type not allowed: ${input.contentType}. Please upload PDF, images, Office documents, or text files.`,
+          });
+        }
+
+        if (input.expiresAt) {
+          const maxExpiry = new Date();
+          maxExpiry.setFullYear(maxExpiry.getFullYear() + MAX_EXPIRY_YEARS);
+          if (input.expiresAt > maxExpiry) {
+            throw new TRPCError({
+              code: 'BAD_REQUEST',
+              message: `Expiry date cannot be more than ${MAX_EXPIRY_YEARS} years in the future.`,
+            });
+          }
+        }
+
         const userId = ctx.authUserId;
         if (input.folderId) {
           await assertFolderOwned(ctx.db, userId, input.folderId);
@@ -199,7 +245,6 @@ export const vaultRouter = router({
 
         const documentId = randomUUID();
         const storageKey = vaultDocumentObjectKey(userId, documentId);
-        // `now` already declared above
 
         await ctx.db.insert(vaultDocument).values({
           id: documentId,
@@ -210,7 +255,7 @@ export const vaultRouter = router({
           tags: input.tags,
           storageKey,
           byteSize: input.byteSize,
-          contentType: 'application/octet-stream',
+          contentType: input.contentType,
           expiresAt: input.expiresAt ?? null,
           uploadStatus: 'pending',
           updatedAt: now,
@@ -218,7 +263,7 @@ export const vaultRouter = router({
 
         const { url } = await presignPutVaultObject(ctx.s3Documents, {
           key: storageKey,
-          contentType: 'application/octet-stream',
+          contentType: input.contentType,
           contentLength: input.byteSize,
         });
 
@@ -249,6 +294,36 @@ export const vaultRouter = router({
           throw new TRPCError({
             code: 'BAD_REQUEST',
             message: 'Byte size does not match upload request.',
+          });
+        }
+
+        if (!ctx.s3Documents) {
+          throw new TRPCError({
+            code: 'PRECONDITION_FAILED',
+            message: new StorageNotConfiguredError().message,
+          });
+        }
+
+        // Server-side size verification using S3 HeadObject API
+        const s3Metadata = await headVaultObject(ctx.s3Documents, row.storageKey);
+        if (s3Metadata.contentLength !== input.byteSize) {
+          // Size mismatch - client lied or upload failed
+          await deleteVaultObject(ctx.s3Documents, row.storageKey);
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: `Actual uploaded size (${s3Metadata.contentLength} bytes) does not match reported size (${input.byteSize} bytes).`,
+          });
+        }
+
+        // Malware scanning hook
+        const scanResult = await scanVaultDocument(row.storageKey, input.byteSize);
+        if (!scanResult.clean) {
+          // Malware detected - delete S3 object and database record
+          await deleteVaultObject(ctx.s3Documents, row.storageKey);
+          await ctx.db.delete(vaultDocument).where(eq(vaultDocument.id, input.documentId));
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: `Upload rejected: ${scanResult.threatName ?? 'Security threat detected'}`,
           });
         }
 
@@ -346,25 +421,27 @@ export const vaultRouter = router({
         return { document: updated ?? null };
       }),
 
-    delete: protectedProcedure.input(z.object({ documentId: z.string().uuid() })).mutation(async ({ ctx, input }) => {
-      const userId = ctx.authUserId;
-      const [row] = await ctx.db
-        .select()
-        .from(vaultDocument)
-        .where(and(eq(vaultDocument.id, input.documentId), eq(vaultDocument.userId, userId)))
-        .limit(1);
-      if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Document not found.' });
+    delete: protectedProcedure
+      .input(z.object({ documentId: z.string().uuid() }))
+      .mutation(async ({ ctx, input }) => {
+        const userId = ctx.authUserId;
+        const [row] = await ctx.db
+          .select()
+          .from(vaultDocument)
+          .where(and(eq(vaultDocument.id, input.documentId), eq(vaultDocument.userId, userId)))
+          .limit(1);
+        if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Document not found.' });
 
-      if (ctx.s3Documents) {
-        try {
-          await deleteVaultObject(ctx.s3Documents, row.storageKey);
-        } catch {
-          // best-effort delete
+        if (ctx.s3Documents) {
+          try {
+            await deleteVaultObject(ctx.s3Documents, row.storageKey);
+          } catch {
+            // best-effort delete
+          }
         }
-      }
-      await ctx.db.delete(vaultDocument).where(eq(vaultDocument.id, input.documentId));
-      return { ok: true as const };
-    }),
+        await ctx.db.delete(vaultDocument).where(eq(vaultDocument.id, input.documentId));
+        return { ok: true as const };
+      }),
 
     presignDownload: protectedProcedure
       .input(z.object({ documentId: z.string().uuid() }))
@@ -399,7 +476,11 @@ export const vaultRouter = router({
         }),
       )
       .mutation(async ({ ctx, input }) => {
-        const ent = await computeEntitlementsForUser({ db: ctx.db, userId: ctx.authUserId, now: new Date() });
+        const ent = await computeEntitlementsForUser({
+          db: ctx.db,
+          userId: ctx.authUserId,
+          now: new Date(),
+        });
         if (!ent.limits.aiEnabled) {
           throw new TRPCError({ code: 'FORBIDDEN', message: 'AI insights require a paid plan.' });
         }
@@ -424,22 +505,24 @@ export const vaultRouter = router({
   }),
 
   share: router({
-    list: protectedProcedure.input(z.object({ documentId: z.string().uuid() })).query(async ({ ctx, input }) => {
-      const userId = ctx.authUserId;
-      const [doc] = await ctx.db
-        .select({ id: vaultDocument.id })
-        .from(vaultDocument)
-        .where(and(eq(vaultDocument.id, input.documentId), eq(vaultDocument.userId, userId)))
-        .limit(1);
-      if (!doc) throw new TRPCError({ code: 'NOT_FOUND', message: 'Document not found.' });
+    list: protectedProcedure
+      .input(z.object({ documentId: z.string().uuid() }))
+      .query(async ({ ctx, input }) => {
+        const userId = ctx.authUserId;
+        const [doc] = await ctx.db
+          .select({ id: vaultDocument.id })
+          .from(vaultDocument)
+          .where(and(eq(vaultDocument.id, input.documentId), eq(vaultDocument.userId, userId)))
+          .limit(1);
+        if (!doc) throw new TRPCError({ code: 'NOT_FOUND', message: 'Document not found.' });
 
-      const rows = await ctx.db
-        .select()
-        .from(vaultShare)
-        .where(eq(vaultShare.documentId, input.documentId))
-        .orderBy(desc(vaultShare.createdAt));
-      return { shares: rows };
-    }),
+        const rows = await ctx.db
+          .select()
+          .from(vaultShare)
+          .where(eq(vaultShare.documentId, input.documentId))
+          .orderBy(desc(vaultShare.createdAt));
+        return { shares: rows };
+      }),
 
     create: protectedProcedure
       .input(
@@ -460,7 +543,10 @@ export const vaultRouter = router({
           throw new TRPCError({ code: 'BAD_REQUEST', message: 'Document upload not complete.' });
         }
         if (input.expiresAt.getTime() <= Date.now()) {
-          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Share expiry must be in the future.' });
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Share expiry must be in the future.',
+          });
         }
 
         const [share] = await ctx.db
@@ -471,7 +557,8 @@ export const vaultRouter = router({
           })
           .returning();
 
-        if (!share) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Share creation failed.' });
+        if (!share)
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Share creation failed.' });
 
         return {
           shareId: share.id,
@@ -480,83 +567,87 @@ export const vaultRouter = router({
         };
       }),
 
-    revoke: protectedProcedure.input(z.object({ shareId: z.string().uuid() })).mutation(async ({ ctx, input }) => {
-      const userId = ctx.authUserId;
-      const [shareRow] = await ctx.db
-        .select()
-        .from(vaultShare)
-        .where(eq(vaultShare.id, input.shareId))
-        .limit(1);
-      if (!shareRow) throw new TRPCError({ code: 'NOT_FOUND', message: 'Share not found.' });
-      const [doc] = await ctx.db
-        .select({ id: vaultDocument.id })
-        .from(vaultDocument)
-        .where(and(eq(vaultDocument.id, shareRow.documentId), eq(vaultDocument.userId, userId)))
-        .limit(1);
-      if (!doc) throw new TRPCError({ code: 'NOT_FOUND', message: 'Share not found.' });
+    revoke: protectedProcedure
+      .input(z.object({ shareId: z.string().uuid() }))
+      .mutation(async ({ ctx, input }) => {
+        const userId = ctx.authUserId;
+        const [shareRow] = await ctx.db
+          .select()
+          .from(vaultShare)
+          .where(eq(vaultShare.id, input.shareId))
+          .limit(1);
+        if (!shareRow) throw new TRPCError({ code: 'NOT_FOUND', message: 'Share not found.' });
+        const [doc] = await ctx.db
+          .select({ id: vaultDocument.id })
+          .from(vaultDocument)
+          .where(and(eq(vaultDocument.id, shareRow.documentId), eq(vaultDocument.userId, userId)))
+          .limit(1);
+        if (!doc) throw new TRPCError({ code: 'NOT_FOUND', message: 'Share not found.' });
 
-      const now = new Date();
-      await ctx.db
-        .update(vaultShare)
-        .set({ revokedAt: now })
-        .where(eq(vaultShare.id, input.shareId));
-      return { ok: true as const };
-    }),
+        const now = new Date();
+        await ctx.db
+          .update(vaultShare)
+          .set({ revokedAt: now })
+          .where(eq(vaultShare.id, input.shareId));
+        return { ok: true as const };
+      }),
 
-    get: publicProcedure.input(z.object({ token: z.string().uuid() })).query(async ({ ctx, input }) => {
-      if (!ctx.s3Documents) {
-        throw new TRPCError({
-          code: 'PRECONDITION_FAILED',
-          message: new StorageNotConfiguredError().message,
+    get: publicProcedure
+      .input(z.object({ token: z.string().uuid() }))
+      .query(async ({ ctx, input }) => {
+        if (!ctx.s3Documents) {
+          throw new TRPCError({
+            code: 'PRECONDITION_FAILED',
+            message: new StorageNotConfiguredError().message,
+          });
+        }
+        const now = new Date();
+        const [share] = await ctx.db
+          .select()
+          .from(vaultShare)
+          .where(eq(vaultShare.accessToken, input.token))
+          .limit(1);
+
+        if (!share) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Share link not found or expired.' });
+        }
+        const [doc] = await ctx.db
+          .select()
+          .from(vaultDocument)
+          .where(eq(vaultDocument.id, share.documentId))
+          .limit(1);
+        if (!doc) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Share link not found or expired.' });
+        }
+        if (share.revokedAt) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Share link not found or expired.' });
+        }
+        if (share.expiresAt.getTime() <= now.getTime()) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Share link not found or expired.' });
+        }
+        if (doc.uploadStatus !== 'complete') {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Share link not found or expired.' });
+        }
+        if (!doc.wrappedDek || !doc.keyWrapSalt) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Share link not found or expired.' });
+        }
+
+        const { url } = await presignGetVaultObject(ctx.s3Documents, {
+          key: doc.storageKey,
         });
-      }
-      const now = new Date();
-      const [share] = await ctx.db
-        .select()
-        .from(vaultShare)
-        .where(eq(vaultShare.accessToken, input.token))
-        .limit(1);
 
-      if (!share) {
-        throw new TRPCError({ code: 'NOT_FOUND', message: 'Share link not found or expired.' });
-      }
-      const [doc] = await ctx.db
-        .select()
-        .from(vaultDocument)
-        .where(eq(vaultDocument.id, share.documentId))
-        .limit(1);
-      if (!doc) {
-        throw new TRPCError({ code: 'NOT_FOUND', message: 'Share link not found or expired.' });
-      }
-      if (share.revokedAt) {
-        throw new TRPCError({ code: 'NOT_FOUND', message: 'Share link not found or expired.' });
-      }
-      if (share.expiresAt.getTime() <= now.getTime()) {
-        throw new TRPCError({ code: 'NOT_FOUND', message: 'Share link not found or expired.' });
-      }
-      if (doc.uploadStatus !== 'complete') {
-        throw new TRPCError({ code: 'NOT_FOUND', message: 'Share link not found or expired.' });
-      }
-      if (!doc.wrappedDek || !doc.keyWrapSalt) {
-        throw new TRPCError({ code: 'NOT_FOUND', message: 'Share link not found or expired.' });
-      }
-
-      const { url } = await presignGetVaultObject(ctx.s3Documents, {
-        key: doc.storageKey,
-      });
-
-      return {
-        displayName: doc.displayName,
-        category: doc.category,
-        contentType: doc.contentType,
-        byteSize: doc.byteSize,
-        documentExpiresAt: doc.expiresAt,
-        shareExpiresAt: share.expiresAt,
-        downloadUrl: url,
-        /** Lets the recipient decrypt locally with the vault passphrase (never logged server-side). */
-        wrappedDek: doc.wrappedDek,
-        keyWrapSalt: doc.keyWrapSalt,
-      };
-    }),
+        return {
+          displayName: doc.displayName,
+          category: doc.category,
+          contentType: doc.contentType,
+          byteSize: doc.byteSize,
+          documentExpiresAt: doc.expiresAt,
+          shareExpiresAt: share.expiresAt,
+          downloadUrl: url,
+          /** Lets the recipient decrypt locally with the vault passphrase (never logged server-side). */
+          wrappedDek: doc.wrappedDek,
+          keyWrapSalt: doc.keyWrapSalt,
+        };
+      }),
   }),
 });

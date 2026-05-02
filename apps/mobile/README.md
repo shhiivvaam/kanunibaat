@@ -1,6 +1,6 @@
-# KanuniBaat Mobile (`apps/mobile`)
+# Jurisly Mobile (`apps/mobile`)
 
-Expo mobile client for KanuniBaat.
+Expo mobile client for Jurisly.
 
 ## Start
 
@@ -22,10 +22,15 @@ Set API base URL in env:
 
 - `EXPO_PUBLIC_API_URL`
 
+For **Settings → Also on web**, set the Next.js origin:
+
+- **`EXPO_PUBLIC_APP_URL`** (e.g. `http://localhost:3000` in dev; production web URL when shipped)
+
 Use root `.env.example` for all shared env conventions.
 
 ## Related docs
 
+- `docs/MOBILE-WEB-PARITY.md`
 - `docs/ONBOARDING.md`
 - `docs/PROJECT-FLOWS.md`
 - `docs/MOBILE-AUTH-DEEPLINKS.md`

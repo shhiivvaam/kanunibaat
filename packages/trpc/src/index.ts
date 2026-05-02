@@ -22,8 +22,13 @@ export {
   type TrpcContext,
   type TrpcContextDeps,
 } from './context';
+export { noopStructuredLogger } from './lib/trpc-structured-logger';
 export {
   extractSessionTokenFromRequest,
+  extractSessionTokenForStreaming,
   resolveUserIdFromSessionToken,
   unsignBetterAuthSessionCookieValue,
 } from './session-resolve';
+export { writeAuditLog } from './lib/audit-log';
+export { normalizeAndValidateCnr } from './cases/njdg-lookup';
+export { scanVaultDocument } from './vault/malware-scan';

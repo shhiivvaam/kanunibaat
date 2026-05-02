@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 function toInputDate(d: Date) {
   return d.toISOString().slice(0, 10);
@@ -23,7 +23,9 @@ export function PracticeAnalytics() {
     return { from, to };
   }, [fromStr, toStr]);
 
-  const summary = trpc.practice.analytics.summary.useQuery(range, { enabled: Boolean(fromStr && toStr) });
+  const summary = trpc.practice.analytics.summary.useQuery(range, {
+    enabled: Boolean(fromStr && toStr),
+  });
   const csv = trpc.practice.analytics.revenueCsv.useQuery(range, { enabled: false });
 
   async function downloadCsv() {
@@ -44,10 +46,15 @@ export function PracticeAnalytics() {
         <Link href="/app/practice" className="text-sm text-[#C2410C] hover:underline">
           ← Practice
         </Link>
-        <h1 className="mt-2 text-xl font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+        <h1
+          className="mt-2 text-xl font-semibold text-[#1C1917]"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
           Practice analytics
         </h1>
-        <p className="mt-1 text-sm text-[#57534E]">Cases, revenue, and billable time for the selected range.</p>
+        <p className="mt-1 text-sm text-[#57534E]">
+          Cases, revenue, and billable time for the selected range.
+        </p>
       </div>
 
       <div className="flex flex-wrap items-end gap-3 rounded-xl border border-[#E7E5E4] bg-white p-4 shadow-sm">
@@ -94,7 +101,10 @@ export function PracticeAnalytics() {
             hint={`${summary.data.decidedCasesForWinRate} decided`}
           />
           <Stat label="New clients" value={summary.data.newClientsInRange} />
-          <Stat label="Repeat clients (2+ cases)" value={summary.data.repeatClientsWithMultipleCasesInRange} />
+          <Stat
+            label="Repeat clients (2+ cases)"
+            value={summary.data.repeatClientsWithMultipleCasesInRange}
+          />
           <Stat label="Billable hours" value={summary.data.billableHoursInRange} />
         </div>
       ) : null}

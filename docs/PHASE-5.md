@@ -1,17 +1,17 @@
 # Phase 5 — Consultation Flow + Payments
 
-**Goal (from [KanuniBaat.md](../KanuniBaat.md) §6 Phase 5):** Allow users to book consultations and execute payment flows with reliable backend accounting.
+**Goal (from [Jurisly.md](../Jurisly.md) §6 Phase 5):** Allow users to book consultations and execute payment flows with reliable backend accounting.
 
 ## Blueprint features -> repo checklist
 
-| Area | Task | Status | Notes / where |
-|------|------|--------|----------------|
-| Schema | Consultation and payment domain tables | Done | `packages/database/drizzle/0003_phase5_consultations_payments.sql`, `packages/database/src/schema/core.ts` |
-| API | Consultation lifecycle procedures | Done | `packages/trpc/src/routers/consultations.ts` |
-| API | Payment/billing procedure surfaces | Done | `packages/trpc/src/routers/billing.ts` |
-| Web | Consultation booking and session pages | Done | `apps/web/src/app/[locale]/app/consultations/book/page.tsx`, `.../consultations/[consultationId]/page.tsx` |
-| Web | Billing page for app users | Done | `apps/web/src/app/[locale]/app/billing/page.tsx` |
-| Webhook hardening | Payment webhook reliability coverage | Partial | Razorpay webhook tests and phase-15 bridge work are in progress in API changes |
+| Area              | Task                                   | Status  | Notes / where                                                                                              |
+| ----------------- | -------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------- |
+| Schema            | Consultation and payment domain tables | Done    | `packages/database/drizzle/0003_phase5_consultations_payments.sql`, `packages/database/src/schema/core.ts` |
+| API               | Consultation lifecycle procedures      | Done    | `packages/trpc/src/routers/consultations.ts`                                                               |
+| API               | Payment/billing procedure surfaces     | Done    | `packages/trpc/src/routers/billing.ts`                                                                     |
+| Web               | Consultation booking and session pages | Done    | `apps/web/src/app/[locale]/app/consultations/book/page.tsx`, `.../consultations/[consultationId]/page.tsx` |
+| Web               | Billing page for app users             | Done    | `apps/web/src/app/[locale]/app/billing/page.tsx`                                                           |
+| Webhook hardening | Payment webhook reliability coverage   | Partial | Razorpay webhook tests and phase-15 bridge work are in progress in API changes                             |
 
 ## Architecture notes
 

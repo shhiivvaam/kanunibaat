@@ -3,6 +3,7 @@ name: CI
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -13,13 +14,16 @@ permissions:
 
 env:
   CI: true
+  HUSKY: '0'
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   NODE_OPTIONS: --max-old-space-size=6144
   DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/ci
   BETTER_AUTH_SECRET: ci-ci-ci-ci-ci-ci-ci-ci-ci-ci-ci-ci-ci-ci
   BETTER_AUTH_URL: http://localhost:3000
+  VAULT_MALWARE_SCAN_PROVIDER: stub
   NEXT_PUBLIC_APP_URL: http://localhost:3000
   NEXT_PUBLIC_API_URL: http://localhost:4000
+  INTERNAL_API_URL: http://localhost:4000
   CORS_ORIGIN: http://localhost:3000
 
 jobs:
@@ -65,6 +69,16 @@ jobs:
       - name: Approve dependency build scripts
         run: pnpm approve-builds --all
 
+      - name: Dependency audit
+        # Fails on high+ (critical). Moderate advisories are tracked via `pnpm audit` locally and dependency-review. See docs/SECURITY-DEPENDENCIES.md.
+        run: pnpm audit --audit-level high
+
+      - name: Database migrations
+        run: pnpm --filter @jurisly/database db:migrate
+
+      - name: Prettier (format check)
+        run: pnpm format:check
+
       - name: Lint
         run: pnpm lint
 
@@ -76,6 +90,9 @@ jobs:
 
       - name: API E2E tests
         run: pnpm --filter api test:e2e
+
+      - name: Mobile — unit tests
+        run: pnpm --filter mobile test
 
       - name: Mobile — Expo Doctor
         run: pnpm --filter mobile run expo-doctor

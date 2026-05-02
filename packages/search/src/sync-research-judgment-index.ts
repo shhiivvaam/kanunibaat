@@ -1,12 +1,14 @@
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 
-import type * as DbSchema from '@kb/database/schema';
-import { researchJudgment } from '@kb/database/schema';
+import type * as DbSchema from '@jurisly/database/schema';
+import { researchJudgment } from '@jurisly/database/schema';
 
 import type { MeiliConnection } from './meili-http';
 import { upsertMeiliDocuments } from './meili-http';
 
-export function researchJudgmentRowToMeiliDocument(row: typeof researchJudgment.$inferSelect): Record<string, unknown> {
+export function researchJudgmentRowToMeiliDocument(
+  row: typeof researchJudgment.$inferSelect,
+): Record<string, unknown> {
   return {
     id: row.id,
     title: row.title,

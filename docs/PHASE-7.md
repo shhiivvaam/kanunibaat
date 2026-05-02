@@ -1,17 +1,17 @@
 # Phase 7 — Document Vault
 
-**Goal (from [KanuniBaat.md](../KanuniBaat.md) §6 Phase 7):** Provide a durable legal-document vault with upload, retrieval, and controlled sharing surfaces.
+**Goal (from [Jurisly.md](../Jurisly.md) §6 Phase 7):** Provide a durable legal-document vault with upload, retrieval, and controlled sharing surfaces.
 
 ## Blueprint features -> repo checklist
 
-| Area | Task | Status | Notes / where |
-|------|------|--------|----------------|
-| Schema | Vault document model and related indexes | Done | `packages/database/drizzle/0004_phase7_vault.sql`, `packages/database/src/schema/core.ts` |
-| API | Vault CRUD + sharing procedures | Done | `packages/trpc/src/routers/vault.ts` |
-| Web | Vault list, upload, and detail routes | Done | `apps/web/src/app/[locale]/app/vault/page.tsx`, `.../vault/upload/page.tsx`, `.../vault/[documentId]/page.tsx` |
-| Web | Public shared-document route | Done | `apps/web/src/app/[locale]/(marketing)/vault/shared/[token]/page.tsx` |
-| UX | Vault list integration in app surfaces | Done | App-shell pages and `vault-list` feature usage in web |
-| E2EE maturity | Client-side encryption lifecycle hardening | Partial | Vault vertical exists; cryptographic UX and policy tightening can continue iteratively |
+| Area          | Task                                       | Status  | Notes / where                                                                                                  |
+| ------------- | ------------------------------------------ | ------- | -------------------------------------------------------------------------------------------------------------- |
+| Schema        | Vault document model and related indexes   | Done    | `packages/database/drizzle/0004_phase7_vault.sql`, `packages/database/src/schema/core.ts`                      |
+| API           | Vault CRUD + sharing procedures            | Done    | `packages/trpc/src/routers/vault.ts`                                                                           |
+| Web           | Vault list, upload, and detail routes      | Done    | `apps/web/src/app/[locale]/app/vault/page.tsx`, `.../vault/upload/page.tsx`, `.../vault/[documentId]/page.tsx` |
+| Web           | Public shared-document route               | Done    | `apps/web/src/app/[locale]/(marketing)/vault/shared/[token]/page.tsx`                                          |
+| UX            | Vault list integration in app surfaces     | Done    | App-shell pages and `vault-list` feature usage in web                                                          |
+| E2EE maturity | Client-side encryption lifecycle hardening | Partial | Vault vertical exists; cryptographic UX and policy tightening can continue iteratively                         |
 
 ## Architecture notes
 

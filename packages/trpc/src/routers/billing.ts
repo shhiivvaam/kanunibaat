@@ -2,15 +2,11 @@ import { TRPCError } from '@trpc/server';
 import { and, desc, eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
-import { kbBillingEvent, kbPlan, kbSubscription } from '@kb/database/schema';
+import { kbBillingEvent, kbPlan, kbSubscription } from '@jurisly/database/schema';
 
 import { requireConfiguredRazorpay } from '../integrations/razorpay';
 import { adminProcedure, protectedProcedure, publicProcedure, router } from '../init';
-import {
-  computeEntitlementsForUser,
-  ensureDefaultPlans,
-  PLAN_KEYS,
-} from '../billing/entitlements';
+import { computeEntitlementsForUser, ensureDefaultPlans, PLAN_KEYS } from '../billing/entitlements';
 
 const planKeySchema = z.enum(PLAN_KEYS);
 
@@ -52,18 +48,47 @@ export const billingRouter = router({
       .input(z.object({ planKey: planKeySchema }))
       .mutation(async ({ ctx, input }) => {
         if (input.planKey === 'free') {
-          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Free plan does not require a subscription.' });
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Free plan does not require a subscription.',
+          });
         }
         const { id: keyId, secret: keySecret } = requireConfiguredRazorpay(ctx);
         await ensureDefaultPlans(ctx.db);
 
-        const [plan] = await ctx.db.select().from(kbPlan).where(eq(kbPlan.key, input.planKey)).limit(1);
+        const [plan] = await ctx.db
+          .select()
+          .from(kbPlan)
+          .where(eq(kbPlan.key, input.planKey))
+          .limit(1);
         if (!plan) throw new TRPCError({ code: 'NOT_FOUND', message: 'Plan not found.' });
         if (!plan.razorpayPlanId) {
           throw new TRPCError({
             code: 'PRECONDITION_FAILED',
             message: 'Razorpay plan IDs are not configured yet.',
           });
+        }
+
+        const [existingActive] = await ctx.db
+          .select()
+          .from(kbSubscription)
+          .where(
+            and(eq(kbSubscription.userId, ctx.authUserId), eq(kbSubscription.status, 'active')),
+          )
+          .limit(1);
+
+        if (existingActive?.razorpaySubscriptionId) {
+          await cancelRazorpaySubscription({
+            keyId,
+            keySecret,
+            subscriptionId: existingActive.razorpaySubscriptionId,
+            cancelAtCycleEnd: false,
+          });
+
+          await ctx.db
+            .update(kbSubscription)
+            .set({ status: 'cancelled', updatedAt: new Date() })
+            .where(eq(kbSubscription.id, existingActive.id));
         }
 
         const now = new Date();
@@ -93,14 +118,24 @@ export const billingRouter = router({
       }),
 
     cancel: protectedProcedure
-      .input(z.object({ subscriptionId: z.string().min(1), cancelAtPeriodEnd: z.boolean().default(true) }))
+      .input(
+        z.object({
+          subscriptionId: z.string().min(1),
+          cancelAtPeriodEnd: z.boolean().default(true),
+        }),
+      )
       .mutation(async ({ ctx, input }) => {
         const { secret: keySecret, id: keyId } = requireConfiguredRazorpay(ctx);
 
         const [sub] = await ctx.db
           .select()
           .from(kbSubscription)
-          .where(and(eq(kbSubscription.userId, ctx.authUserId), eq(kbSubscription.razorpaySubscriptionId, input.subscriptionId)))
+          .where(
+            and(
+              eq(kbSubscription.userId, ctx.authUserId),
+              eq(kbSubscription.razorpaySubscriptionId, input.subscriptionId),
+            ),
+          )
           .limit(1);
         if (!sub) throw new TRPCError({ code: 'NOT_FOUND', message: 'Subscription not found.' });
 
@@ -122,7 +157,11 @@ export const billingRouter = router({
 
   entitlements: router({
     me: protectedProcedure.query(async ({ ctx }) => {
-      const e = await computeEntitlementsForUser({ db: ctx.db, userId: ctx.authUserId, now: new Date() });
+      const e = await computeEntitlementsForUser({
+        db: ctx.db,
+        userId: ctx.authUserId,
+        now: new Date(),
+      });
       return { entitlements: e };
     }),
   }),
@@ -169,7 +208,12 @@ export const billingRouter = router({
           n: sql<number>`count(*)::int`,
         })
         .from(kbSubscription)
-        .where(and(eq(kbSubscription.status, 'cancelled'), sql`${kbSubscription.updatedAt} >= ${windowStart}`));
+        .where(
+          and(
+            eq(kbSubscription.status, 'cancelled'),
+            sql`${kbSubscription.updatedAt} >= ${windowStart}`,
+          ),
+        );
 
       const [active] = await ctx.db
         .select({
@@ -205,7 +249,12 @@ export const billingRouter = router({
       const [cancelled] = await ctx.db
         .select({ n: sql<number>`count(*)::int` })
         .from(kbSubscription)
-        .where(and(eq(kbSubscription.status, 'cancelled'), sql`${kbSubscription.updatedAt} >= ${windowStart}`));
+        .where(
+          and(
+            eq(kbSubscription.status, 'cancelled'),
+            sql`${kbSubscription.updatedAt} >= ${windowStart}`,
+          ),
+        );
 
       const churnRate = Number(cancelled?.n ?? 0) / activeN;
       const ltvInr = churnRate > 0 ? Math.round(arpu / churnRate) : 0;
@@ -235,7 +284,10 @@ async function createRazorpaySubscription(opts: {
   });
   if (!res.ok) {
     const text = await res.text().catch(() => '');
-    throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: `Subscription creation failed (${res.status}). ${text}` });
+    throw new TRPCError({
+      code: 'INTERNAL_SERVER_ERROR',
+      message: `Subscription creation failed (${res.status}). ${text}`,
+    });
   }
   const json = (await res.json()) as unknown;
   const parsed = z
@@ -246,7 +298,8 @@ async function createRazorpaySubscription(opts: {
       current_end: z.number().int().optional(),
     })
     .safeParse(json);
-  if (!parsed.success) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Invalid Razorpay response.' });
+  if (!parsed.success)
+    throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Invalid Razorpay response.' });
   return parsed.data;
 }
 
@@ -256,17 +309,22 @@ async function cancelRazorpaySubscription(opts: {
   subscriptionId: string;
   cancelAtCycleEnd: boolean;
 }): Promise<void> {
-  const res = await fetch(`https://api.razorpay.com/v1/subscriptions/${opts.subscriptionId}/cancel`, {
-    method: 'POST',
-    headers: {
-      authorization: `Basic ${Buffer.from(`${opts.keyId}:${opts.keySecret}`).toString('base64')}`,
-      'content-type': 'application/json',
+  const res = await fetch(
+    `https://api.razorpay.com/v1/subscriptions/${opts.subscriptionId}/cancel`,
+    {
+      method: 'POST',
+      headers: {
+        authorization: `Basic ${Buffer.from(`${opts.keyId}:${opts.keySecret}`).toString('base64')}`,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({ cancel_at_cycle_end: opts.cancelAtCycleEnd ? 1 : 0 }),
     },
-    body: JSON.stringify({ cancel_at_cycle_end: opts.cancelAtCycleEnd ? 1 : 0 }),
-  });
+  );
   if (!res.ok) {
     const text = await res.text().catch(() => '');
-    throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: `Subscription cancel failed (${res.status}). ${text}` });
+    throw new TRPCError({
+      code: 'INTERNAL_SERVER_ERROR',
+      message: `Subscription cancel failed (${res.status}). ${text}`,
+    });
   }
 }
-

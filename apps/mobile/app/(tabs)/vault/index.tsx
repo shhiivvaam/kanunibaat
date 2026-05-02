@@ -1,7 +1,7 @@
 import { Link, useRouter } from 'expo-router';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export default function VaultListScreen() {
   const router = useRouter();
@@ -27,7 +27,10 @@ export default function VaultListScreen() {
                 : `${Math.round(q.data.usage.maxTotalBytes / (1024 * 1024))} MB`}
             </Text>
           </View>
-          <Pressable style={styles.primaryBtn} onPress={() => router.push('/(tabs)/vault/upload' as never)}>
+          <Pressable
+            style={styles.primaryBtn}
+            onPress={() => router.push('/(tabs)/vault/upload' as never)}
+          >
             <Text style={styles.primaryBtnText}>Upload</Text>
           </Pressable>
           {q.data.documents.length === 0 ? (

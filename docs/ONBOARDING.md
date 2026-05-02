@@ -1,10 +1,10 @@
 # Onboarding Guide
 
-This guide is the fastest path for a new developer or AI agent to become productive in KanuniBaat.
+This guide is the fastest path for a new developer or AI agent to become productive in Jurisly.
 
 ## 1) What this project is
 
-KanuniBaat is a legal-tech platform with:
+Jurisly is a legal-tech platform with:
 
 - public marketing + growth pages,
 - authenticated app surfaces (user/lawyer/admin),
@@ -28,8 +28,11 @@ KanuniBaat is a legal-tech platform with:
    - `NEXT_PUBLIC_APP_URL`
    - `NEXT_PUBLIC_API_URL`
 3. Install and build workspace deps:
-   - `pnpm install`
-   - `pnpm build` (important on fresh setup)
+   - **One command after clone:** `pnpm install` (Node 22+, pnpm 10+ per README). This runs `prepare`, which builds all `packages/*` **and** runs **Husky**, so **Git hooks are registered automatically** — no separate `husky init` or `chmod` for teammates.
+   - **Do not** use `pnpm install --ignore-scripts`: that skips `prepare`, so hooks are not wired and `node_modules/.bin/pnpm` may be missing until you install again with scripts enabled.
+4. **Commit / push guardrails:** `.husky/pre-commit` and `.husky/pre-push` run `pnpm verify` (format, lint, typecheck, tests, API e2e, Expo Doctor, full build). Bad commits/pushes are blocked until fixes land. Emergency bypass (use rarely): `HUSKY=0 git commit` or `HUSKY=0 git push`.
+5. **Server-side backup:** Turn on GitHub **branch protection** and require the **CI** workflow to pass before merge, so bypassed hooks still cannot ship to `main`.
+6. On a very fresh machine you only need a **one-time** way to run the first `pnpm install` (e.g. `corepack enable && corepack prepare pnpm@10.33.0 --activate`, or a global `pnpm`). After that, hooks use **`node_modules/.bin/pnpm`** from this repo.
 
 ## 4) Run local stack
 
@@ -47,7 +50,7 @@ Start in this order:
 2. `packages/trpc/src/router.ts` -> domain router composition.
 3. `packages/trpc/src/routers/*.ts` -> per-domain business logic.
 4. `apps/web/src/app/[locale]` -> user-visible route surfaces.
-5. `apps/api/src/http-stack.ts` -> public endpoint wiring and webhook behavior.
+5. `apps/api/src/http/http-stack.ts` -> public endpoint wiring and webhook behavior.
 
 ## 6) Documentation reading order
 

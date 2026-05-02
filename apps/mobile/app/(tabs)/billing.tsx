@@ -1,7 +1,10 @@
 import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import type { inferRouterInputs } from '@trpc/server';
+import type { AppRouter } from '@jurisly/api-client';
+import { trpc } from '@jurisly/api-client';
 
-import { trpc } from '@kb/api-client';
+type BillingSubCreateInput = inferRouterInputs<AppRouter>['billing']['subscription']['createOrUpdate'];
 
 export default function BillingScreen() {
   const plans = trpc.billing.plans.list.useQuery();
@@ -62,7 +65,11 @@ export default function BillingScreen() {
                 <Pressable
                   style={[styles.primaryBtn, create.isPending ? { opacity: 0.6 } : null]}
                   disabled={create.isPending}
-                  onPress={() => void create.mutateAsync({ planKey: p.key as any })}
+                  onPress={() =>
+                    void create.mutateAsync({
+                      planKey: p.key as BillingSubCreateInput['planKey'],
+                    })
+                  }
                 >
                   <Text style={styles.primaryBtnText}>Subscribe</Text>
                 </Pressable>
@@ -113,13 +120,37 @@ const styles = StyleSheet.create({
   title: { fontSize: 20, fontWeight: '700' },
   sub: { fontSize: 13, color: '#444' },
   err: { fontSize: 13, color: '#b91c1c' },
-  card: { borderWidth: 1, borderColor: '#eee', borderRadius: 12, padding: 12, backgroundColor: '#fff' },
-  innerCard: { borderWidth: 1, borderColor: '#f1f1f1', borderRadius: 12, padding: 12, backgroundColor: '#fff' },
+  card: {
+    borderWidth: 1,
+    borderColor: '#eee',
+    borderRadius: 12,
+    padding: 12,
+    backgroundColor: '#fff',
+  },
+  innerCard: {
+    borderWidth: 1,
+    borderColor: '#f1f1f1',
+    borderRadius: 12,
+    padding: 12,
+    backgroundColor: '#fff',
+  },
   cardTitle: { fontSize: 14, fontWeight: '700' },
   meta: { fontSize: 12, color: '#666', marginTop: 4 },
-  primaryBtn: { backgroundColor: '#C2410C', paddingVertical: 12, borderRadius: 12, alignItems: 'center', marginTop: 10 },
+  primaryBtn: {
+    backgroundColor: '#C2410C',
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 10,
+  },
   primaryBtnText: { color: '#fff', fontWeight: '700' },
-  secondaryBtn: { borderWidth: 1, borderColor: '#ddd', paddingVertical: 12, borderRadius: 12, alignItems: 'center', marginTop: 12 },
+  secondaryBtn: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 12,
+  },
   secondaryBtnText: { color: '#444', fontWeight: '700' },
 });
-

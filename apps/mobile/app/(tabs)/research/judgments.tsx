@@ -1,8 +1,17 @@
 import { Link } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export default function ResearchJudgmentsScreen() {
   const [draftQ, setDraftQ] = useState('');
@@ -19,7 +28,12 @@ export default function ResearchJudgmentsScreen() {
         <Text style={styles.back}>← Research</Text>
       </Link>
       <Text style={styles.title}>Judgments</Text>
-      <TextInput style={styles.input} value={draftQ} onChangeText={setDraftQ} placeholder="Search…" />
+      <TextInput
+        style={styles.input}
+        value={draftQ}
+        onChangeText={setDraftQ}
+        placeholder="Search…"
+      />
       <View style={styles.row}>
         <Text style={styles.label}>Expand (AI)</Text>
         <Switch value={expand} onValueChange={setExpand} />
@@ -54,7 +68,13 @@ const styles = StyleSheet.create({
   btn: { backgroundColor: '#C2410C', padding: 12, borderRadius: 12, alignItems: 'center' },
   btnText: { color: '#fff', fontWeight: '700' },
   err: { color: '#b91c1c' },
-  hit: { padding: 12, borderRadius: 12, borderWidth: 1, borderColor: '#E7E5E4', backgroundColor: '#fff' },
+  hit: {
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E7E5E4',
+    backgroundColor: '#fff',
+  },
   hitTitle: { fontWeight: '700', color: '#1C1917' },
   hitMeta: { marginTop: 4, fontSize: 12, color: '#78716C' },
 });

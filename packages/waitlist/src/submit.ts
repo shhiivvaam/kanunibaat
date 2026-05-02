@@ -62,7 +62,11 @@ export async function submitUserWaitlist(
     `Phone: ${displayOptional(input.phone, '(not provided)')}`,
     `Referrer: ${displayOptional(input.referrer, '(not provided)')}`,
   ];
-  const result = await sendWaitlistEmail(env, `[KanooniBaat] App waitlist — ${input.email}`, lines.join('\n'));
+  const result = await sendWaitlistEmail(
+    env,
+    `[Jurisly] App waitlist — ${input.email}`,
+    lines.join('\n'),
+  );
 
   if (!result.sent) {
     return {
@@ -95,7 +99,7 @@ export async function submitLawyerWaitlist(
   ];
   const result = await sendWaitlistEmail(
     env,
-    `[KanooniBaat] Lawyer waitlist — ${input.email}`,
+    `[Jurisly] Lawyer waitlist — ${input.email}`,
     lines.join('\n'),
   );
 

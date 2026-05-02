@@ -7,19 +7,22 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run --config vitest.config.mjs",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@kb/api-client": "workspace:*",
-    "@kb/config": "workspace:*",
-    "@kb/database": "workspace:*",
-    "@kb/emergency-guide": "workspace:*",
-    "@kb/storage": "workspace:*",
-    "@kb/utils": "workspace:*",
-    "@kb/vault-crypto": "workspace:*",
+    "@jurisly/api-client": "workspace:*",
+    "@jurisly/config": "workspace:*",
+    "@jurisly/database": "workspace:*",
+    "@jurisly/emergency-guide": "workspace:*",
+    "@jurisly/storage": "workspace:*",
+    "@jurisly/utils": "workspace:*",
+    "@jurisly/vault-crypto": "workspace:*",
     "@sentry/nextjs": "^10.48.0",
     "@tanstack/react-query": "^5.66.0",
     "@trpc/client": "^11.16.0",
+    "@upstash/redis": "^1.37.0",
     "better-auth": "^1.6.1",
     "gray-matter": "^4.0.3",
     "lucide-react": "^1.8.0",
@@ -32,13 +35,19 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "^20",
     "@types/react": "19.2.14",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^4.3.4",
     "eslint": "^9",
     "eslint-config-next": "16.2.3",
+    "happy-dom": "^20.9.0",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.4"
   }
 }

@@ -3,7 +3,7 @@ import { Link, Stack } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export default function GuideListScreen() {
   const list = trpc.emergencyGuide.list.useQuery();
@@ -13,7 +13,10 @@ export default function GuideListScreen() {
     const needle = q.trim().toLowerCase();
     if (!needle) return all;
     return all.filter(
-      (s) => s.titleEn.toLowerCase().includes(needle) || s.titleHi.includes(q.trim()) || s.slug.includes(needle),
+      (s) =>
+        s.titleEn.toLowerCase().includes(needle) ||
+        s.titleHi.includes(q.trim()) ||
+        s.slug.includes(needle),
     );
   }, [list.data?.scenarios, q]);
 
@@ -46,7 +49,9 @@ export default function GuideListScreen() {
             ))}
           </View>
         )}
-        {list.data?.disclaimer ? <Text style={styles.disclaimer}>{list.data.disclaimer}</Text> : null}
+        {list.data?.disclaimer ? (
+          <Text style={styles.disclaimer}>{list.data.disclaimer}</Text>
+        ) : null}
       </ScrollView>
     </>
   );

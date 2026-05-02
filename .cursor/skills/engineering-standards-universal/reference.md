@@ -110,7 +110,7 @@ Think like a senior staff engineer at a world-class tech company on every single
 
 ## Documentation
 
-- **Self-documenting code first**: Names, structure, and types should tell the story. Comments explain *why*, not *what*.
+- **Self-documenting code first**: Names, structure, and types should tell the story. Comments explain _why_, not _what_.
 - **Every public API must be documented**: Functions, classes, and modules exposed to other layers need clear docstrings — parameters, return values, exceptions, and usage intent.
 - **README for every major module**: What it does, how to set it up, how to run it, and key architectural decisions. Keep it short and current.
 - **Architecture Decision Records (ADRs)**: For any significant technical decision, document the context, the options considered, and the decision made. Future engineers (and you) will thank you.
@@ -122,7 +122,7 @@ Think like a senior staff engineer at a world-class tech company on every single
 ## Git & Version Control
 
 - **Atomic commits**: Each commit must represent one logical change. Never bundle unrelated changes.
-- **Meaningful commit messages**: Use conventional commits format — `feat:`, `fix:`, `refactor:`, `chore:`, `docs:`, etc. The message must explain *what changed and why*, not just *what*.
+- **Meaningful commit messages**: Use conventional commits format — `feat:`, `fix:`, `refactor:`, `chore:`, `docs:`, etc. The message must explain _what changed and why_, not just _what_.
 - **Branch naming**: `feature/`, `fix/`, `chore/`, `release/` prefixes. Always tied to a ticket or issue.
 - **No direct commits to main/master**: All changes via pull requests. No exceptions, even for small fixes.
 - **Small, frequent PRs**: Large PRs are a code review anti-pattern. Keep them focused and reviewable.

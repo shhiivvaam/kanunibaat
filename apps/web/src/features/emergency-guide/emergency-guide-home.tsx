@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 import { HotlinesBar } from './hotlines-bar';
 import { urgencyBadgeClass, urgencyLabel } from './urgency-styles';
@@ -17,7 +17,10 @@ export function EmergencyGuideHome() {
     const needle = q.trim().toLowerCase();
     if (!needle) return rows;
     return rows.filter(
-      (s) => s.titleEn.toLowerCase().includes(needle) || s.titleHi.includes(q.trim()) || s.slug.includes(needle),
+      (s) =>
+        s.titleEn.toLowerCase().includes(needle) ||
+        s.titleHi.includes(q.trim()) ||
+        s.slug.includes(needle),
     );
   }, [list.data?.scenarios, q]);
 
@@ -57,10 +60,16 @@ export function EmergencyGuideHome() {
                 >
                   {urgencyLabel(s.urgency)}
                 </span>
-                <h2 className="mt-3 text-base font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+                <h2
+                  className="mt-3 text-base font-semibold text-[#1C1917]"
+                  style={{ fontFamily: 'var(--font-display)' }}
+                >
                   {s.titleEn}
                 </h2>
-                <p className="mt-1 text-sm text-[#57534E]" style={{ fontFamily: 'var(--font-body)' }}>
+                <p
+                  className="mt-1 text-sm text-[#57534E]"
+                  style={{ fontFamily: 'var(--font-body)' }}
+                >
                   {s.titleHi}
                 </p>
               </Link>

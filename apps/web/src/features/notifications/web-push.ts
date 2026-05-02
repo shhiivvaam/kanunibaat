@@ -40,4 +40,3 @@ export async function ensureWebPushSubscription(): Promise<{
   }
   return { endpoint: json.endpoint, p256dh, auth };
 }
-

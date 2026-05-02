@@ -1,8 +1,16 @@
 import { Link } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export default function PracticeClientsScreen() {
   const utils = trpc.useUtils();
@@ -31,9 +39,19 @@ export default function PracticeClientsScreen() {
       <Text style={styles.label}>Name</Text>
       <TextInput style={styles.input} value={name} onChangeText={setName} />
       <Text style={[styles.label, { marginTop: 10 }]}>Phone</Text>
-      <TextInput style={styles.input} value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+      <TextInput
+        style={styles.input}
+        value={phone}
+        onChangeText={setPhone}
+        keyboardType="phone-pad"
+      />
       <Text style={[styles.label, { marginTop: 10 }]}>Email</Text>
-      <TextInput style={styles.input} value={email} onChangeText={setEmail} keyboardType="email-address" />
+      <TextInput
+        style={styles.input}
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+      />
 
       {create.error ? <Text style={styles.error}>{create.error.message}</Text> : null}
 
@@ -60,7 +78,9 @@ export default function PracticeClientsScreen() {
           {(q.data?.clients ?? []).map((c) => (
             <View key={c.id} style={styles.card}>
               <Text style={styles.cardTitle}>{c.displayName}</Text>
-              <Text style={styles.cardMeta}>{[c.phone, c.email].filter(Boolean).join(' · ') || 'No contact'}</Text>
+              <Text style={styles.cardMeta}>
+                {[c.phone, c.email].filter(Boolean).join(' · ') || 'No contact'}
+              </Text>
             </View>
           ))}
         </View>

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 const STATUSES = [
   'intake',
@@ -22,7 +22,10 @@ export function PracticeCasesList() {
   return (
     <div className="space-y-6" style={{ fontFamily: 'var(--font-body)' }}>
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+        <h1
+          className="text-xl font-semibold text-[#1C1917]"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
           Cases
         </h1>
         <div className="flex gap-3">
@@ -62,8 +65,13 @@ export function PracticeCasesList() {
         <ul className="divide-y divide-[#E7E5E4] rounded-xl border border-[#E7E5E4] bg-white shadow-sm">
           {(q.data?.cases ?? []).map((c) => (
             <li key={c.id}>
-              <Link href={`/app/practice/cases/${c.id}`} className="block px-4 py-3 text-sm hover:bg-[#FAFAF9]">
-                <span className="font-medium text-[#1C1917]">{c.courtName || c.caseType || 'Case'}</span>
+              <Link
+                href={`/app/practice/cases/${c.id}`}
+                className="block px-4 py-3 text-sm hover:bg-[#FAFAF9]"
+              >
+                <span className="font-medium text-[#1C1917]">
+                  {c.courtName || c.caseType || 'Case'}
+                </span>
                 <span className="mt-1 block text-xs text-[#78716C]">
                   {c.status}
                   {c.cnrNumber ? ` · CNR ${c.cnrNumber}` : ''}

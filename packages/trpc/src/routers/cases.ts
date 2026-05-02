@@ -6,7 +6,7 @@ import { and, desc, eq, gte, ilike, isNotNull, lte, or } from 'drizzle-orm';
 import type { PostgresJsDatabase } from 'drizzle-orm/postgres-js';
 import { z } from 'zod';
 
-import type * as DbSchema from '@kb/database/schema';
+import type * as DbSchema from '@jurisly/database/schema';
 import {
   lawyerCase,
   lawyerCaseDocument,
@@ -14,14 +14,15 @@ import {
   lawyerCaseTask,
   lawyerClient,
   notificationJob,
-} from '@kb/database/schema';
+  user,
+} from '@jurisly/database/schema';
 import {
   caseDocumentObjectKey,
   deleteCaseDocumentObject,
   presignGetCaseDocumentObject,
   presignPutObject,
   StorageNotConfiguredError,
-} from '@kb/storage';
+} from '@jurisly/storage';
 
 import { fetchCourtSnapshotViaBridge, normalizeAndValidateCnr } from '../cases/njdg-lookup';
 import { makeDedupeKey } from '../notifications/payload';
@@ -36,7 +37,11 @@ async function upsertReminderJobsForHearing(opts: {
   caseId: string;
 }): Promise<void> {
   const now = new Date();
-  const times = computeReminderTimes({ at: opts.hearingAt, now, offsetsMs: HEARING_REMINDER_OFFSETS_MS });
+  const times = computeReminderTimes({
+    at: opts.hearingAt,
+    now,
+    offsetsMs: HEARING_REMINDER_OFFSETS_MS,
+  });
   for (const t of times) {
     const offsetMs = opts.hearingAt.getTime() - t.getTime();
     const dedupeKey = makeDedupeKey(['hearing', opts.hearingId, offsetMs]);
@@ -52,7 +57,11 @@ async function upsertReminderJobsForHearing(opts: {
           body: 'Upcoming hearing scheduled.',
           url: `/app/practice/cases/${opts.caseId}`,
           mobilePath: `/practice/${opts.caseId}`,
-          data: { caseId: opts.caseId, hearingId: opts.hearingId, hearingAt: opts.hearingAt.toISOString() },
+          data: {
+            caseId: opts.caseId,
+            hearingId: opts.hearingId,
+            hearingAt: opts.hearingAt.toISOString(),
+          },
         },
         updatedAt: now,
       })
@@ -67,7 +76,11 @@ async function upsertReminderJobsForHearing(opts: {
             body: 'Upcoming hearing scheduled.',
             url: `/app/practice/cases/${opts.caseId}`,
             mobilePath: `/practice/${opts.caseId}`,
-            data: { caseId: opts.caseId, hearingId: opts.hearingId, hearingAt: opts.hearingAt.toISOString() },
+            data: {
+              caseId: opts.caseId,
+              hearingId: opts.hearingId,
+              hearingAt: opts.hearingAt.toISOString(),
+            },
           },
           updatedAt: now,
         },
@@ -119,6 +132,20 @@ async function assertClientOwned(
     throw new TRPCError({ code: 'NOT_FOUND', message: 'Client not found.' });
   }
   return row;
+}
+
+async function assertAssigneeUserExists(
+  db: PostgresJsDatabase<typeof DbSchema>,
+  assigneeUserId: string,
+): Promise<void> {
+  const [u] = await db
+    .select({ id: user.id })
+    .from(user)
+    .where(eq(user.id, assigneeUserId))
+    .limit(1);
+  if (!u) {
+    throw new TRPCError({ code: 'BAD_REQUEST', message: 'Assignee is not a valid user.' });
+  }
 }
 
 function escapeLikePattern(s: string): string {
@@ -194,22 +221,24 @@ export const casesRouter = router({
         return { client: updated ?? null };
       }),
 
-    delete: lawyerProcedure.input(z.object({ id: z.string().uuid() })).mutation(async ({ ctx, input }) => {
-      await assertClientOwned(ctx.db, ctx.authUserId, input.id);
-      const [ref] = await ctx.db
-        .select({ id: lawyerCase.id })
-        .from(lawyerCase)
-        .where(eq(lawyerCase.lawyerClientId, input.id))
-        .limit(1);
-      if (ref) {
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: 'Cannot delete client linked to one or more cases. Unlink cases first.',
-        });
-      }
-      await ctx.db.delete(lawyerClient).where(eq(lawyerClient.id, input.id));
-      return { ok: true as const };
-    }),
+    delete: lawyerProcedure
+      .input(z.object({ id: z.string().uuid() }))
+      .mutation(async ({ ctx, input }) => {
+        await assertClientOwned(ctx.db, ctx.authUserId, input.id);
+        const [ref] = await ctx.db
+          .select({ id: lawyerCase.id })
+          .from(lawyerCase)
+          .where(eq(lawyerCase.lawyerClientId, input.id))
+          .limit(1);
+        if (ref) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Cannot delete client linked to one or more cases. Unlink cases first.',
+          });
+        }
+        await ctx.db.delete(lawyerClient).where(eq(lawyerClient.id, input.id));
+        return { ok: true as const };
+      }),
   }),
 
   case: router({
@@ -248,10 +277,12 @@ export const casesRouter = router({
         return { cases: rows };
       }),
 
-    byId: lawyerProcedure.input(z.object({ id: z.string().uuid() })).query(async ({ ctx, input }) => {
-      const row = await loadCaseForLawyer(ctx.db, ctx.authUserId, input.id);
-      return { case: row };
-    }),
+    byId: lawyerProcedure
+      .input(z.object({ id: z.string().uuid() }))
+      .query(async ({ ctx, input }) => {
+        const row = await loadCaseForLawyer(ctx.db, ctx.authUserId, input.id);
+        return { case: row };
+      }),
 
     create: lawyerProcedure
       .input(
@@ -329,7 +360,17 @@ export const casesRouter = router({
         if (input.lawyerClientId) {
           await assertClientOwned(ctx.db, ctx.authUserId, input.lawyerClientId);
         }
-        const patch: Partial<typeof lawyerCase.$inferInsert> = { updatedAt: new Date() };
+
+        // Fetch existing case before update to detect status changes
+        const [existingCase] = await ctx.db
+          .select()
+          .from(lawyerCase)
+          .where(eq(lawyerCase.id, input.id))
+          .limit(1);
+        if (!existingCase) throw new TRPCError({ code: 'NOT_FOUND', message: 'Case not found.' });
+
+        const now = new Date();
+        const patch: Partial<typeof lawyerCase.$inferInsert> = { updatedAt: now };
         const fields = [
           'lawyerClientId',
           'clientDisplayName',
@@ -354,31 +395,57 @@ export const casesRouter = router({
             (patch as Record<string, unknown>)[k] = input[k];
           }
         }
+
         const [updated] = await ctx.db
           .update(lawyerCase)
           .set(patch)
           .where(eq(lawyerCase.id, input.id))
           .returning();
+
+        // Send notification if case status changed
+        if (updated && input.status && input.status !== existingCase.status) {
+          const dedupeKey = makeDedupeKey(['case_status', updated.id, input.status]);
+          await ctx.db
+            .insert(notificationJob)
+            .values({
+              userId: ctx.authUserId,
+              kind: 'case_update',
+              dedupeKey,
+              scheduledAt: now,
+              payloadJson: {
+                title: 'Case status updated',
+                body: `${existingCase.clientDisplayName ?? 'Case'} status changed to ${input.status}`,
+                url: `/app/lawyer/cases/${updated.id}`,
+              },
+              updatedAt: now,
+            })
+            .onConflictDoNothing({ target: notificationJob.dedupeKey });
+        }
+
         return { case: updated ?? null };
       }),
 
-    delete: lawyerProcedure.input(z.object({ id: z.string().uuid() })).mutation(async ({ ctx, input }) => {
-      await loadCaseForLawyer(ctx.db, ctx.authUserId, input.id);
-      await ctx.db.delete(lawyerCase).where(eq(lawyerCase.id, input.id));
-      return { ok: true as const };
-    }),
+    delete: lawyerProcedure
+      .input(z.object({ id: z.string().uuid() }))
+      .mutation(async ({ ctx, input }) => {
+        await loadCaseForLawyer(ctx.db, ctx.authUserId, input.id);
+        await ctx.db.delete(lawyerCase).where(eq(lawyerCase.id, input.id));
+        return { ok: true as const };
+      }),
   }),
 
   hearing: router({
-    list: lawyerProcedure.input(z.object({ caseId: z.string().uuid() })).query(async ({ ctx, input }) => {
-      await loadCaseForLawyer(ctx.db, ctx.authUserId, input.caseId);
-      const rows = await ctx.db
-        .select()
-        .from(lawyerCaseHearing)
-        .where(eq(lawyerCaseHearing.caseId, input.caseId))
-        .orderBy(desc(lawyerCaseHearing.hearingAt));
-      return { hearings: rows };
-    }),
+    list: lawyerProcedure
+      .input(z.object({ caseId: z.string().uuid() }))
+      .query(async ({ ctx, input }) => {
+        await loadCaseForLawyer(ctx.db, ctx.authUserId, input.caseId);
+        const rows = await ctx.db
+          .select()
+          .from(lawyerCaseHearing)
+          .where(eq(lawyerCaseHearing.caseId, input.caseId))
+          .orderBy(desc(lawyerCaseHearing.hearingAt));
+        return { hearings: rows };
+      }),
 
     create: lawyerProcedure
       .input(
@@ -436,7 +503,9 @@ export const casesRouter = router({
         const [existing] = await ctx.db
           .select()
           .from(lawyerCaseHearing)
-          .where(and(eq(lawyerCaseHearing.id, input.id), eq(lawyerCaseHearing.caseId, input.caseId)))
+          .where(
+            and(eq(lawyerCaseHearing.id, input.id), eq(lawyerCaseHearing.caseId, input.caseId)),
+          )
           .limit(1);
         if (!existing) throw new TRPCError({ code: 'NOT_FOUND', message: 'Hearing not found.' });
         const patch: Partial<typeof lawyerCaseHearing.$inferInsert> = {};
@@ -470,7 +539,9 @@ export const casesRouter = router({
         const [existing] = await ctx.db
           .select()
           .from(lawyerCaseHearing)
-          .where(and(eq(lawyerCaseHearing.id, input.id), eq(lawyerCaseHearing.caseId, input.caseId)))
+          .where(
+            and(eq(lawyerCaseHearing.id, input.id), eq(lawyerCaseHearing.caseId, input.caseId)),
+          )
           .limit(1);
         if (!existing) throw new TRPCError({ code: 'NOT_FOUND', message: 'Hearing not found.' });
         await ctx.db.delete(lawyerCaseHearing).where(eq(lawyerCaseHearing.id, input.id));
@@ -479,15 +550,17 @@ export const casesRouter = router({
   }),
 
   task: router({
-    list: lawyerProcedure.input(z.object({ caseId: z.string().uuid() })).query(async ({ ctx, input }) => {
-      await loadCaseForLawyer(ctx.db, ctx.authUserId, input.caseId);
-      const rows = await ctx.db
-        .select()
-        .from(lawyerCaseTask)
-        .where(eq(lawyerCaseTask.caseId, input.caseId))
-        .orderBy(lawyerCaseTask.dueAt, desc(lawyerCaseTask.createdAt));
-      return { tasks: rows };
-    }),
+    list: lawyerProcedure
+      .input(z.object({ caseId: z.string().uuid() }))
+      .query(async ({ ctx, input }) => {
+        await loadCaseForLawyer(ctx.db, ctx.authUserId, input.caseId);
+        const rows = await ctx.db
+          .select()
+          .from(lawyerCaseTask)
+          .where(eq(lawyerCaseTask.caseId, input.caseId))
+          .orderBy(lawyerCaseTask.dueAt, desc(lawyerCaseTask.createdAt));
+        return { tasks: rows };
+      }),
 
     create: lawyerProcedure
       .input(
@@ -502,6 +575,9 @@ export const casesRouter = router({
       )
       .mutation(async ({ ctx, input }) => {
         await loadCaseForLawyer(ctx.db, ctx.authUserId, input.caseId);
+        if (input.assigneeUserId) {
+          await assertAssigneeUserExists(ctx.db, input.assigneeUserId);
+        }
         const now = new Date();
         const [created] = await ctx.db
           .insert(lawyerCaseTask)
@@ -515,6 +591,27 @@ export const casesRouter = router({
             updatedAt: now,
           })
           .returning();
+
+        // Send notification if task is assigned to someone
+        if (created && input.assigneeUserId) {
+          const dedupeKey = makeDedupeKey(['task_assigned', created.id]);
+          await ctx.db
+            .insert(notificationJob)
+            .values({
+              userId: input.assigneeUserId,
+              kind: 'task_assigned',
+              dedupeKey,
+              scheduledAt: now,
+              payloadJson: {
+                title: 'New task assigned',
+                body: `You have been assigned: ${input.title}`,
+                url: `/app/lawyer/cases/${input.caseId}/tasks`,
+              },
+              updatedAt: now,
+            })
+            .onConflictDoNothing({ target: notificationJob.dedupeKey });
+        }
+
         return { task: created ?? null };
       }),
 
@@ -532,23 +629,55 @@ export const casesRouter = router({
       )
       .mutation(async ({ ctx, input }) => {
         await loadCaseForLawyer(ctx.db, ctx.authUserId, input.caseId);
+        if (input.assigneeUserId !== undefined && input.assigneeUserId !== null) {
+          await assertAssigneeUserExists(ctx.db, input.assigneeUserId);
+        }
         const [existing] = await ctx.db
           .select()
           .from(lawyerCaseTask)
           .where(and(eq(lawyerCaseTask.id, input.id), eq(lawyerCaseTask.caseId, input.caseId)))
           .limit(1);
         if (!existing) throw new TRPCError({ code: 'NOT_FOUND', message: 'Task not found.' });
-        const patch: Partial<typeof lawyerCaseTask.$inferInsert> = { updatedAt: new Date() };
+
+        const now = new Date();
+        const patch: Partial<typeof lawyerCaseTask.$inferInsert> = { updatedAt: now };
         if (input.title !== undefined) patch.title = input.title;
         if (input.dueAt !== undefined) patch.dueAt = input.dueAt;
         if (input.priority !== undefined) patch.priority = input.priority;
         if (input.status !== undefined) patch.status = input.status;
         if (input.assigneeUserId !== undefined) patch.assigneeUserId = input.assigneeUserId;
+
         const [updated] = await ctx.db
           .update(lawyerCaseTask)
           .set(patch)
           .where(eq(lawyerCaseTask.id, input.id))
           .returning();
+
+        // Send notification if assignee changed to a new user (and not null)
+        if (
+          updated &&
+          input.assigneeUserId !== undefined &&
+          input.assigneeUserId !== existing.assigneeUserId &&
+          input.assigneeUserId !== null
+        ) {
+          const dedupeKey = makeDedupeKey(['task_assigned', updated.id]);
+          await ctx.db
+            .insert(notificationJob)
+            .values({
+              userId: input.assigneeUserId,
+              kind: 'task_assigned',
+              dedupeKey,
+              scheduledAt: now,
+              payloadJson: {
+                title: 'Task assigned to you',
+                body: `You have been assigned: ${updated.title}`,
+                url: `/app/lawyer/cases/${input.caseId}/tasks`,
+              },
+              updatedAt: now,
+            })
+            .onConflictDoNothing({ target: notificationJob.dedupeKey });
+        }
+
         return { task: updated ?? null };
       }),
 
@@ -568,15 +697,17 @@ export const casesRouter = router({
   }),
 
   document: router({
-    list: lawyerProcedure.input(z.object({ caseId: z.string().uuid() })).query(async ({ ctx, input }) => {
-      await loadCaseForLawyer(ctx.db, ctx.authUserId, input.caseId);
-      const rows = await ctx.db
-        .select()
-        .from(lawyerCaseDocument)
-        .where(eq(lawyerCaseDocument.caseId, input.caseId))
-        .orderBy(desc(lawyerCaseDocument.createdAt));
-      return { documents: rows };
-    }),
+    list: lawyerProcedure
+      .input(z.object({ caseId: z.string().uuid() }))
+      .query(async ({ ctx, input }) => {
+        await loadCaseForLawyer(ctx.db, ctx.authUserId, input.caseId);
+        const rows = await ctx.db
+          .select()
+          .from(lawyerCaseDocument)
+          .where(eq(lawyerCaseDocument.caseId, input.caseId))
+          .orderBy(desc(lawyerCaseDocument.createdAt));
+        return { documents: rows };
+      }),
 
     requestUpload: lawyerProcedure
       .input(
@@ -644,7 +775,10 @@ export const casesRouter = router({
           throw new TRPCError({ code: 'BAD_REQUEST', message: 'Upload already confirmed.' });
         }
         if (row.byteSize !== input.byteSize) {
-          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Byte size does not match upload request.' });
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Byte size does not match upload request.',
+          });
         }
         const now = new Date();
         await ctx.db
@@ -682,7 +816,9 @@ export const casesRouter = router({
         if (row.uploadStatus !== 'complete') {
           throw new TRPCError({ code: 'BAD_REQUEST', message: 'Upload not complete.' });
         }
-        const { url } = await presignGetCaseDocumentObject(ctx.s3Documents, { key: row.storageKey });
+        const { url } = await presignGetCaseDocumentObject(ctx.s3Documents, {
+          key: row.storageKey,
+        });
         return { downloadUrl: url };
       }),
 
@@ -772,25 +908,28 @@ export const casesRouter = router({
   }),
 
   court: router({
-    lookupByCnr: lawyerProcedure.input(z.object({ cnr: z.string().min(1).max(40) })).query(async ({ ctx, input }) => {
-      if (!ctx.njdgBridgeUrl || !ctx.njdgBridgeSecret) {
-        throw new TRPCError({
-          code: 'PRECONDITION_FAILED',
-          message: 'Court status bridge is not configured (set NJDG_BRIDGE_URL and NJDG_BRIDGE_SECRET).',
-        });
-      }
-      try {
-        const cnr = normalizeAndValidateCnr(input.cnr);
-        const snapshot = await fetchCourtSnapshotViaBridge(
-          ctx.njdgBridgeUrl,
-          ctx.njdgBridgeSecret,
-          cnr,
-        );
-        return { cnr, snapshot };
-      } catch (e) {
-        const msg = e instanceof Error ? e.message : 'Lookup failed.';
-        throw new TRPCError({ code: 'BAD_REQUEST', message: msg });
-      }
-    }),
+    lookupByCnr: lawyerProcedure
+      .input(z.object({ cnr: z.string().min(1).max(40) }))
+      .query(async ({ ctx, input }) => {
+        if (!ctx.njdgBridgeUrl || !ctx.njdgBridgeSecret) {
+          throw new TRPCError({
+            code: 'PRECONDITION_FAILED',
+            message:
+              'Court status bridge is not configured (set NJDG_BRIDGE_URL and NJDG_BRIDGE_SECRET).',
+          });
+        }
+        try {
+          const cnr = normalizeAndValidateCnr(input.cnr);
+          const snapshot = await fetchCourtSnapshotViaBridge(
+            ctx.njdgBridgeUrl,
+            ctx.njdgBridgeSecret,
+            cnr,
+          );
+          return { cnr, snapshot };
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : 'Lookup failed.';
+          throw new TRPCError({ code: 'BAD_REQUEST', message: msg });
+        }
+      }),
   }),
 });

@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { eq } from 'drizzle-orm';
 
-import { db, schema } from '@kb/database';
+import { db, schema } from '@jurisly/database';
 
 import { sendWhatsAppText } from './cloud-api';
 
@@ -31,6 +31,10 @@ function computeWebBaseUrl(): string {
 }
 
 function link(opts: { base: string; locale: string; path: string }): string {
+  // Generate locale-prefixed web URLs
+  // These URLs will automatically open the mobile app when universal links are configured
+  // (see apps/mobile/app.json and docs/MOBILE-AUTH-DEEPLINKS.md)
+  // If the app is not installed, they open the web version
   const base = opts.base.replace(/\/$/, '');
   const path = opts.path.startsWith('/') ? opts.path : `/${opts.path}`;
   return `${base}/${encodeURIComponent(opts.locale)}${path}`;
@@ -59,7 +63,7 @@ function menu(locale: string): string {
 
 function localePrompt(): string {
   return [
-    'Welcome to KanuniBaat.',
+    'Welcome to Jurisly.',
     'Reply with your language:',
     'en = English',
     'hi = हिन्दी',

@@ -1,12 +1,22 @@
 import { Link } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export default function ResearchDraftingScreen() {
   const fill = trpc.research.drafting.fillTemplate.useMutation();
-  const [templateKey, setTemplateKey] = useState<'legal_notice_reply' | 'bail_application_outline' | 'written_statement_outline'>('legal_notice_reply');
+  const [templateKey] = useState<
+    'legal_notice_reply' | 'bail_application_outline' | 'written_statement_outline'
+  >('legal_notice_reply');
   const [factsRaw, setFactsRaw] = useState('{"clientName":"[Name]"}');
 
   return (
@@ -29,7 +39,11 @@ export default function ResearchDraftingScreen() {
           }
         }}
       >
-        {fill.isPending ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>Generate</Text>}
+        {fill.isPending ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.btnText}>Generate</Text>
+        )}
       </Pressable>
       {fill.error ? <Text style={styles.err}>{fill.error.message}</Text> : null}
       {fill.data ? (
@@ -47,11 +61,25 @@ const styles = StyleSheet.create({
   back: { color: '#C2410C', fontWeight: '600' },
   title: { fontSize: 20, fontWeight: '700', color: '#1C1917' },
   hint: { fontSize: 12, color: '#78716C' },
-  input: { borderWidth: 1, borderColor: '#D6D3D1', borderRadius: 10, padding: 10, minHeight: 100, fontFamily: 'monospace', fontSize: 12 },
+  input: {
+    borderWidth: 1,
+    borderColor: '#D6D3D1',
+    borderRadius: 10,
+    padding: 10,
+    minHeight: 100,
+    fontFamily: 'monospace',
+    fontSize: 12,
+  },
   btn: { backgroundColor: '#C2410C', padding: 12, borderRadius: 12, alignItems: 'center' },
   btnText: { color: '#fff', fontWeight: '700' },
   err: { color: '#b91c1c' },
-  out: { padding: 12, borderRadius: 12, backgroundColor: '#fff', borderWidth: 1, borderColor: '#E7E5E4' },
+  out: {
+    padding: 12,
+    borderRadius: 12,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#E7E5E4',
+  },
   outTitle: { fontWeight: '700', fontSize: 16, color: '#1C1917' },
   outBody: { marginTop: 8, fontSize: 14, color: '#44403C' },
 });

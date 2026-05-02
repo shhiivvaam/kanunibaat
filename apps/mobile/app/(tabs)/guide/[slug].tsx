@@ -11,8 +11,8 @@ import {
   View,
 } from 'react-native';
 
-import { trpc } from '@kb/api-client';
-import { INDIAN_STATES_AND_UTS } from '@kb/utils';
+import { trpc } from '@jurisly/api-client';
+import { INDIAN_STATES_AND_UTS } from '@jurisly/utils';
 
 function Bullets({ title, items }: { title: string; items: string[] }) {
   if (items.length === 0) return null;
@@ -70,7 +70,12 @@ export default function GuideDetailScreen() {
                   onPress={() => setStateCode(s.code)}
                   style={[styles.stateChip, stateCode === s.code ? styles.stateChipOn : null]}
                 >
-                  <Text style={[styles.stateChipText, stateCode === s.code ? styles.stateChipTextOn : null]}>
+                  <Text
+                    style={[
+                      styles.stateChipText,
+                      stateCode === s.code ? styles.stateChipTextOn : null,
+                    ]}
+                  >
                     {s.code}
                   </Text>
                 </Pressable>
@@ -95,10 +100,16 @@ export default function GuideDetailScreen() {
               style={styles.primaryBtn}
               disabled={personalize.isPending}
             >
-              <Text style={styles.primaryBtnText}>{personalize.isPending ? '…' : 'Personalise guide'}</Text>
+              <Text style={styles.primaryBtnText}>
+                {personalize.isPending ? '…' : 'Personalise guide'}
+              </Text>
             </Pressable>
-            {personalize.isError ? <Text style={styles.error}>{personalize.error.message}</Text> : null}
-            {personalize.data?.notice ? <Text style={styles.notice}>{personalize.data.notice}</Text> : null}
+            {personalize.isError ? (
+              <Text style={styles.error}>{personalize.error.message}</Text>
+            ) : null}
+            {personalize.data?.notice ? (
+              <Text style={styles.notice}>{personalize.data.notice}</Text>
+            ) : null}
 
             {guide ? (
               <>
@@ -122,7 +133,9 @@ export default function GuideDetailScreen() {
               </>
             )}
 
-            {detail.data?.disclaimer ? <Text style={styles.disclaimer}>{detail.data.disclaimer}</Text> : null}
+            {detail.data?.disclaimer ? (
+              <Text style={styles.disclaimer}>{detail.data.disclaimer}</Text>
+            ) : null}
 
             <Link href={lawyerHref} style={styles.lawyerLink}>
               <Text style={styles.lawyerLinkText}>Find a relevant lawyer</Text>
@@ -183,8 +196,21 @@ const styles = StyleSheet.create({
   },
   primaryBtnText: { color: '#FFFFFF', fontWeight: '700' },
   notice: { fontSize: 13, color: '#92400E', marginTop: 8 },
-  section: { marginTop: 14, padding: 12, backgroundColor: '#FAFAF9', borderRadius: 12, borderWidth: 1, borderColor: '#E7E5E4' },
-  sectionTitle: { fontSize: 12, fontWeight: '700', color: '#78716C', textTransform: 'uppercase', marginBottom: 6 },
+  section: {
+    marginTop: 14,
+    padding: 12,
+    backgroundColor: '#FAFAF9',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E7E5E4',
+  },
+  sectionTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#78716C',
+    textTransform: 'uppercase',
+    marginBottom: 6,
+  },
   bullet: { fontSize: 14, color: '#292524', marginTop: 4, lineHeight: 20 },
   error: { color: '#B91C1C' },
   disclaimer: { fontSize: 11, color: '#A8A29E', marginTop: 8 },

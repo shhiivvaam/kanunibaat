@@ -12,7 +12,7 @@ import {
   View,
 } from 'react-native';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 const STATUSES = [
   'intake',
@@ -35,8 +35,13 @@ export default function PracticeCaseDetailScreen() {
   const hearings = trpc.cases.hearing.list.useQuery({ caseId: id }, { enabled: Boolean(id) });
   const tasks = trpc.cases.task.list.useQuery({ caseId: id }, { enabled: Boolean(id) });
   const documents = trpc.cases.document.list.useQuery({ caseId: id }, { enabled: Boolean(id) });
-  const timeList = trpc.practice.billing.timeEntry.list.useQuery({ caseId: id }, { enabled: Boolean(id) });
-  const timeActive = trpc.practice.billing.timeEntry.active.useQuery(undefined, { enabled: Boolean(id) });
+  const timeList = trpc.practice.billing.timeEntry.list.useQuery(
+    { caseId: id },
+    { enabled: Boolean(id) },
+  );
+  const timeActive = trpc.practice.billing.timeEntry.active.useQuery(undefined, {
+    enabled: Boolean(id),
+  });
   const timeStart = trpc.practice.billing.timeEntry.start.useMutation({
     onSuccess: async () => {
       await utils.practice.billing.timeEntry.list.invalidate({ caseId: id });
@@ -86,7 +91,7 @@ export default function PracticeCaseDetailScreen() {
     if (!timeActive.data?.entry) return;
     const tmr = setInterval(() => setTick((t) => t + 1), 1000);
     return () => clearInterval(tmr);
-  }, [timeActive.data?.entry?.id]);
+  }, [timeActive.data?.entry]);
 
   const hearingCreate = trpc.cases.hearing.create.useMutation({
     onSuccess: async () => {
@@ -122,7 +127,10 @@ export default function PracticeCaseDetailScreen() {
 
   const [lookupInput, setLookupInput] = useState('');
   const [lookupState, setLookupState] = useState<
-    { kind: 'idle' } | { kind: 'loading' } | { kind: 'ok'; snapshot: unknown } | { kind: 'err'; message: string }
+    | { kind: 'idle' }
+    | { kind: 'loading' }
+    | { kind: 'ok'; snapshot: unknown }
+    | { kind: 'err'; message: string }
   >({ kind: 'idle' });
 
   async function pickAndUpload() {
@@ -204,7 +212,11 @@ export default function PracticeCaseDetailScreen() {
       <Text style={[styles.label, { marginTop: 10 }]}>Status</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipsScroll}>
         {STATUSES.map((s, i) => (
-          <Pressable key={s} style={[styles.chip, statusIdx === i && styles.chipOn]} onPress={() => setStatusIdx(i)}>
+          <Pressable
+            key={s}
+            style={[styles.chip, statusIdx === i && styles.chipOn]}
+            onPress={() => setStatusIdx(i)}
+          >
             <Text style={[styles.chipText, statusIdx === i && styles.chipTextOn]}>{s}</Text>
           </Pressable>
         ))}
@@ -212,16 +224,28 @@ export default function PracticeCaseDetailScreen() {
       <Text style={[styles.label, { marginTop: 10 }]}>CNR</Text>
       <TextInput style={styles.input} value={cnrInput} onChangeText={setCnrInput} />
       <Text style={[styles.label, { marginTop: 10 }]}>Description</Text>
-      <TextInput style={[styles.input, { minHeight: 72 }]} value={description} onChangeText={setDescription} multiline />
+      <TextInput
+        style={[styles.input, { minHeight: 72 }]}
+        value={description}
+        onChangeText={setDescription}
+        multiline
+      />
       <Text style={[styles.label, { marginTop: 10 }]}>Outcome (for analytics)</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipsScroll}>
         {CASE_OUTCOMES.map((s, i) => (
-          <Pressable key={s} style={[styles.chip, outcomeIdx === i && styles.chipOn]} onPress={() => setOutcomeIdx(i)}>
+          <Pressable
+            key={s}
+            style={[styles.chip, outcomeIdx === i && styles.chipOn]}
+            onPress={() => setOutcomeIdx(i)}
+          >
             <Text style={[styles.chipText, outcomeIdx === i && styles.chipTextOn]}>{s}</Text>
           </Pressable>
         ))}
       </ScrollView>
-      <Link href={`/(tabs)/practice/invoices?caseId=${encodeURIComponent(id)}` as never} style={[styles.btnSecondary, { marginTop: 12 }]}>
+      <Link
+        href={`/(tabs)/practice/invoices?caseId=${encodeURIComponent(id)}` as never}
+        style={[styles.btnSecondary, { marginTop: 12 }]}
+      >
         <Text style={styles.btnSecondaryText}>New invoice for this case</Text>
       </Link>
       <Pressable
@@ -288,7 +312,12 @@ export default function PracticeCaseDetailScreen() {
       ))}
 
       <Text style={styles.section}>Court lookup (CNR)</Text>
-      <TextInput style={styles.input} value={lookupInput} onChangeText={setLookupInput} placeholder="CNR" />
+      <TextInput
+        style={styles.input}
+        value={lookupInput}
+        onChangeText={setLookupInput}
+        placeholder="CNR"
+      />
       <Pressable
         style={[styles.btnSecondary, { marginTop: 8 }]}
         onPress={() => {
@@ -321,8 +350,18 @@ export default function PracticeCaseDetailScreen() {
 
       <Text style={styles.section}>Hearings</Text>
       <Text style={styles.hint}>Enter ISO datetime e.g. 2026-04-20T10:00</Text>
-      <TextInput style={styles.input} value={hearingAt} onChangeText={setHearingAt} placeholder="2026-04-20T10:00" />
-      <TextInput style={[styles.input, { marginTop: 8 }]} value={judgeName} onChangeText={setJudgeName} placeholder="Judge" />
+      <TextInput
+        style={styles.input}
+        value={hearingAt}
+        onChangeText={setHearingAt}
+        placeholder="2026-04-20T10:00"
+      />
+      <TextInput
+        style={[styles.input, { marginTop: 8 }]}
+        value={judgeName}
+        onChangeText={setJudgeName}
+        placeholder="Judge"
+      />
       <Pressable
         style={[styles.btn, { marginTop: 8 }]}
         disabled={!hearingAt || hearingCreate.isPending}
@@ -347,7 +386,12 @@ export default function PracticeCaseDetailScreen() {
       ))}
 
       <Text style={styles.section}>Tasks</Text>
-      <TextInput style={styles.input} value={taskTitle} onChangeText={setTaskTitle} placeholder="Title" />
+      <TextInput
+        style={styles.input}
+        value={taskTitle}
+        onChangeText={setTaskTitle}
+        placeholder="Title"
+      />
       <Pressable
         style={[styles.btn, { marginTop: 8 }]}
         disabled={!taskTitle.trim() || taskCreate.isPending}
@@ -385,7 +429,11 @@ export default function PracticeCaseDetailScreen() {
       <Text style={styles.section}>Documents</Text>
       {uploadErr ? <Text style={styles.error}>{uploadErr}</Text> : null}
       <Pressable style={styles.btn} disabled={uploadBusy} onPress={() => void pickAndUpload()}>
-        {uploadBusy ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>Pick file & upload</Text>}
+        {uploadBusy ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.btnText}>Pick file & upload</Text>
+        )}
       </Pressable>
       {(documents.data?.documents ?? []).map((d) => (
         <View key={d.id} style={styles.docRow}>
@@ -468,7 +516,12 @@ const styles = StyleSheet.create({
   muted: { marginTop: 8, color: '#57534E' },
   json: { marginTop: 8, fontSize: 11, color: '#44403C', fontFamily: 'monospace' },
   row: { marginTop: 8, fontSize: 13, color: '#44403C' },
-  taskRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 },
+  taskRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 4,
+  },
   link: { color: '#C2410C', fontWeight: '600', fontSize: 13 },
   danger: { color: '#b91c1c', fontWeight: '600', fontSize: 13 },
   docRow: { marginTop: 12, paddingBottom: 8, borderBottomWidth: 1, borderBottomColor: '#E7E5E4' },

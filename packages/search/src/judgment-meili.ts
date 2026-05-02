@@ -7,7 +7,12 @@ function hitFromMeiliJudgment(record: Record<string, unknown>): JudgmentSearchHi
   const title = record.title;
   const court = record.court;
   const citation = record.citation;
-  if (typeof id !== 'string' || typeof title !== 'string' || typeof court !== 'string' || typeof citation !== 'string') {
+  if (
+    typeof id !== 'string' ||
+    typeof title !== 'string' ||
+    typeof court !== 'string' ||
+    typeof citation !== 'string'
+  ) {
     return null;
   }
   const decisionAt =
@@ -25,7 +30,9 @@ function hitFromMeiliJudgment(record: Record<string, unknown>): JudgmentSearchHi
     citation,
     decisionAt,
     summaryExcerpt: typeof record.summaryExcerpt === 'string' ? record.summaryExcerpt : '',
-    topics: Array.isArray(record.topics) ? record.topics.filter((x): x is string => typeof x === 'string') : [],
+    topics: Array.isArray(record.topics)
+      ? record.topics.filter((x): x is string => typeof x === 'string')
+      : [],
   };
 }
 

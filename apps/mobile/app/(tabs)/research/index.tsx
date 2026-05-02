@@ -1,7 +1,7 @@
 import { Link } from 'expo-router';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export default function ResearchHomeScreen() {
   const profile = trpc.profile.me.useQuery();

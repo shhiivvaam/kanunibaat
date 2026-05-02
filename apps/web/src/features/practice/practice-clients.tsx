@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export function PracticeClients() {
   const utils = trpc.useUtils();
@@ -24,7 +24,10 @@ export function PracticeClients() {
   return (
     <div className="space-y-8" style={{ fontFamily: 'var(--font-body)' }}>
       <div className="flex items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+        <h1
+          className="text-xl font-semibold text-[#1C1917]"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
           Clients
         </h1>
         <Link href="/app/practice" className="text-sm text-[#C2410C] hover:underline">

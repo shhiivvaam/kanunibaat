@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export default function RightsScreen() {
   const router = useRouter();
@@ -20,7 +20,12 @@ export default function RightsScreen() {
       <Text style={styles.sub}>Rights & law explainers</Text>
 
       <View style={styles.filters}>
-        <TextInput style={styles.input} placeholder="Category" value={category} onChangeText={setCategory} />
+        <TextInput
+          style={styles.input}
+          placeholder="Category"
+          value={category}
+          onChangeText={setCategory}
+        />
         <TextInput style={styles.input} placeholder="Search" value={q} onChangeText={setQ} />
       </View>
 
@@ -32,13 +37,20 @@ export default function RightsScreen() {
         keyExtractor={(i) => i.id}
         contentContainerStyle={{ gap: 10, paddingVertical: 12 }}
         renderItem={({ item }) => (
-          <Pressable style={styles.card} onPress={() => router.push(`/rights/${item.slug}` as any)}>
+          <Pressable
+            style={styles.card}
+            onPress={() =>
+              router.push({ pathname: '/rights/[slug]', params: { slug: item.slug } })
+            }
+          >
             <Text style={styles.cardMeta}>{item.category || 'general'}</Text>
             <Text style={styles.cardTitle}>{item.titleJson.en ?? item.slug}</Text>
             <Text style={styles.cardMeta}>{item.lifeSituation}</Text>
           </Pressable>
         )}
-        ListEmptyComponent={!res.isLoading ? <Text style={styles.sub}>No articles yet.</Text> : null}
+        ListEmptyComponent={
+          !res.isLoading ? <Text style={styles.sub}>No articles yet.</Text> : null
+        }
       />
     </View>
   );
@@ -51,8 +63,13 @@ const styles = StyleSheet.create({
   err: { fontSize: 13, color: '#b91c1c' },
   filters: { flexDirection: 'row', gap: 8 },
   input: { flex: 1, borderWidth: 1, borderColor: '#ddd', borderRadius: 10, padding: 10 },
-  card: { borderWidth: 1, borderColor: '#eee', borderRadius: 12, padding: 12, backgroundColor: '#fff' },
+  card: {
+    borderWidth: 1,
+    borderColor: '#eee',
+    borderRadius: 12,
+    padding: 12,
+    backgroundColor: '#fff',
+  },
   cardTitle: { fontSize: 14, fontWeight: '700', marginTop: 4 },
   cardMeta: { fontSize: 12, color: '#666' },
 });
-

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useMemo } from 'react';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export function PracticeDashboard() {
   const profile = trpc.profile.me.useQuery();
@@ -21,8 +21,8 @@ export function PracticeDashboard() {
   if (!profile.data?.roles.includes('lawyer')) {
     return (
       <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
-        Practice management is available to lawyers only. Complete lawyer onboarding and verification, or switch to a
-        lawyer account.
+        Practice management is available to lawyers only. Complete lawyer onboarding and
+        verification, or switch to a lawyer account.
       </div>
     );
   }
@@ -33,7 +33,10 @@ export function PracticeDashboard() {
   return (
     <div className="space-y-8" style={{ fontFamily: 'var(--font-body)' }}>
       <div>
-        <h1 className="text-xl font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+        <h1
+          className="text-xl font-semibold text-[#1C1917]"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
           Practice
         </h1>
         <p className="mt-2 text-sm text-[#57534E]">Cases, clients, hearings, and tasks.</p>
@@ -42,7 +45,9 @@ export function PracticeDashboard() {
       <div className="grid gap-4 sm:grid-cols-3">
         <div className="rounded-xl border border-[#E7E5E4] bg-white p-4 shadow-sm">
           <p className="text-xs font-medium uppercase tracking-wide text-[#78716C]">Open cases</p>
-          <p className="mt-1 text-2xl font-semibold text-[#1C1917]">{cases.isPending ? '—' : activeCases}</p>
+          <p className="mt-1 text-2xl font-semibold text-[#1C1917]">
+            {cases.isPending ? '—' : activeCases}
+          </p>
         </div>
         <div className="rounded-xl border border-[#E7E5E4] bg-white p-4 shadow-sm">
           <p className="text-xs font-medium uppercase tracking-wide text-[#78716C]">Total cases</p>
@@ -101,14 +106,19 @@ export function PracticeDashboard() {
           <p className="mt-2 text-sm text-[#57534E]">Loading calendar…</p>
         ) : (
           <div className="mt-3 space-y-3 text-sm">
-            {(calendar.data?.hearings.length ?? 0) === 0 && (calendar.data?.tasks.length ?? 0) === 0 ? (
+            {(calendar.data?.hearings.length ?? 0) === 0 &&
+            (calendar.data?.tasks.length ?? 0) === 0 ? (
               <p className="text-[#78716C]">No hearings or tasks in this window.</p>
             ) : null}
             {calendar.data?.hearings.map((h) => (
-              <div key={h.id} className="border-t border-[#F5F5F4] pt-2 first:border-t-0 first:pt-0">
+              <div
+                key={h.id}
+                className="border-t border-[#F5F5F4] pt-2 first:border-t-0 first:pt-0"
+              >
                 <span className="font-medium text-[#44403C]">Hearing</span>{' '}
                 <span className="text-[#78716C]">
-                  {new Date(h.hearingAt).toLocaleString()} · {h.case.courtName || h.case.caseType || h.case.id}
+                  {new Date(h.hearingAt).toLocaleString()} ·{' '}
+                  {h.case.courtName || h.case.caseType || h.case.id}
                 </span>
               </div>
             ))}

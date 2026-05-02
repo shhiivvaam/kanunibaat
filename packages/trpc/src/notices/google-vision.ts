@@ -58,4 +58,3 @@ export async function ocrWithGoogleVision(
   if (out.length === 0) throw new Error('No text detected in the uploaded notice.');
   return { text: out };
 }
-

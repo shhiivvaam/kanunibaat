@@ -23,11 +23,11 @@
     "smoke:trpc": "node ./scripts/smoke-trpc.mjs"
   },
   "dependencies": {
-    "@kb/database": "workspace:*",
-    "@kb/search": "workspace:*",
-    "@kb/storage": "workspace:*",
-    "@kb/trpc": "workspace:*",
-    "@kb/waitlist": "workspace:*",
+    "@jurisly/database": "workspace:*",
+    "@jurisly/search": "workspace:*",
+    "@jurisly/storage": "workspace:*",
+    "@jurisly/trpc": "workspace:*",
+    "@jurisly/waitlist": "workspace:*",
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",

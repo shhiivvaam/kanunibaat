@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 function toYmd(d: Date) {
   return d.toISOString().slice(0, 10);
@@ -21,14 +21,26 @@ export default function PracticeAnalyticsScreen() {
     return { from, to };
   }, [fromStr, toStr]);
 
-  const summary = trpc.practice.analytics.summary.useQuery(range, { enabled: Boolean(fromStr && toStr) });
+  const summary = trpc.practice.analytics.summary.useQuery(range, {
+    enabled: Boolean(fromStr && toStr),
+  });
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Analytics</Text>
       <Text style={styles.muted}>Range</Text>
-      <TextInput style={styles.input} value={fromStr} onChangeText={setFromStr} placeholder="YYYY-MM-DD" />
-      <TextInput style={[styles.input, { marginTop: 8 }]} value={toStr} onChangeText={setToStr} placeholder="YYYY-MM-DD" />
+      <TextInput
+        style={styles.input}
+        value={fromStr}
+        onChangeText={setFromStr}
+        placeholder="YYYY-MM-DD"
+      />
+      <TextInput
+        style={[styles.input, { marginTop: 8 }]}
+        value={toStr}
+        onChangeText={setToStr}
+        placeholder="YYYY-MM-DD"
+      />
 
       {summary.isPending ? (
         <ActivityIndicator style={{ marginTop: 16 }} />
@@ -39,7 +51,10 @@ export default function PracticeAnalyticsScreen() {
           <Stat label="Active cases" value={String(summary.data.activeCases)} />
           <Stat label="Revenue paid (INR)" value={String(summary.data.revenuePaidInr)} />
           <Stat label="Billable hours" value={String(summary.data.billableHoursInRange)} />
-          <Stat label="Win rate" value={summary.data.winRatePercent == null ? '—' : `${summary.data.winRatePercent}%`} />
+          <Stat
+            label="Win rate"
+            value={summary.data.winRatePercent == null ? '—' : `${summary.data.winRatePercent}%`}
+          />
         </View>
       ) : null}
     </ScrollView>

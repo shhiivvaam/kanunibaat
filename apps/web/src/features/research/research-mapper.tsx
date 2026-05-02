@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export function ResearchMapper() {
   const [source, setSource] = useState('IPC');
@@ -28,12 +28,15 @@ export function ResearchMapper() {
       <Link href="/app/research" className="text-sm text-[#C2410C] hover:underline">
         ← Research home
       </Link>
-      <h1 className="text-xl font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+      <h1
+        className="text-xl font-semibold text-[#1C1917]"
+        style={{ fontFamily: 'var(--font-display)' }}
+      >
         Statute crosswalk
       </h1>
       <p className="text-xs text-[#78716C]">
-        Illustrative IPC / CrPC / IEA → BNS / BNSS / BSA mappings from seed data. Always verify against official
-        conversion tables before filing.
+        Illustrative IPC / CrPC / IEA → BNS / BNSS / BSA mappings from seed data. Always verify
+        against official conversion tables before filing.
       </p>
       <div className="grid max-w-lg gap-3 sm:grid-cols-3">
         <label className="text-sm">
@@ -75,7 +78,9 @@ export function ResearchMapper() {
       >
         Lookup
       </button>
-      {submitted !== null && q.isFetching ? <p className="text-sm text-[#57534E]">Loading…</p> : null}
+      {submitted !== null && q.isFetching ? (
+        <p className="text-sm text-[#57534E]">Loading…</p>
+      ) : null}
       {q.isError ? <p className="text-sm text-red-700">{q.error.message}</p> : null}
       {submitted !== null && q.data ? (
         <ul className="rounded-xl border border-[#E7E5E4] bg-white p-4 text-sm shadow-sm">

@@ -77,7 +77,7 @@ Primary code paths:
 
 - `packages/trpc/src/routers/consultations.ts`
 - `packages/trpc/src/routers/billing.ts`
-- `apps/api/src/http-stack.ts` (Razorpay webhook endpoints)
+- `apps/api/src/http/http-stack.ts` (Razorpay webhook endpoints)
 
 ## 7) Vault and sharing flow
 

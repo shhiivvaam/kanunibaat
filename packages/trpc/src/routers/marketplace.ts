@@ -1,8 +1,13 @@
-import { and, eq } from 'drizzle-orm';
+import { and, avg, count, desc, eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
-import { lawyerAvailability, lawyerProfile, userProfile } from '@kb/database/schema';
-import { searchLawyersWithFallback } from '@kb/search';
+import {
+  lawyerAvailability,
+  lawyerConsultationReview,
+  lawyerProfile,
+  userProfile,
+} from '@jurisly/database/schema';
+import { searchLawyersWithFallback } from '@jurisly/search';
 
 import { publicProcedure, router } from '../init';
 
@@ -45,11 +50,67 @@ export const marketplaceRouter = router({
       })
       .from(lawyerProfile)
       .innerJoin(userProfile, eq(lawyerProfile.userId, userProfile.userId))
-      .where(and(eq(lawyerProfile.slug, input.slug), eq(lawyerProfile.verificationStatus, 'verified')))
+      .where(
+        and(eq(lawyerProfile.slug, input.slug), eq(lawyerProfile.verificationStatus, 'verified')),
+      )
       .limit(1);
 
     if (!row) {
       return { lawyer: null };
+    }
+
+    const lawyerUserId = row.userId;
+
+    const [agg] = await ctx.db
+      .select({
+        avgRating: avg(lawyerConsultationReview.rating),
+        reviewCount: count(),
+      })
+      .from(lawyerConsultationReview)
+      .where(eq(lawyerConsultationReview.lawyerUserId, lawyerUserId));
+
+    const recentReviews = await ctx.db
+      .select({
+        rating: lawyerConsultationReview.rating,
+        reviewText: lawyerConsultationReview.reviewText,
+        createdAt: lawyerConsultationReview.createdAt,
+      })
+      .from(lawyerConsultationReview)
+      .where(eq(lawyerConsultationReview.lawyerUserId, lawyerUserId))
+      .orderBy(desc(lawyerConsultationReview.createdAt))
+      .limit(5);
+
+    let avgFirstReplyMinutes: number | null = null;
+    try {
+      const stat = await ctx.db.execute(
+        sql`
+        SELECT ROUND(AVG(EXTRACT(EPOCH FROM (agg.first_created - c.started_at)) / 60.0)::numeric, 1)::float AS m
+        FROM consultation c
+        INNER JOIN (
+          SELECT consultation_id, MIN(created_at) AS first_created
+          FROM consultation_message
+          WHERE sender_user_id = ${lawyerUserId}
+          GROUP BY consultation_id
+        ) agg ON agg.consultation_id = c.id
+        WHERE c.lawyer_user_id = ${lawyerUserId}
+          AND c.status = 'completed'
+          AND c.started_at IS NOT NULL
+          AND agg.first_created >= c.started_at
+      `,
+      );
+      const firstRow = Array.isArray(stat)
+        ? stat[0]
+        : (stat as { rows?: { m: unknown }[] }).rows?.[0];
+      const rawM =
+        firstRow && typeof firstRow === 'object' && 'm' in firstRow
+          ? (firstRow as { m: unknown }).m
+          : null;
+      if (rawM != null && rawM !== '') {
+        const n = typeof rawM === 'number' ? rawM : Number(rawM);
+        avgFirstReplyMinutes = Number.isFinite(n) ? n : null;
+      }
+    } catch {
+      avgFirstReplyMinutes = null;
     }
 
     return {
@@ -65,6 +126,14 @@ export const marketplaceRouter = router({
         practiceAreas: Array.isArray(row.practiceAreas) ? row.practiceAreas : [],
         languages: Array.isArray(row.languages) ? row.languages : [],
         yearsExperience: row.yearsExperience,
+        avgRating: agg?.avgRating != null ? Number(agg.avgRating) : null,
+        reviewCount: Number(agg?.reviewCount ?? 0),
+        avgFirstReplyMinutes,
+        recentReviews: recentReviews.map((r) => ({
+          rating: r.rating,
+          reviewText: r.reviewText,
+          createdAt: r.createdAt,
+        })),
       },
     };
   }),
@@ -75,7 +144,12 @@ export const marketplaceRouter = router({
       const [lp] = await ctx.db
         .select({ status: lawyerProfile.verificationStatus })
         .from(lawyerProfile)
-        .where(and(eq(lawyerProfile.userId, input.lawyerUserId), eq(lawyerProfile.verificationStatus, 'verified')))
+        .where(
+          and(
+            eq(lawyerProfile.userId, input.lawyerUserId),
+            eq(lawyerProfile.verificationStatus, 'verified'),
+          ),
+        )
         .limit(1);
       if (!lp) return { availability: [] as const };
 

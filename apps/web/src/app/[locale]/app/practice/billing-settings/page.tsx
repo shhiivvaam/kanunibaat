@@ -1,2 +1,5 @@
-export { default } from '../../../../app/practice/billing-settings/page';
+import { PracticeBillingSettings } from '@/features/practice/practice-billing-settings';
 
+export default function PracticeBillingSettingsPage() {
+  return <PracticeBillingSettings />;
+}

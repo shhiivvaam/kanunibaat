@@ -17,4 +17,7 @@ export {
   upsertLawyersMeili,
 } from './meili';
 export { syncLawyerMeiliFromDb } from './sync-lawyer-index';
-export { researchJudgmentRowToMeiliDocument, syncResearchJudgmentsToMeili } from './sync-research-judgment-index';
+export {
+  researchJudgmentRowToMeiliDocument,
+  syncResearchJudgmentsToMeili,
+} from './sync-research-judgment-index';

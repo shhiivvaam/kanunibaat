@@ -1,2 +1,5 @@
-export { default } from '../../../../app/lawyer/onboarding/page';
+import { LawyerOnboarding } from '@/features/lawyer/lawyer-onboarding';
 
+export default function LawyerOnboardingPage() {
+  return <LawyerOnboarding />;
+}

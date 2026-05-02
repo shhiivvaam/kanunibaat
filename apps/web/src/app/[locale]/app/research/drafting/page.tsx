@@ -1,2 +1,5 @@
-export { default } from '../../../../app/research/drafting/page';
+import { ResearchDrafting } from '@/features/research/research-drafting';
 
+export default function ResearchDraftingPage() {
+  return <ResearchDrafting />;
+}

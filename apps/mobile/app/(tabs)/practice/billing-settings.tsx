@@ -1,8 +1,15 @@
 import { Link } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+} from 'react-native';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export default function PracticeBillingSettingsScreen() {
   const q = trpc.practice.billing.firm.get.useQuery();
@@ -74,7 +81,14 @@ const styles = StyleSheet.create({
   backText: { color: '#C2410C', fontWeight: '600' },
   title: { fontSize: 22, fontWeight: '700', color: '#1C1917' },
   label: { fontSize: 13, fontWeight: '600', color: '#44403C' },
-  input: { marginTop: 4, borderWidth: 1, borderColor: '#D6D3D1', borderRadius: 10, padding: 10, fontSize: 15 },
+  input: {
+    marginTop: 4,
+    borderWidth: 1,
+    borderColor: '#D6D3D1',
+    borderRadius: 10,
+    padding: 10,
+    fontSize: 15,
+  },
   btn: { paddingVertical: 12, borderRadius: 12, backgroundColor: '#C2410C', alignItems: 'center' },
   btnText: { fontWeight: '700', color: '#fff' },
 });

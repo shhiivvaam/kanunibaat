@@ -3,9 +3,9 @@
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
-import { trpc } from '@kb/api-client';
-import { MAX_VAULT_OBJECT_BYTES } from '@kb/storage';
-import { encryptVaultPayload } from '@kb/vault-crypto';
+import { trpc } from '@jurisly/api-client';
+import { MAX_VAULT_OBJECT_BYTES } from '@jurisly/storage';
+import { encryptVaultPayload } from '@jurisly/vault-crypto';
 
 export function VaultList() {
   const q = trpc.vault.document.list.useQuery(undefined, { staleTime: 10_000 });
@@ -26,7 +26,10 @@ export function VaultList() {
   const [dlError, setDlError] = useState<string | null>(null);
   const [dlBusy, setDlBusy] = useState<boolean>(false);
 
-  const dlPreviewItems = useMemo(() => (dlList.data?.items ?? []).slice(0, 8), [dlList.data?.items]);
+  const dlPreviewItems = useMemo(
+    () => (dlList.data?.items ?? []).slice(0, 8),
+    [dlList.data?.items],
+  );
 
   if (q.isPending) {
     return <p className="text-sm text-[#57534E]">Loading vault…</p>;
@@ -74,7 +77,10 @@ export function VaultList() {
       const dl = await dlDownload.mutateAsync({ uri: dlSelectedUri });
       const bytes = Uint8Array.from(atob(dl.base64), (c) => c.charCodeAt(0));
 
-      const { ciphertext, wrappedDekBase64, keyWrapSaltBase64 } = await encryptVaultPayload(bytes, dlPassphrase);
+      const { ciphertext, wrappedDekBase64, keyWrapSaltBase64 } = await encryptVaultPayload(
+        bytes,
+        dlPassphrase,
+      );
       if (ciphertext.byteLength > MAX_VAULT_OBJECT_BYTES) {
         throw new Error(`Encrypted file exceeds ${MAX_VAULT_OBJECT_BYTES} bytes.`);
       }
@@ -86,6 +92,7 @@ export function VaultList() {
         tags: ['digilocker'],
         expiresAt: null,
         byteSize: ciphertext.byteLength,
+        contentType: 'application/pdf',
       });
 
       const body = new Uint8Array(ciphertext.byteLength);
@@ -117,12 +124,19 @@ export function VaultList() {
   return (
     <div className="space-y-6" style={{ fontFamily: 'var(--font-body)' }}>
       <div>
-        <h1 className="text-xl font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+        <h1
+          className="text-xl font-semibold text-[#1C1917]"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
           Document vault
         </h1>
         <p className="mt-2 text-sm text-[#57534E]">
-          Client-encrypted storage for sensitive documents. Free tier: {usage.maxDocuments} documents,{' '}
-          {usage.maxTotalBytes == null ? 'unlimited' : `${Math.round(usage.maxTotalBytes / (1024 * 1024))} MB`} total.
+          Client-encrypted storage for sensitive documents. Free tier: {usage.maxDocuments}{' '}
+          documents,{' '}
+          {usage.maxTotalBytes == null
+            ? 'unlimited'
+            : `${Math.round(usage.maxTotalBytes / (1024 * 1024))} MB`}{' '}
+          total.
         </p>
       </div>
 
@@ -136,8 +150,11 @@ export function VaultList() {
         <div className="flex items-center justify-between text-sm">
           <span className="font-medium text-[#44403C]">Storage used</span>
           <span className="text-[#78716C]">
-            {usage.completeCount} / {usage.maxDocuments} docs · {Math.round(usage.totalBytes / 1024)} KB /{' '}
-            {usage.maxTotalBytes == null ? 'unlimited' : `${Math.round(usage.maxTotalBytes / (1024 * 1024))} MB`}
+            {usage.completeCount} / {usage.maxDocuments} docs ·{' '}
+            {Math.round(usage.totalBytes / 1024)} KB /{' '}
+            {usage.maxTotalBytes == null
+              ? 'unlimited'
+              : `${Math.round(usage.maxTotalBytes / (1024 * 1024))} MB`}
           </span>
         </div>
         <div className="mt-2 h-2 overflow-hidden rounded-full bg-[#E7E5E4]">
@@ -159,7 +176,8 @@ export function VaultList() {
           <div>
             <p className="text-sm font-semibold text-[#1C1917]">DigiLocker</p>
             <p className="mt-1 text-xs text-[#78716C]">
-              Import documents from DigiLocker. Files are still encrypted in your browser before upload.
+              Import documents from DigiLocker. Files are still encrypted in your browser before
+              upload.
             </p>
           </div>
           {dlStatus.data?.enabled ? (
@@ -202,7 +220,9 @@ export function VaultList() {
                   </option>
                 ))}
               </select>
-              <p className="text-[11px] text-[#78716C]">For now, imports are limited to ~2MB per document.</p>
+              <p className="text-[11px] text-[#78716C]">
+                For now, imports are limited to ~2MB per document.
+              </p>
             </div>
 
             <div className="space-y-2">

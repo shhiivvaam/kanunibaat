@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export function CaseTracker() {
   const [cnr, setCnr] = useState('');
@@ -29,7 +29,10 @@ export function CaseTracker() {
     },
   });
 
-  const normalizedCnr = useMemo(() => (lookup.data?.cnr ? lookup.data.cnr : null), [lookup.data?.cnr]);
+  const normalizedCnr = useMemo(
+    () => (lookup.data?.cnr ? lookup.data.cnr : null),
+    [lookup.data?.cnr],
+  );
   const isTracked = Boolean(
     normalizedCnr && list.data?.some((t) => t.cnr === normalizedCnr && t.enabled),
   );
@@ -37,10 +40,15 @@ export function CaseTracker() {
   return (
     <div className="space-y-8" style={{ fontFamily: 'var(--font-body)' }}>
       <div>
-        <h1 className="text-xl font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+        <h1
+          className="text-xl font-semibold text-[#1C1917]"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
           Case tracker (NJDG)
         </h1>
-        <p className="mt-1 text-sm text-[#57534E]">Enter a CNR number to fetch the latest public case status.</p>
+        <p className="mt-1 text-sm text-[#57534E]">
+          Enter a CNR number to fetch the latest public case status.
+        </p>
       </div>
 
       <section className="rounded-xl border border-[#E7E5E4] bg-white p-4 shadow-sm">
@@ -60,7 +68,9 @@ export function CaseTracker() {
           </button>
         </div>
         {lookup.isPending ? <p className="mt-3 text-sm text-[#57534E]">Loading…</p> : null}
-        {lookup.isError ? <p className="mt-3 text-sm text-red-700">{lookup.error.message}</p> : null}
+        {lookup.isError ? (
+          <p className="mt-3 text-sm text-red-700">{lookup.error.message}</p>
+        ) : null}
 
         {lookup.data ? (
           <div className="mt-4 space-y-3">
@@ -97,18 +107,20 @@ export function CaseTracker() {
             <p className="mt-2 text-sm text-[#57534E]">Loading…</p>
           ) : (
             <ul className="mt-3 space-y-2 text-sm">
-              {list.data?.filter((t) => t.enabled).map((t) => (
-                <li key={t.id} className="flex items-center justify-between gap-2">
-                  <span className="text-[#44403C]">{t.cnr}</span>
-                  <button
-                    type="button"
-                    className="text-xs font-semibold text-red-700 hover:underline"
-                    onClick={() => void untrack.mutateAsync({ cnr: t.cnr })}
-                  >
-                    Remove
-                  </button>
-                </li>
-              ))}
+              {list.data
+                ?.filter((t) => t.enabled)
+                .map((t) => (
+                  <li key={t.id} className="flex items-center justify-between gap-2">
+                    <span className="text-[#44403C]">{t.cnr}</span>
+                    <button
+                      type="button"
+                      className="text-xs font-semibold text-red-700 hover:underline"
+                      onClick={() => void untrack.mutateAsync({ cnr: t.cnr })}
+                    >
+                      Remove
+                    </button>
+                  </li>
+                ))}
               {list.data?.filter((t) => t.enabled).length === 0 ? (
                 <li className="text-[#78716C]">No tracked cases.</li>
               ) : null}
@@ -119,4 +131,3 @@ export function CaseTracker() {
     </div>
   );
 }
-

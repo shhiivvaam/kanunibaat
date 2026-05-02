@@ -10,4 +10,3 @@ export function isRtlLocale(locale: string): boolean {
   if (!rtlEnabled) return false;
   return (rtlLocales as readonly string[]).includes(locale);
 }
-

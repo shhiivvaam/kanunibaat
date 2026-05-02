@@ -1,6 +1,6 @@
 'use client';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 
@@ -22,12 +22,6 @@ export function LawyerOnboarding() {
   const confirmUpload = trpc.lawyer.confirmDocumentUpload.useMutation({
     onSuccess: () => void utils.lawyer.listDocuments.invalidate(),
   });
-  const listDocs = trpc.lawyer.listDocuments.useQuery(undefined, {
-    enabled: Boolean(profile.data?.lawyer),
-  });
-  const submit = trpc.lawyer.submitForReview.useMutation({
-    onSuccess: () => void utils.profile.me.invalidate(),
-  });
 
   const [headline, setHeadline] = useState('');
   const [bio, setBio] = useState('');
@@ -41,6 +35,16 @@ export function LawyerOnboarding() {
 
   const law = profile.data?.lawyer;
   const status = law?.verificationStatus;
+
+  const listDocs = trpc.lawyer.listDocuments.useQuery(undefined, {
+    enabled: Boolean(profile.data?.lawyer),
+  });
+  const barCouncilCheck = trpc.lawyer.checkBarCouncilVerification.useQuery(undefined, {
+    enabled: Boolean(profile.data?.lawyer) && (status === 'draft' || status === 'rejected'),
+  });
+  const submit = trpc.lawyer.submitForReview.useMutation({
+    onSuccess: () => void utils.profile.me.invalidate(),
+  });
 
   const seeded = useRef(false);
   useEffect(() => {
@@ -107,12 +111,16 @@ export function LawyerOnboarding() {
   return (
     <div className="space-y-10" style={{ fontFamily: 'var(--font-body)' }}>
       <div>
-        <h1 className="text-2xl font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+        <h1
+          className="text-2xl font-semibold text-[#1C1917]"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
           Lawyer onboarding
         </h1>
         <p className="mt-2 text-sm text-[#57534E]">
-          Complete your professional profile, upload required documents, then submit for admin verification. Document
-          uploads require AWS S3 env on the API; until then you will see a clear configuration message.
+          Complete your professional profile, upload required documents, then submit for admin
+          verification. Document uploads require AWS S3 env on the API; until then you will see a
+          clear configuration message.
         </p>
       </div>
 
@@ -130,7 +138,9 @@ export function LawyerOnboarding() {
           >
             {bootstrap.isPending ? 'Working…' : 'Start lawyer profile'}
           </button>
-          {bootstrap.error ? <p className="mt-2 text-sm text-red-700">{bootstrap.error.message}</p> : null}
+          {bootstrap.error ? (
+            <p className="mt-2 text-sm text-red-700">{bootstrap.error.message}</p>
+          ) : null}
         </section>
       ) : null}
 
@@ -277,17 +287,66 @@ export function LawyerOnboarding() {
                 {(listDocs.data?.documents ?? []).map((doc) => (
                   <li key={doc.id}>
                     {doc.kind} — {doc.fileName}{' '}
-                    {doc.uploadedAt ? <span className="text-green-700">(complete)</span> : <span className="text-amber-700">(pending)</span>}
+                    {doc.uploadedAt ? (
+                      <span className="text-green-700">(complete)</span>
+                    ) : (
+                      <span className="text-amber-700">(pending)</span>
+                    )}
                   </li>
                 ))}
               </ul>
             </div>
           </section>
 
+          {barCouncilCheck.data ? (
+            <section className="rounded-2xl border border-[#E7E5E4] bg-white p-6 shadow-sm">
+              <h2 className="text-sm font-semibold text-[#1C1917]">Bar Council verification</h2>
+              {barCouncilCheck.data.available ? (
+                barCouncilCheck.data.canVerify ? (
+                  'verificationResult' in barCouncilCheck.data &&
+                  barCouncilCheck.data.verificationResult?.status === 'verified' ? (
+                    <div className="mt-3 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-950">
+                      Your enrollment has been automatically verified with the Bar Council.
+                    </div>
+                  ) : 'verificationResult' in barCouncilCheck.data &&
+                    barCouncilCheck.data.verificationResult?.status === 'unverified' ? (
+                    <div className="mt-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-950">
+                      Automated verification could not confirm your enrollment. Our team will
+                      manually review your documents.
+                    </div>
+                  ) : (
+                    <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+                      <p className="font-medium">Automated verification unavailable</p>
+                      <p className="mt-1">
+                        {('verificationResult' in barCouncilCheck.data &&
+                          barCouncilCheck.data.verificationResult?.message) ||
+                          'Bar Council API integration pending. Your profile will be verified manually by our team.'}
+                      </p>
+                    </div>
+                  )
+                ) : (
+                  <div className="mt-3 rounded-lg border border-[#E7E5E4] bg-[#FAFAF9] px-4 py-3 text-sm text-[#57534E]">
+                    {('reason' in barCouncilCheck.data && barCouncilCheck.data.reason) ||
+                      'Please provide bar state and enrollment number to enable verification check.'}
+                  </div>
+                )
+              ) : (
+                <div className="mt-3 rounded-lg border border-[#E7E5E4] bg-[#FAFAF9] px-4 py-3 text-sm text-[#57534E]">
+                  <p className="font-medium">Automated verification not available</p>
+                  <p className="mt-1">
+                    {('reason' in barCouncilCheck.data && barCouncilCheck.data.reason) ||
+                      'All verifications are processed manually by our team.'}
+                  </p>
+                </div>
+              )}
+            </section>
+          ) : null}
+
           <section className="rounded-2xl border border-[#E7E5E4] bg-white p-6 shadow-sm">
             <h2 className="text-sm font-semibold text-[#1C1917]">Submit for review</h2>
             <p className="mt-2 text-sm text-[#57534E]">
-              You must have bar state, enrollment number, and both required documents uploaded before submitting.
+              You must have bar state, enrollment number, and both required documents uploaded
+              before submitting.
             </p>
             <button
               type="button"
@@ -297,7 +356,9 @@ export function LawyerOnboarding() {
             >
               Submit for verification
             </button>
-            {submit.error ? <p className="mt-2 text-sm text-red-700">{submit.error.message}</p> : null}
+            {submit.error ? (
+              <p className="mt-2 text-sm text-red-700">{submit.error.message}</p>
+            ) : null}
           </section>
         </>
       ) : null}
@@ -306,13 +367,16 @@ export function LawyerOnboarding() {
         <div className="rounded-2xl border border-[#E7E5E4] bg-white p-6 text-sm text-[#44403C] shadow-sm">
           {status === 'pending' ? (
             <p>
-              Your profile is <strong>pending review</strong>. We will notify you when an admin has completed
-              verification.
+              Your profile is <strong>pending review</strong>. We will notify you when an admin has
+              completed verification.
             </p>
           ) : (
             <p>
               You are <strong className="text-green-800">verified</strong>. Your public profile:{' '}
-              <Link href={`/lawyers/${law.slug}`} className="font-semibold text-[#C2410C] hover:underline">
+              <Link
+                href={`/lawyers/${law.slug}`}
+                className="font-semibold text-[#C2410C] hover:underline"
+              >
                 /lawyers/{law.slug}
               </Link>
             </p>

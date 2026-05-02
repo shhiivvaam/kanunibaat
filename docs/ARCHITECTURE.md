@@ -1,17 +1,17 @@
-# KanuniBaat — Architecture
+# Jurisly — Architecture
 
-KanuniBaat is a **pnpm + Turborepo monorepo** with a shared type-safe API contract, a Postgres/Drizzle data layer, and product surfaces across web, mobile, and backend integrations.
+Jurisly is a **pnpm + Turborepo monorepo** with a shared type-safe API contract, a Postgres/Drizzle data layer, and product surfaces across web, mobile, and backend integrations.
 
 ## System overview
 
-| Layer | Primary stack | Responsibility |
-|------|------|------|
-| Web app | Next.js App Router (`apps/web`) | Marketing + authenticated app surfaces, Better Auth host, locale-routed UI |
-| API app | NestJS (`apps/api`) | Public HTTP stack, `/trpc` adapter, webhooks, internal cron endpoints |
-| Mobile app | Expo Router (`apps/mobile`) | Mobile-first product surface using shared tRPC contract |
-| Shared API | `@kb/trpc` (`packages/trpc`) | Domain routers, RBAC procedures, integration glue |
-| Database | Drizzle + PostgreSQL (`packages/database`) | Schema + migrations for product domains |
-| Shared clients/types | `@kb/api-client`, `@kb/types`, `@kb/utils` | Typed API client, domain constants/schemas, reusable utilities |
+| Layer                | Primary stack                                             | Responsibility                                                             |
+| -------------------- | --------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Web app              | Next.js App Router (`apps/web`)                           | Marketing + authenticated app surfaces, Better Auth host, locale-routed UI |
+| API app              | NestJS (`apps/api`)                                       | Public HTTP stack, `/trpc` adapter, webhooks, internal cron endpoints      |
+| Mobile app           | Expo Router (`apps/mobile`)                               | Mobile-first product surface using shared tRPC contract                    |
+| Shared API           | `@jurisly/trpc` (`packages/trpc`)                         | Domain routers, RBAC procedures, integration glue                          |
+| Database             | Drizzle + PostgreSQL (`packages/database`)                | Schema + migrations for product domains                                    |
+| Shared clients/types | `@jurisly/api-client`, `@jurisly/types`, `@jurisly/utils` | Typed API client, domain constants/schemas, reusable utilities             |
 
 ## Monorepo topology
 
@@ -78,7 +78,7 @@ KanuniBaat is a **pnpm + Turborepo monorepo** with a shared type-safe API contra
 
 ## Configuration model
 
-- Runtime environment is validated in API at startup (`apps/api/src/env.ts`).
+- Runtime environment is validated in API at startup (`apps/api/src/config/env.ts`).
 - `.env.example` is the canonical config contract for local/staging/prod parity.
 - Sensitive integration values remain environment-only.
 

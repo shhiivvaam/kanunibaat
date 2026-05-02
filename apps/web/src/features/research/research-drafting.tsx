@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 const TEMPLATES = [
   { value: 'legal_notice_reply' as const, label: 'Reply to legal notice' },
@@ -13,7 +13,8 @@ const TEMPLATES = [
 
 export function ResearchDrafting() {
   const fill = trpc.research.drafting.fillTemplate.useMutation();
-  const [templateKey, setTemplateKey] = useState<(typeof TEMPLATES)[number]['value']>('legal_notice_reply');
+  const [templateKey, setTemplateKey] =
+    useState<(typeof TEMPLATES)[number]['value']>('legal_notice_reply');
   const [factsRaw, setFactsRaw] = useState('{"clientName":"[Name]","dispute":"[Brief facts]"}');
 
   return (
@@ -21,10 +22,15 @@ export function ResearchDrafting() {
       <Link href="/app/research" className="text-sm text-[#C2410C] hover:underline">
         ← Research home
       </Link>
-      <h1 className="text-xl font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+      <h1
+        className="text-xl font-semibold text-[#1C1917]"
+        style={{ fontFamily: 'var(--font-display)' }}
+      >
         AI drafting
       </h1>
-      <p className="text-xs text-[#78716C]">Requires OPENAI_API_KEY on the API. Output is a first draft for lawyer review only.</p>
+      <p className="text-xs text-[#78716C]">
+        Requires OPENAI_API_KEY on the API. Output is a first draft for lawyer review only.
+      </p>
       <label className="block text-sm">
         <span className="text-[#44403C]">Template</span>
         <select

@@ -7,6 +7,7 @@ import {
   boolean,
   date,
   doublePrecision,
+  index,
   integer,
   jsonb,
   pgEnum,
@@ -66,10 +67,18 @@ export const lawyerProfile = pgTable('lawyer_profile', {
   headline: text('headline').notNull().default(''),
   bio: text('bio').notNull().default(''),
   city: text('city'),
-  practiceAreas: jsonb('practice_areas').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
-  languages: jsonb('languages').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+  practiceAreas: jsonb('practice_areas')
+    .$type<string[]>()
+    .notNull()
+    .default(sql`'[]'::jsonb`),
+  languages: jsonb('languages')
+    .$type<string[]>()
+    .notNull()
+    .default(sql`'[]'::jsonb`),
   yearsExperience: integer('years_experience'),
-  verificationStatus: lawyerVerificationStatusEnum('verification_status').notNull().default('draft'),
+  verificationStatus: lawyerVerificationStatusEnum('verification_status')
+    .notNull()
+    .default('draft'),
   rejectionReason: text('rejection_reason'),
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
@@ -126,7 +135,10 @@ export const noticeScan = pgTable('notice_scan', {
   deadlineDate: timestamp('deadline_date', { withTimezone: true, mode: 'date' }),
   amountInr: integer('amount_inr'),
   aiSummary: text('ai_summary'),
-  recommendedActions: jsonb('recommended_actions').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+  recommendedActions: jsonb('recommended_actions')
+    .$type<string[]>()
+    .notNull()
+    .default(sql`'[]'::jsonb`),
   recommendedLawyerType: text('recommended_lawyer_type'),
   locale: text('locale').notNull().default('en'),
   failureReason: text('failure_reason'),
@@ -202,6 +214,23 @@ export const consultationMessage = pgTable('consultation_message', {
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
 });
 
+/** One verified-client rating per consultation (completed bookings only). */
+export const lawyerConsultationReview = pgTable('lawyer_consultation_review', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  consultationId: uuid('consultation_id')
+    .notNull()
+    .references(() => consultation.id, { onDelete: 'cascade' }),
+  reviewerUserId: text('reviewer_user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  lawyerUserId: text('lawyer_user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  rating: integer('rating').notNull(),
+  reviewText: text('review_text'),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+});
+
 export const vaultDocumentCategoryEnum = pgEnum('vault_document_category', [
   'property',
   'family',
@@ -216,7 +245,10 @@ export const vaultDocumentCategoryEnum = pgEnum('vault_document_category', [
   'other',
 ]);
 
-export const vaultDocumentUploadStatusEnum = pgEnum('vault_document_upload_status', ['pending', 'complete']);
+export const vaultDocumentUploadStatusEnum = pgEnum('vault_document_upload_status', [
+  'pending',
+  'complete',
+]);
 
 export const vaultFolder = pgTable('vault_folder', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -239,7 +271,10 @@ export const vaultDocument = pgTable('vault_document', {
   folderId: uuid('folder_id').references(() => vaultFolder.id, { onDelete: 'set null' }),
   category: vaultDocumentCategoryEnum('category').notNull().default('other'),
   displayName: text('display_name').notNull(),
-  tags: jsonb('tags').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+  tags: jsonb('tags')
+    .$type<string[]>()
+    .notNull()
+    .default(sql`'[]'::jsonb`),
   storageKey: text('storage_key').notNull(),
   byteSize: integer('byte_size').notNull().default(0),
   contentType: text('content_type').notNull().default('application/octet-stream'),
@@ -282,7 +317,11 @@ export const lawyerCaseStatusEnum = pgEnum('lawyer_case_status', [
   'appealed',
 ]);
 
-export const lawyerCaseTaskPriorityEnum = pgEnum('lawyer_case_task_priority', ['low', 'normal', 'high']);
+export const lawyerCaseTaskPriorityEnum = pgEnum('lawyer_case_task_priority', [
+  'low',
+  'normal',
+  'high',
+]);
 
 export const lawyerCaseTaskStatusEnum = pgEnum('lawyer_case_task_status', ['open', 'done']);
 
@@ -319,7 +358,9 @@ export const lawyerCase = pgTable('lawyer_case', {
   lawyerUserId: text('lawyer_user_id')
     .notNull()
     .references(() => user.id, { onDelete: 'cascade' }),
-  lawyerClientId: uuid('lawyer_client_id').references(() => lawyerClient.id, { onDelete: 'set null' }),
+  lawyerClientId: uuid('lawyer_client_id').references(() => lawyerClient.id, {
+    onDelete: 'set null',
+  }),
   clientDisplayName: text('client_display_name'),
   courtCaseNumber: text('court_case_number'),
   cnrNumber: text('cnr_number'),
@@ -350,7 +391,10 @@ export const lawyerCaseHearing = pgTable('lawyer_case_hearing', {
   judgeName: text('judge_name'),
   whatHappened: text('what_happened'),
   nextHearingAt: timestamp('next_hearing_at', { withTimezone: true, mode: 'date' }),
-  actionItems: jsonb('action_items').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+  actionItems: jsonb('action_items')
+    .$type<string[]>()
+    .notNull()
+    .default(sql`'[]'::jsonb`),
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
 });
 
@@ -427,7 +471,10 @@ export const lawyerInvoiceStatusEnum = pgEnum('lawyer_invoice_status', [
   'void',
 ]);
 
-export const lawyerInvoiceSupplyTypeEnum = pgEnum('lawyer_invoice_supply_type', ['intrastate', 'interstate']);
+export const lawyerInvoiceSupplyTypeEnum = pgEnum('lawyer_invoice_supply_type', [
+  'intrastate',
+  'interstate',
+]);
 
 export const lawyerInvoiceLineKindEnum = pgEnum('lawyer_invoice_line_kind', [
   'consultation',
@@ -441,6 +488,7 @@ export const lawyerInvoicePaymentStatusEnum = pgEnum('lawyer_invoice_payment_sta
   'created',
   'paid',
   'failed',
+  'refunded',
 ]);
 
 export const kbPushPlatformEnum = pgEnum('kb_push_platform', ['expo', 'webpush']);
@@ -450,9 +498,14 @@ export const kbNotificationKindEnum = pgEnum('kb_notification_kind', [
   'consultation_reminder',
   'consultation_message',
   'case_update',
+  'task_assigned',
 ]);
 
-export const kbNotificationJobStatusEnum = pgEnum('kb_notification_job_status', ['pending', 'sent', 'failed']);
+export const kbNotificationJobStatusEnum = pgEnum('kb_notification_job_status', [
+  'pending',
+  'sent',
+  'failed',
+]);
 
 export const pushDestination = pgTable('push_destination', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -480,7 +533,10 @@ export const notificationJob = pgTable(
     scheduledAt: timestamp('scheduled_at', { withTimezone: true, mode: 'date' }).notNull(),
     sentAt: timestamp('sent_at', { withTimezone: true, mode: 'date' }),
     status: kbNotificationJobStatusEnum('status').notNull().default('pending'),
-    payloadJson: jsonb('payload_json').$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
+    payloadJson: jsonb('payload_json')
+      .$type<Record<string, unknown>>()
+      .notNull()
+      .default(sql`'{}'::jsonb`),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   },
@@ -497,8 +553,13 @@ export const caseTracker = pgTable(
     cnr: text('cnr').notNull(),
     enabled: boolean('enabled').notNull().default(true),
     lastSnapshotHash: text('last_snapshot_hash'),
-    lastSnapshotJson: jsonb('last_snapshot_json').$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
-    nextCheckAt: timestamp('next_check_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+    lastSnapshotJson: jsonb('last_snapshot_json')
+      .$type<Record<string, unknown>>()
+      .notNull()
+      .default(sql`'{}'::jsonb`),
+    nextCheckAt: timestamp('next_check_at', { withTimezone: true, mode: 'date' })
+      .notNull()
+      .defaultNow(),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   },
@@ -515,7 +576,9 @@ export const whatsappConversation = pgTable(
     waUserId: text('wa_user_id').notNull(),
     lastState: text('last_state').notNull().default('entry'),
     lastLocale: text('last_locale').notNull().default('en'),
-    lastSeenAt: timestamp('last_seen_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+    lastSeenAt: timestamp('last_seen_at', { withTimezone: true, mode: 'date' })
+      .notNull()
+      .defaultNow(),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   },
@@ -530,7 +593,10 @@ export const whatsappMessage = pgTable('whatsapp_message', {
   waMessageId: text('wa_message_id').notNull().unique(),
   direction: whatsappMessageDirectionEnum('direction').notNull(),
   body: text('body').notNull().default(''),
-  rawJson: jsonb('raw_json').$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
+  rawJson: jsonb('raw_json')
+    .$type<Record<string, unknown>>()
+    .notNull()
+    .default(sql`'{}'::jsonb`),
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
 });
 
@@ -551,7 +617,10 @@ export const digilockerConnection = pgTable(
     accessTokenEnc: text('access_token_enc').notNull(),
     refreshTokenEnc: text('refresh_token_enc').notNull(),
     expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'date' }),
-    scopesJson: jsonb('scopes_json').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+    scopesJson: jsonb('scopes_json')
+      .$type<string[]>()
+      .notNull()
+      .default(sql`'[]'::jsonb`),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   },
@@ -571,13 +640,40 @@ export const digilockerDocument = pgTable(
     title: text('title').notNull().default(''),
     mime: text('mime'),
     fetchedAt: timestamp('fetched_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
-    vaultDocumentId: uuid('vault_document_id').references(() => vaultDocument.id, { onDelete: 'set null' }),
+    vaultDocumentId: uuid('vault_document_id').references(() => vaultDocument.id, {
+      onDelete: 'set null',
+    }),
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex('digilocker_document_conn_doc_uidx').on(t.connectionId, t.docId)],
 );
 
-export const kbQaQuestionStatusEnum = pgEnum('kb_qa_question_status', ['open', 'answered', 'closed', 'hidden']);
+export const auditLog = pgTable(
+  'audit_log',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id').references(() => user.id, { onDelete: 'set null' }),
+    action: text('action').notNull(),
+    entityType: text('entity_type'),
+    entityId: text('entity_id'),
+    metadata: jsonb('metadata').$type<Record<string, unknown>>(),
+    ipAddress: text('ip_address'),
+    userAgent: text('user_agent'),
+    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  },
+  (table) => ({
+    userIdx: index('audit_log_user_idx').on(table.userId),
+    actionIdx: index('audit_log_action_idx').on(table.action),
+    createdAtIdx: index('audit_log_created_at_idx').on(table.createdAt),
+  }),
+);
+
+export const kbQaQuestionStatusEnum = pgEnum('kb_qa_question_status', [
+  'open',
+  'answered',
+  'closed',
+  'hidden',
+]);
 export const kbQaVoteValueEnum = pgEnum('kb_qa_vote_value', ['up', 'down']);
 
 export const kbPlanPeriodEnum = pgEnum('kb_plan_period', ['month']);
@@ -597,7 +693,10 @@ export const kbPlan = pgTable('kb_plan', {
   priceInr: integer('price_inr').notNull().default(0),
   period: kbPlanPeriodEnum('period').notNull().default('month'),
   razorpayPlanId: text('razorpay_plan_id'),
-  limitsJson: jsonb('limits_json').$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
+  limitsJson: jsonb('limits_json')
+    .$type<Record<string, unknown>>()
+    .notNull()
+    .default(sql`'{}'::jsonb`),
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
 });
@@ -632,7 +731,9 @@ export const kbUsageMeter = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   },
-  (t) => [uniqueIndex('kb_usage_meter_user_meter_period_uidx').on(t.userId, t.meterKey, t.periodStartAt)],
+  (t) => [
+    uniqueIndex('kb_usage_meter_user_meter_period_uidx').on(t.userId, t.meterKey, t.periodStartAt),
+  ],
 );
 
 export const kbBillingEvent = pgTable(
@@ -647,8 +748,13 @@ export const kbBillingEvent = pgTable(
     amountInr: integer('amount_inr'),
     currency: text('currency'),
     occurredAt: timestamp('occurred_at', { withTimezone: true, mode: 'date' }),
-    payloadJson: jsonb('payload_json').$type<Record<string, unknown>>().notNull().default(sql`'{}'::jsonb`),
-    receivedAt: timestamp('received_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+    payloadJson: jsonb('payload_json')
+      .$type<Record<string, unknown>>()
+      .notNull()
+      .default(sql`'{}'::jsonb`),
+    receivedAt: timestamp('received_at', { withTimezone: true, mode: 'date' })
+      .notNull()
+      .defaultNow(),
   },
   (t) => [uniqueIndex('kb_billing_event_provider_event_uidx').on(t.provider, t.providerEventId)],
 );
@@ -658,10 +764,22 @@ export const contentArticle = pgTable('content_article', {
   slug: text('slug').notNull().unique(),
   category: text('category').notNull().default(''),
   lifeSituation: text('life_situation').notNull().default(''),
-  titleJson: jsonb('title_json').$type<Record<string, string>>().notNull().default(sql`'{}'::jsonb`),
-  bodyJson: jsonb('body_json').$type<Record<string, string>>().notNull().default(sql`'{}'::jsonb`),
-  tagsJson: jsonb('tags_json').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
-  applicableLawsJson: jsonb('applicable_laws_json').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+  titleJson: jsonb('title_json')
+    .$type<Record<string, string>>()
+    .notNull()
+    .default(sql`'{}'::jsonb`),
+  bodyJson: jsonb('body_json')
+    .$type<Record<string, string>>()
+    .notNull()
+    .default(sql`'{}'::jsonb`),
+  tagsJson: jsonb('tags_json')
+    .$type<string[]>()
+    .notNull()
+    .default(sql`'[]'::jsonb`),
+  applicableLawsJson: jsonb('applicable_laws_json')
+    .$type<string[]>()
+    .notNull()
+    .default(sql`'[]'::jsonb`),
   reviewedByUserId: text('reviewed_by_user_id').references(() => user.id, { onDelete: 'set null' }),
   publishedAt: timestamp('published_at', { withTimezone: true, mode: 'date' }),
   isPublished: boolean('is_published').notNull().default(false),
@@ -723,7 +841,9 @@ export const lawyerInvoice = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: 'cascade' }),
     caseId: uuid('case_id').references(() => lawyerCase.id, { onDelete: 'set null' }),
-    consultationId: uuid('consultation_id').references(() => consultation.id, { onDelete: 'set null' }),
+    consultationId: uuid('consultation_id').references(() => consultation.id, {
+      onDelete: 'set null',
+    }),
     invoiceNumber: text('invoice_number').notNull(),
     status: lawyerInvoiceStatusEnum('status').notNull().default('draft'),
     supplyType: lawyerInvoiceSupplyTypeEnum('supply_type').notNull().default('intrastate'),
@@ -763,26 +883,25 @@ export const lawyerInvoiceLine = pgTable('lawyer_invoice_line', {
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
 });
 
-export const lawyerTimeEntry = pgTable(
-  'lawyer_time_entry',
-  {
-    id: uuid('id').primaryKey().defaultRandom(),
-    lawyerUserId: text('lawyer_user_id')
-      .notNull()
-      .references(() => user.id, { onDelete: 'cascade' }),
-    caseId: uuid('case_id')
-      .notNull()
-      .references(() => lawyerCase.id, { onDelete: 'cascade' }),
-    taskId: uuid('task_id').references(() => lawyerCaseTask.id, { onDelete: 'set null' }),
-    startedAt: timestamp('started_at', { withTimezone: true, mode: 'date' }).notNull(),
-    endedAt: timestamp('ended_at', { withTimezone: true, mode: 'date' }),
-    durationSeconds: integer('duration_seconds'),
-    notes: text('notes').notNull().default(''),
-    billedInvoiceId: uuid('billed_invoice_id').references(() => lawyerInvoice.id, { onDelete: 'set null' }),
-    createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
-    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
-  },
-);
+export const lawyerTimeEntry = pgTable('lawyer_time_entry', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  lawyerUserId: text('lawyer_user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  caseId: uuid('case_id')
+    .notNull()
+    .references(() => lawyerCase.id, { onDelete: 'cascade' }),
+  taskId: uuid('task_id').references(() => lawyerCaseTask.id, { onDelete: 'set null' }),
+  startedAt: timestamp('started_at', { withTimezone: true, mode: 'date' }).notNull(),
+  endedAt: timestamp('ended_at', { withTimezone: true, mode: 'date' }),
+  durationSeconds: integer('duration_seconds'),
+  notes: text('notes').notNull().default(''),
+  billedInvoiceId: uuid('billed_invoice_id').references(() => lawyerInvoice.id, {
+    onDelete: 'set null',
+  }),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
+});
 
 export const lawyerInvoicePayment = pgTable('lawyer_invoice_payment', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -809,7 +928,10 @@ export const researchJudgment = pgTable('research_judgment', {
   citation: text('citation').notNull(),
   summaryExcerpt: text('summary_excerpt').notNull().default(''),
   bodyForSearch: text('body_for_search').notNull().default(''),
-  topics: jsonb('topics').$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+  topics: jsonb('topics')
+    .$type<string[]>()
+    .notNull()
+    .default(sql`'[]'::jsonb`),
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
 });
@@ -881,15 +1003,42 @@ export const consultationRelations = relations(consultation, ({ one, many }) => 
   payments: many(payment),
   messages: many(consultationMessage),
   invoices: many(lawyerInvoice),
+  review: one(lawyerConsultationReview, {
+    fields: [consultation.id],
+    references: [lawyerConsultationReview.consultationId],
+  }),
 }));
 
 export const paymentRelations = relations(payment, ({ one }) => ({
-  consultation: one(consultation, { fields: [payment.consultationId], references: [consultation.id] }),
+  consultation: one(consultation, {
+    fields: [payment.consultationId],
+    references: [consultation.id],
+  }),
 }));
 
 export const consultationMessageRelations = relations(consultationMessage, ({ one }) => ({
-  consultation: one(consultation, { fields: [consultationMessage.consultationId], references: [consultation.id] }),
+  consultation: one(consultation, {
+    fields: [consultationMessage.consultationId],
+    references: [consultation.id],
+  }),
   sender: one(user, { fields: [consultationMessage.senderUserId], references: [user.id] }),
+}));
+
+export const lawyerConsultationReviewRelations = relations(lawyerConsultationReview, ({ one }) => ({
+  consultation: one(consultation, {
+    fields: [lawyerConsultationReview.consultationId],
+    references: [consultation.id],
+  }),
+  reviewer: one(user, {
+    fields: [lawyerConsultationReview.reviewerUserId],
+    references: [user.id],
+    relationName: 'lawyer_review_reviewer_user',
+  }),
+  lawyer: one(user, {
+    fields: [lawyerConsultationReview.lawyerUserId],
+    references: [user.id],
+    relationName: 'lawyer_review_subject_user',
+  }),
 }));
 
 export const vaultFolderRelations = relations(vaultFolder, ({ one, many }) => ({
@@ -963,24 +1112,36 @@ export const lawyerInvoiceCounterRelations = relations(lawyerInvoiceCounter, ({ 
 export const lawyerInvoiceRelations = relations(lawyerInvoice, ({ one, many }) => ({
   lawyer: one(user, { fields: [lawyerInvoice.lawyerUserId], references: [user.id] }),
   case: one(lawyerCase, { fields: [lawyerInvoice.caseId], references: [lawyerCase.id] }),
-  consultation: one(consultation, { fields: [lawyerInvoice.consultationId], references: [consultation.id] }),
+  consultation: one(consultation, {
+    fields: [lawyerInvoice.consultationId],
+    references: [consultation.id],
+  }),
   lines: many(lawyerInvoiceLine),
   payments: many(lawyerInvoicePayment),
 }));
 
 export const lawyerInvoiceLineRelations = relations(lawyerInvoiceLine, ({ one }) => ({
-  invoice: one(lawyerInvoice, { fields: [lawyerInvoiceLine.invoiceId], references: [lawyerInvoice.id] }),
+  invoice: one(lawyerInvoice, {
+    fields: [lawyerInvoiceLine.invoiceId],
+    references: [lawyerInvoice.id],
+  }),
 }));
 
 export const lawyerTimeEntryRelations = relations(lawyerTimeEntry, ({ one }) => ({
   lawyer: one(user, { fields: [lawyerTimeEntry.lawyerUserId], references: [user.id] }),
   case: one(lawyerCase, { fields: [lawyerTimeEntry.caseId], references: [lawyerCase.id] }),
   task: one(lawyerCaseTask, { fields: [lawyerTimeEntry.taskId], references: [lawyerCaseTask.id] }),
-  billedInvoice: one(lawyerInvoice, { fields: [lawyerTimeEntry.billedInvoiceId], references: [lawyerInvoice.id] }),
+  billedInvoice: one(lawyerInvoice, {
+    fields: [lawyerTimeEntry.billedInvoiceId],
+    references: [lawyerInvoice.id],
+  }),
 }));
 
 export const lawyerInvoicePaymentRelations = relations(lawyerInvoicePayment, ({ one }) => ({
-  invoice: one(lawyerInvoice, { fields: [lawyerInvoicePayment.invoiceId], references: [lawyerInvoice.id] }),
+  invoice: one(lawyerInvoice, {
+    fields: [lawyerInvoicePayment.invoiceId],
+    references: [lawyerInvoice.id],
+  }),
 }));
 
 export const pushDestinationRelations = relations(pushDestination, ({ one }) => ({

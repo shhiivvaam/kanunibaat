@@ -1,2 +1,5 @@
-export { default } from '../../../../app/vault/upload/page';
+import { VaultUpload } from '@/features/vault/vault-upload';
 
+export default function VaultUploadPage() {
+  return <VaultUpload />;
+}

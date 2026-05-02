@@ -1,3 +1,5 @@
+import { fetchWithTimeout } from '../lib/outbound-fetch';
+
 export type WhatsAppSendTextResult =
   | { ok: true; messageId: string }
   | { ok: false; error: string };
@@ -10,7 +12,7 @@ export async function sendWhatsAppText(opts: {
 }): Promise<WhatsAppSendTextResult> {
   const url = `https://graph.facebook.com/v20.0/${encodeURIComponent(opts.phoneNumberId)}/messages`;
 
-  const res = await fetch(url, {
+  const res = await fetchWithTimeout(url, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${opts.apiToken}`,

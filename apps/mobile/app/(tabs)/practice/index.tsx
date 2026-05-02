@@ -2,7 +2,7 @@ import { Link } from 'expo-router';
 import { useMemo } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export default function PracticeDashboardScreen() {
   const profile = trpc.profile.me.useQuery();
@@ -48,7 +48,9 @@ export default function PracticeDashboardScreen() {
         </View>
         <View style={styles.statCard}>
           <Text style={styles.statLabel}>Total</Text>
-          <Text style={styles.statVal}>{cases.isPending ? '—' : String(cases.data?.cases.length ?? 0)}</Text>
+          <Text style={styles.statVal}>
+            {cases.isPending ? '—' : String(cases.data?.cases.length ?? 0)}
+          </Text>
         </View>
         <View style={styles.statCard}>
           <Text style={styles.statLabel}>7 days</Text>
@@ -83,12 +85,14 @@ export default function PracticeDashboardScreen() {
         <ActivityIndicator />
       ) : (
         <View style={styles.list}>
-          {(calendar.data?.hearings.length ?? 0) === 0 && (calendar.data?.tasks.length ?? 0) === 0 ? (
+          {(calendar.data?.hearings.length ?? 0) === 0 &&
+          (calendar.data?.tasks.length ?? 0) === 0 ? (
             <Text style={styles.muted}>Nothing scheduled in this window.</Text>
           ) : null}
           {calendar.data?.hearings.map((h) => (
             <Text key={h.id} style={styles.row}>
-              Hearing · {new Date(h.hearingAt).toLocaleString()} · {h.case.courtName || h.case.caseType}
+              Hearing · {new Date(h.hearingAt).toLocaleString()} ·{' '}
+              {h.case.courtName || h.case.caseType}
             </Text>
           ))}
           {calendar.data?.tasks.map((t) => (
@@ -108,7 +112,13 @@ const styles = StyleSheet.create({
   container: { padding: 20, paddingBottom: 40 },
   title: { fontSize: 22, fontWeight: '700', color: '#1C1917' },
   muted: { marginTop: 6, fontSize: 14, color: '#57534E' },
-  warn: { fontSize: 14, color: '#92400e', backgroundColor: '#fffbeb', padding: 14, borderRadius: 12 },
+  warn: {
+    fontSize: 14,
+    color: '#92400e',
+    backgroundColor: '#fffbeb',
+    padding: 14,
+    borderRadius: 12,
+  },
   stats: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 20 },
   statCard: {
     flex: 1,

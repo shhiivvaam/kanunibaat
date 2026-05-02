@@ -3,7 +3,7 @@ import { Link, Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export default function LawyersListScreen() {
   const params = useLocalSearchParams<{ q?: string | string[] }>();
@@ -28,8 +28,8 @@ export default function LawyersListScreen() {
       <Stack.Screen options={{ title: 'Find lawyers' }} />
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.lead}>
-          Verified advocates on KanuniBaat. Search is powered by the API (Meilisearch when configured, Postgres
-          fallback).
+          Verified advocates on Jurisly. Search is powered by the API (Meilisearch when configured,
+          Postgres fallback).
         </Text>
         <TextInput
           value={search}
@@ -44,11 +44,7 @@ export default function LawyersListScreen() {
         ) : (
           <View style={styles.list}>
             {(q.data?.hits ?? []).map((h) => (
-              <Link
-                key={h.userId}
-                href={`/(tabs)/lawyers/${h.slug}` as Href}
-                style={styles.link}
-              >
+              <Link key={h.userId} href={`/(tabs)/lawyers/${h.slug}` as Href} style={styles.link}>
                 {h.displayName ?? 'Lawyer'} — {h.city ?? h.barState ?? 'India'}
               </Link>
             ))}

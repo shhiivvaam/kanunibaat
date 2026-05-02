@@ -1,8 +1,8 @@
 import { Link, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export default function ResearchJudgmentDetailScreen() {
   const { judgmentId } = useLocalSearchParams<{ judgmentId: string }>();
@@ -34,13 +34,19 @@ export default function ResearchJudgmentDetailScreen() {
         {j.citation} · {j.court}
       </Text>
       <Text style={styles.body}>{j.summaryExcerpt}</Text>
-      <Pressable style={styles.btn} disabled={summarize.isPending} onPress={() => void summarize.mutateAsync({ id })}>
-        {summarize.isPending ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>AI summary</Text>}
+      <Pressable
+        style={styles.btn}
+        disabled={summarize.isPending}
+        onPress={() => void summarize.mutateAsync({ id })}
+      >
+        {summarize.isPending ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.btnText}>AI summary</Text>
+        )}
       </Pressable>
       {summarize.error ? <Text style={styles.err}>{summarize.error.message}</Text> : null}
-      {summarize.data ? (
-        <Text style={styles.body}>{summarize.data.summary.summary}</Text>
-      ) : null}
+      {summarize.data ? <Text style={styles.body}>{summarize.data.summary.summary}</Text> : null}
       <Pressable
         style={styles.btnSecondary}
         disabled={chain.isPending}
@@ -66,7 +72,13 @@ const styles = StyleSheet.create({
   body: { fontSize: 14, color: '#44403C', lineHeight: 20 },
   btn: { backgroundColor: '#C2410C', padding: 12, borderRadius: 12, alignItems: 'center' },
   btnText: { color: '#fff', fontWeight: '700' },
-  btnSecondary: { borderWidth: 1, borderColor: '#D6D3D1', padding: 12, borderRadius: 12, alignItems: 'center' },
+  btnSecondary: {
+    borderWidth: 1,
+    borderColor: '#D6D3D1',
+    padding: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
   btnSecondaryText: { fontWeight: '700', color: '#44403C' },
   err: { color: '#b91c1c' },
   mono: { fontFamily: 'monospace', fontSize: 11, color: '#44403C' },

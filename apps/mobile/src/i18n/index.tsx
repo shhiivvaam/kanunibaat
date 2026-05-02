@@ -49,7 +49,9 @@ type I18nCtx = {
 const I18nContext = createContext<I18nCtx | null>(null);
 
 export function I18nProvider(props: { children: React.ReactNode; initialLocale?: MobileLocale }) {
-  const [locale, setLocale] = useState<MobileLocale>(() => props.initialLocale ?? resolveDeviceLocale());
+  const [locale, setLocale] = useState<MobileLocale>(
+    () => props.initialLocale ?? resolveDeviceLocale(),
+  );
 
   useEffect(() => {
     maybeEnableRtl({ locale, enabled: process.env.EXPO_PUBLIC_RTL_ENABLED === 'true' });
@@ -85,4 +87,3 @@ export function useT(): (key: string, options?: Record<string, unknown>) => stri
   if (!ctx) throw new Error('useT must be used within I18nProvider');
   return ctx.t;
 }
-

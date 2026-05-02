@@ -1,8 +1,8 @@
 import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput } from 'react-native';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 const STATUSES = [
   'intake',
@@ -59,13 +59,19 @@ export default function PracticeNewCaseScreen() {
             style={[styles.chip, lawyerClientId === c.id && styles.chipOn]}
             onPress={() => setLawyerClientId(c.id)}
           >
-            <Text style={[styles.chipText, lawyerClientId === c.id && styles.chipTextOn]}>{c.displayName}</Text>
+            <Text style={[styles.chipText, lawyerClientId === c.id && styles.chipTextOn]}>
+              {c.displayName}
+            </Text>
           </Pressable>
         ))}
       </ScrollView>
 
       <Text style={[styles.label, { marginTop: 12 }]}>Offline client name</Text>
-      <TextInput style={styles.input} value={clientDisplayName} onChangeText={setClientDisplayName} />
+      <TextInput
+        style={styles.input}
+        value={clientDisplayName}
+        onChangeText={setClientDisplayName}
+      />
 
       <Text style={[styles.label, { marginTop: 12 }]}>Court / title</Text>
       <TextInput style={styles.input} value={courtName} onChangeText={setCourtName} />
@@ -73,7 +79,11 @@ export default function PracticeNewCaseScreen() {
       <Text style={[styles.label, { marginTop: 12 }]}>Court type</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipsScroll}>
         {COURT_TYPES.map((t, i) => (
-          <Pressable key={t} style={[styles.chip, courtTypeIdx === i && styles.chipOn]} onPress={() => setCourtTypeIdx(i)}>
+          <Pressable
+            key={t}
+            style={[styles.chip, courtTypeIdx === i && styles.chipOn]}
+            onPress={() => setCourtTypeIdx(i)}
+          >
             <Text style={[styles.chipText, courtTypeIdx === i && styles.chipTextOn]}>{t}</Text>
           </Pressable>
         ))}
@@ -88,14 +98,23 @@ export default function PracticeNewCaseScreen() {
       <Text style={[styles.label, { marginTop: 12 }]}>Status</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipsScroll}>
         {STATUSES.map((s, i) => (
-          <Pressable key={s} style={[styles.chip, statusIdx === i && styles.chipOn]} onPress={() => setStatusIdx(i)}>
+          <Pressable
+            key={s}
+            style={[styles.chip, statusIdx === i && styles.chipOn]}
+            onPress={() => setStatusIdx(i)}
+          >
             <Text style={[styles.chipText, statusIdx === i && styles.chipTextOn]}>{s}</Text>
           </Pressable>
         ))}
       </ScrollView>
 
       <Text style={[styles.label, { marginTop: 12 }]}>Description</Text>
-      <TextInput style={[styles.input, { minHeight: 80 }]} value={description} onChangeText={setDescription} multiline />
+      <TextInput
+        style={[styles.input, { minHeight: 80 }]}
+        value={description}
+        onChangeText={setDescription}
+        multiline
+      />
 
       {create.error ? <Text style={styles.error}>{create.error.message}</Text> : null}
 

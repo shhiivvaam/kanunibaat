@@ -1,4 +1,4 @@
-# KanuniBaat Web (`apps/web`)
+# Jurisly Web (`apps/web`)
 
 Next.js App Router app for:
 
@@ -52,5 +52,6 @@ Routing and fallback are configured in:
 ## Related docs
 
 - `docs/ARCHITECTURE.md`
+- `docs/DEPLOYMENT-FREE-TIER.md` (Vercel prod env + Render API URL)
 - `docs/PROJECT-FLOWS.md`
 - `docs/PHASE-14.md`

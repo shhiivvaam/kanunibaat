@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "KanuniBaat",
-    "slug": "kanunibaat",
+    "name": "Jurisly",
+    "slug": "jurisly",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "kanunibaat",
+    "scheme": "jurisly",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
@@ -15,16 +15,36 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.kanooni.baat"
+      "bundleIdentifier": "com.tryjurisly.app",
+      "associatedDomains": ["applinks:app.tryjurisly.com", "applinks:tryjurisly.com"]
     },
     "android": {
-      "package": "com.kanooni.baat",
+      "package": "com.tryjurisly.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "tryjurisly.com",
+              "pathPrefix": "/"
+            },
+            {
+              "scheme": "https",
+              "host": "app.tryjurisly.com",
+              "pathPrefix": "/"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -37,7 +57,7 @@
         "@sentry/react-native/expo",
         {
           "url": "https://sentry.io/",
-          "project": "kanunibaat-app",
+          "project": "jurisly-app",
           "organization": "newsbite"
         }
       ]

@@ -2,8 +2,8 @@ import { TRPCError } from '@trpc/server';
 import { asc, eq, inArray } from 'drizzle-orm';
 import { z } from 'zod';
 
-import { lawyerDocument, lawyerProfile, user, userProfile } from '@kb/database/schema';
-import { syncLawyerMeiliFromDb, syncResearchJudgmentsToMeili } from '@kb/search';
+import { lawyerDocument, lawyerProfile, user, userProfile } from '@jurisly/database/schema';
+import { syncLawyerMeiliFromDb, syncResearchJudgmentsToMeili } from '@jurisly/search';
 
 import { adminProcedure, router } from '../init';
 
@@ -66,7 +66,10 @@ export const adminRouter = router({
   }),
 
   listUsers: adminProcedure.query(async ({ ctx }) => {
-    const rows = await ctx.db.select({ id: user.id, email: user.email, name: user.name }).from(user).limit(50);
+    const rows = await ctx.db
+      .select({ id: user.id, email: user.email, name: user.name })
+      .from(user)
+      .limit(50);
     return { users: rows };
   }),
 
@@ -130,7 +133,11 @@ export const adminRouter = router({
         message: 'Meilisearch is not configured (MEILISEARCH_URL / MEILISEARCH_MASTER_KEY).',
       });
     }
-    const { count } = await syncResearchJudgmentsToMeili(ctx.db, ctx.meili, ctx.meiliJudgmentsIndexName);
+    const { count } = await syncResearchJudgmentsToMeili(
+      ctx.db,
+      ctx.meili,
+      ctx.meiliJudgmentsIndexName,
+    );
     return { indexed: count };
   }),
 });

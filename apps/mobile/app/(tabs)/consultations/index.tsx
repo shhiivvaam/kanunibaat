@@ -1,7 +1,7 @@
 import { Link } from 'expo-router';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export default function ConsultationsListScreen() {
   const q = trpc.consultations.me.useQuery();
@@ -24,11 +24,7 @@ export default function ConsultationsListScreen() {
       ) : (
         <View style={styles.list}>
           {q.data?.map((c) => (
-            <Link
-              key={c.id}
-              href={`/(tabs)/consultations/${c.id}` as never}
-              style={styles.card}
-            >
+            <Link key={c.id} href={`/(tabs)/consultations/${c.id}` as never} style={styles.card}>
               <Text style={styles.cardTitle}>
                 {c.mode.toUpperCase()} · {c.status.replaceAll('_', ' ')}
               </Text>
@@ -48,7 +44,12 @@ export default function ConsultationsListScreen() {
 
 const styles = StyleSheet.create({
   container: { padding: 20, paddingBottom: 40 },
-  header: { marginBottom: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
+  header: {
+    marginBottom: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'baseline',
+  },
   title: { fontSize: 22, fontWeight: '700', color: '#1C1917' },
   link: { color: '#C2410C', fontWeight: '600' },
   list: { gap: 10 },
@@ -65,4 +66,3 @@ const styles = StyleSheet.create({
   error: { color: '#B91C1C' },
   muted: { color: '#78716C' },
 });
-

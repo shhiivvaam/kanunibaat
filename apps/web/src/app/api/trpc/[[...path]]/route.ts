@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import { randomUUID } from 'node:crypto';
 
 function internalApiBaseUrl(): string {
   return (
@@ -20,6 +21,10 @@ async function proxyTrpc(req: NextRequest, pathSegments: string[] | undefined): 
   if (cookie) headers.set('cookie', cookie);
   const authorization = req.headers.get('authorization');
   if (authorization) headers.set('authorization', authorization);
+  const requestId =
+    req.headers.get('x-request-id') ?? req.headers.get('x-correlation-id');
+  if (requestId) headers.set('x-request-id', requestId);
+  else headers.set('x-request-id', randomUUID());
 
   const init: RequestInit = {
     method: req.method,

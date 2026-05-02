@@ -4,12 +4,7 @@ function g(partial: GuideSections): GuideSections {
   return partial;
 }
 
-function q(
-  id: string,
-  labelEn: string,
-  labelHi: string,
-  required = true,
-): ContextQuestion {
+function q(id: string, labelEn: string, labelHi: string, required = true): ContextQuestion {
   return { id, labelEn, labelHi, required };
 }
 
@@ -23,8 +18,18 @@ export const EMERGENCY_SCENARIOS: readonly EmergencyScenario[] = [
     lawyerSearchHint: 'civil litigation notice reply',
     contextQuestions: [
       q('notice_type', 'What kind of notice is it?', 'यह किस प्रकार का नोटिस है?', true),
-      q('deadline', 'Is there a reply deadline mentioned?', 'क्या जवाब देने की तारीख लिखी है?', true),
-      q('sender', 'Who sent it (advocate / company / authority)?', 'किसने भेजा (वकील / कंपनी / विभाग)?', false),
+      q(
+        'deadline',
+        'Is there a reply deadline mentioned?',
+        'क्या जवाब देने की तारीख लिखी है?',
+        true,
+      ),
+      q(
+        'sender',
+        'Who sent it (advocate / company / authority)?',
+        'किसने भेजा (वकील / कंपनी / विभाग)?',
+        false,
+      ),
     ],
     base: g({
       rightNow: [
@@ -67,7 +72,12 @@ export const EMERGENCY_SCENARIOS: readonly EmergencyScenario[] = [
     contextQuestions: [
       q('injuries', 'Were there injuries? How serious?', 'क्या चोटें आईं? कितनी गंभीर?', true),
       q('fir', 'Was an FIR registered?', 'क्या FIR दर्ज हुई?', true),
-      q('insurance', 'Do you have insurance details (self / other party)?', 'बीमा विवरण है?', false),
+      q(
+        'insurance',
+        'Do you have insurance details (self / other party)?',
+        'बीमा विवरण है?',
+        false,
+      ),
     ],
     base: g({
       rightNow: [
@@ -92,10 +102,7 @@ export const EMERGENCY_SCENARIOS: readonly EmergencyScenario[] = [
         'Police may record the incident; cooperate with factual information.',
         'Claims and disputes may go to tribunals/courts depending on severity and insurance.',
       ],
-      timeline: [
-        'Immediate: medical needs first.',
-        'Soon: notify insurer and preserve evidence.',
-      ],
+      timeline: ['Immediate: medical needs first.', 'Soon: notify insurer and preserve evidence.'],
       applicableLaws: [
         'Motor Vehicles Act and related rules; insurance contract terms; IPC/BNS provisions if injuries/death.',
       ],
@@ -110,7 +117,12 @@ export const EMERGENCY_SCENARIOS: readonly EmergencyScenario[] = [
     contextQuestions: [
       q('where', 'Where are you / is the person held?', 'कहाँ रखा गया है?', true),
       q('offence', 'What offence was mentioned (if known)?', 'कौन सा अपराध बताया गया?', false),
-      q('legal_help', 'Has a lawyer or family been informed?', 'क्या वकील या परिवार को सूचित किया गया?', true),
+      q(
+        'legal_help',
+        'Has a lawyer or family been informed?',
+        'क्या वकील या परिवार को सूचित किया गया?',
+        true,
+      ),
     ],
     base: g({
       rightNow: [
@@ -153,7 +165,12 @@ export const EMERGENCY_SCENARIOS: readonly EmergencyScenario[] = [
     contextQuestions: [
       q('safe', 'Are you in a safe place right now?', 'क्या आप अभी सुरक्षित स्थान पर हैं?', true),
       q('children', 'Are children involved?', 'क्या बच्चे शामिल हैं?', true),
-      q('help', 'Do you need emergency shelter / helpline?', 'क्या आपको आश्रय / हेल्पलाइन चाहिए?', true),
+      q(
+        'help',
+        'Do you need emergency shelter / helpline?',
+        'क्या आपको आश्रय / हेल्पलाइन चाहिए?',
+        true,
+      ),
     ],
     base: g({
       rightNow: [
@@ -178,10 +195,7 @@ export const EMERGENCY_SCENARIOS: readonly EmergencyScenario[] = [
         'Police can be approached for protection; follow advocate guidance for complaints/orders.',
         'Courts may grant protection/restraining relief depending on jurisdiction and facts.',
       ],
-      timeline: [
-        'Immediate: safety first.',
-        'Soon: legal steps with documented evidence.',
-      ],
+      timeline: ['Immediate: safety first.', 'Soon: legal steps with documented evidence.'],
       applicableLaws: [
         'Protection of Women from Domestic Violence Act and related provisions; IPC/BNS where applicable.',
       ],
@@ -196,7 +210,12 @@ export const EMERGENCY_SCENARIOS: readonly EmergencyScenario[] = [
     contextQuestions: [
       q('cheque', 'Was a cheque dishonoured (yes/no)?', 'क्या चेक डिसऑनर हुआ?', true),
       q('amount', 'Approximate amount involved?', 'लगभग राशि?', false),
-      q('notice_138', 'Did you receive/send a legal notice under NI Act?', 'क्या NI अधिनियम की नोटिस मिली/भेजी?', false),
+      q(
+        'notice_138',
+        'Did you receive/send a legal notice under NI Act?',
+        'क्या NI अधिनियम की नोटिस मिली/भेजी?',
+        false,
+      ),
     ],
     base: g({
       rightNow: [
@@ -208,11 +227,7 @@ export const EMERGENCY_SCENARIOS: readonly EmergencyScenario[] = [
         'Payee may have remedies for dishonour; drawer has defences depending on facts.',
         'Fraud may involve separate criminal processes — only police/prosecution can pursue.',
       ],
-      documents: [
-        'Cheque, dishonour memo',
-        'Ledger / agreement proving debt',
-        'Correspondence',
-      ],
+      documents: ['Cheque, dishonour memo', 'Ledger / agreement proving debt', 'Correspondence'],
       whatNotToDo: [
         'Do not issue threats of violence for recovery.',
         'Do not forge documents to prove debt.',
@@ -221,9 +236,7 @@ export const EMERGENCY_SCENARIOS: readonly EmergencyScenario[] = [
         'Police for fraud/forgery complaints where cognizable.',
         'Courts for NI complaints and civil suits as advised.',
       ],
-      timeline: [
-        'NI Act: strict timelines for notice and complaint — act quickly with a lawyer.',
-      ],
+      timeline: ['NI Act: strict timelines for notice and complaint — act quickly with a lawyer.'],
       applicableLaws: [
         'Negotiable Instruments Act, 1881; Indian Contract Act; IPC/BNS for fraud where relevant.',
       ],
@@ -236,7 +249,12 @@ export const EMERGENCY_SCENARIOS: readonly EmergencyScenario[] = [
     titleHi: 'संपत्ति या जमीन विवाद',
     lawyerSearchHint: 'property civil land title dispute',
     contextQuestions: [
-      q('title', 'Do you have sale deed / title documents?', 'क्या बिक्री पत्र / टाइटल दस्तावेज हैं?', true),
+      q(
+        'title',
+        'Do you have sale deed / title documents?',
+        'क्या बिक्री पत्र / टाइटल दस्तावेज हैं?',
+        true,
+      ),
       q('possession', 'Who is in possession now?', 'अभी कब्जा किसके पास है?', true),
       q('court', 'Is there already a court case?', 'क्या पहले से कोर्ट केस है?', false),
     ],
@@ -254,15 +272,11 @@ export const EMERGENCY_SCENARIOS: readonly EmergencyScenario[] = [
         'Khata / mutation / survey maps as applicable',
         'Tax receipts',
       ],
-      whatNotToDo: [
-        'Avoid self-help evictions or breaking locks without legal process.',
-      ],
+      whatNotToDo: ['Avoid self-help evictions or breaking locks without legal process.'],
       policeOrCourt: [
         'Police may intervene in specific offences; civil disputes usually go to civil courts.',
       ],
-      timeline: [
-        'Civil suits and injunctions can take time — plan with your advocate.',
-      ],
+      timeline: ['Civil suits and injunctions can take time — plan with your advocate.'],
       applicableLaws: [
         'Transfer of Property Act; state revenue laws; CPC procedures; specific local statutes.',
       ],
@@ -299,9 +313,7 @@ export const EMERGENCY_SCENARIOS: readonly EmergencyScenario[] = [
       policeOrCourt: [
         'Usually labour forums; criminal law only if specific offences like wrongful confinement are alleged with facts.',
       ],
-      timeline: [
-        'Many forums have limitation periods — consult quickly.',
-      ],
+      timeline: ['Many forums have limitation periods — consult quickly.'],
       applicableLaws: [
         'Industrial Disputes Act; state Shops Act; Payment of Wages Act; contract law.',
       ],
@@ -324,22 +336,13 @@ export const EMERGENCY_SCENARIOS: readonly EmergencyScenario[] = [
         'File a structured written complaint to the company first (recorded).',
         'Consider consumer commission with lawyer help for larger disputes.',
       ],
-      rights: [
-        'Consumer protection remedies exist for defects/deficiency; timelines apply.',
-      ],
-      documents: [
-        'Invoices, warranty, photos/videos of defect',
-        'Emails to support',
-      ],
-      whatNotToDo: [
-        'Do not make false public allegations — stick to facts.',
-      ],
+      rights: ['Consumer protection remedies exist for defects/deficiency; timelines apply.'],
+      documents: ['Invoices, warranty, photos/videos of defect', 'Emails to support'],
+      whatNotToDo: ['Do not make false public allegations — stick to facts.'],
       policeOrCourt: [
         'Police for cheating only with strong evidence; consumer forums for service defects.',
       ],
-      timeline: [
-        'Company grievance window first; then legal forum within limitation.',
-      ],
+      timeline: ['Company grievance window first; then legal forum within limitation.'],
       applicableLaws: [
         'Consumer Protection Act; contract law; IPC/BNS for fraud where applicable.',
       ],
@@ -365,10 +368,7 @@ export const EMERGENCY_SCENARIOS: readonly EmergencyScenario[] = [
       rights: [
         'You can report cyber offences; follow police/lawyer guidance on preservation of evidence.',
       ],
-      documents: [
-        'Transaction IDs, screenshots, device details',
-        'Chat logs (lawfully obtained)',
-      ],
+      documents: ['Transaction IDs, screenshots, device details', 'Chat logs (lawfully obtained)'],
       whatNotToDo: [
         'Do not pay blackmailers — it often escalates.',
         'Do not delete evidence before reporting.',
@@ -376,9 +376,7 @@ export const EMERGENCY_SCENARIOS: readonly EmergencyScenario[] = [
       policeOrCourt: [
         'Cyber police cells for FIR/investigation; courts later for recovery/prosecution support.',
       ],
-      timeline: [
-        'Immediate: freeze/limit damage; early reporting improves tracing chances.',
-      ],
+      timeline: ['Immediate: freeze/limit damage; early reporting improves tracing chances.'],
       applicableLaws: [
         'Information Technology Act; IPC/BNS provisions; RBI/banking fraud processes.',
       ],
@@ -401,26 +399,15 @@ export const EMERGENCY_SCENARIOS: readonly EmergencyScenario[] = [
         'Avoid forceful self-help by either side.',
         'Consult a civil/rent lawyer before vacating or locking out.',
       ],
-      rights: [
-        'Rights differ for protected tenants vs leave-and-license; documentation matters.',
-      ],
-      documents: [
-        'Lease, rent receipts',
-        'Notices, correspondence',
-      ],
+      rights: ['Rights differ for protected tenants vs leave-and-license; documentation matters.'],
+      documents: ['Lease, rent receipts', 'Notices, correspondence'],
       whatNotToDo: [
         'Landlords: illegal lockouts can backfire legally.',
         'Tenants: withholding rent without legal advice can weaken position.',
       ],
-      policeOrCourt: [
-        'Police may attend breaches of peace; civil courts for possession suits.',
-      ],
-      timeline: [
-        'Eviction suits can be lengthy — interim orders may matter.',
-      ],
-      applicableLaws: [
-        'State rent acts; Transfer of Property Act; CPC.',
-      ],
+      policeOrCourt: ['Police may attend breaches of peace; civil courts for possession suits.'],
+      timeline: ['Eviction suits can be lengthy — interim orders may matter.'],
+      applicableLaws: ['State rent acts; Transfer of Property Act; CPC.'],
     }),
   },
   {
@@ -431,7 +418,12 @@ export const EMERGENCY_SCENARIOS: readonly EmergencyScenario[] = [
     lawyerSearchHint: 'criminal defence FIR bail',
     contextQuestions: [
       q('sections', 'Do you know sections alleged (if any)?', 'कौन से धाराएँ?', false),
-      q('arrest', 'Are you arrested / anticipatory bail needed?', 'गिरफ्तारी / अग्रिम जमानत?', true),
+      q(
+        'arrest',
+        'Are you arrested / anticipatory bail needed?',
+        'गिरफ्तारी / अग्रिम जमानत?',
+        true,
+      ),
       q('station', 'Which police station?', 'कौन सा थाना?', true),
     ],
     base: g({
@@ -443,22 +435,11 @@ export const EMERGENCY_SCENARIOS: readonly EmergencyScenario[] = [
       rights: [
         'Right to legal defence and fair procedure; follow lawyer instructions on statements.',
       ],
-      documents: [
-        'FIR copy, summons',
-        'Alibi evidence if any (lawfully)',
-      ],
-      whatNotToDo: [
-        'Do not tamper with witnesses or evidence.',
-      ],
-      policeOrCourt: [
-        'Police investigation; courts for bail and trial.',
-      ],
-      timeline: [
-        'Early legal intervention often matters for bail and charge framing stages.',
-      ],
-      applicableLaws: [
-        'CrPC/BNSS; IPC/BNS sections as alleged; special statutes if any.',
-      ],
+      documents: ['FIR copy, summons', 'Alibi evidence if any (lawfully)'],
+      whatNotToDo: ['Do not tamper with witnesses or evidence.'],
+      policeOrCourt: ['Police investigation; courts for bail and trial.'],
+      timeline: ['Early legal intervention often matters for bail and charge framing stages.'],
+      applicableLaws: ['CrPC/BNSS; IPC/BNS sections as alleged; special statutes if any.'],
     }),
   },
   {
@@ -481,10 +462,7 @@ export const EMERGENCY_SCENARIOS: readonly EmergencyScenario[] = [
       rights: [
         'Matrimonial remedies depend on personal laws and facts; information is general only.',
       ],
-      documents: [
-        'Marriage certificate, IDs',
-        'Financial statements, property papers',
-      ],
+      documents: ['Marriage certificate, IDs', 'Financial statements, property papers'],
       whatNotToDo: [
         'Do not use children as leverage.',
         'Do not hide assets — courts may draw adverse inferences.',
@@ -492,9 +470,7 @@ export const EMERGENCY_SCENARIOS: readonly EmergencyScenario[] = [
       policeOrCourt: [
         'Family courts / mediation where applicable; police for protection in violence cases.',
       ],
-      timeline: [
-        'Mutual consent can be faster; contested matters may take longer.',
-      ],
+      timeline: ['Mutual consent can be faster; contested matters may take longer.'],
       applicableLaws: [
         'Hindu Marriage Act / Special Marriage Act / personal laws as applicable; DV Act where relevant.',
       ],
@@ -517,16 +493,9 @@ export const EMERGENCY_SCENARIOS: readonly EmergencyScenario[] = [
         'Secure originals of IDs, property papers, and bank passbooks safely.',
         'Notify banks/insurers with death certificate as per their process.',
       ],
-      rights: [
-        'Legal heirs have succession rights as per will or intestate succession laws.',
-      ],
-      documents: [
-        'Death certificate, ID proofs of heirs',
-        'Will (if any), property documents',
-      ],
-      whatNotToDo: [
-        'Do not withdraw funds without proper legal process if accounts are disputed.',
-      ],
+      rights: ['Legal heirs have succession rights as per will or intestate succession laws.'],
+      documents: ['Death certificate, ID proofs of heirs', 'Will (if any), property documents'],
+      whatNotToDo: ['Do not withdraw funds without proper legal process if accounts are disputed.'],
       policeOrCourt: [
         'Court may be needed for probate/letters of administration in some cases — lawyer-guided.',
       ],
@@ -556,16 +525,9 @@ export const EMERGENCY_SCENARIOS: readonly EmergencyScenario[] = [
         'Preserve messages, emails, and witness names confidentially.',
         'You may approach IC as per POSH policy timelines; consult a lawyer for drafting.',
       ],
-      rights: [
-        'Law provides for inquiry and confidentiality norms in workplace complaints.',
-      ],
-      documents: [
-        'Complaint draft, evidence copies',
-        'Employment contract, HR policy',
-      ],
-      whatNotToDo: [
-        'Do not publicise names in ways that could violate inquiry fairness or law.',
-      ],
+      rights: ['Law provides for inquiry and confidentiality norms in workplace complaints.'],
+      documents: ['Complaint draft, evidence copies', 'Employment contract, HR policy'],
+      whatNotToDo: ['Do not publicise names in ways that could violate inquiry fairness or law.'],
       policeOrCourt: [
         'Workplace route via IC; criminal law route separate if cognizable offence — lawyer-led.',
       ],
@@ -596,19 +558,12 @@ export const EMERGENCY_SCENARIOS: readonly EmergencyScenario[] = [
       rights: [
         'You may be entitled to reasons and remedies depending on whether freeze is by bank policy, court, or agency.',
       ],
-      documents: [
-        'Bank correspondence, account statements',
-        'Any notices from authorities',
-      ],
-      whatNotToDo: [
-        'Do not use third-party accounts to hide proceeds if under investigation.',
-      ],
+      documents: ['Bank correspondence, account statements', 'Any notices from authorities'],
+      whatNotToDo: ['Do not use third-party accounts to hide proceeds if under investigation.'],
       policeOrCourt: [
         'Courts/agencies that ordered freeze; bank grievance as parallel where appropriate.',
       ],
-      timeline: [
-        'Act quickly — freezes often follow investigations with tight response windows.',
-      ],
+      timeline: ['Act quickly — freezes often follow investigations with tight response windows.'],
       applicableLaws: [
         'Banking contracts; CrPC/BNSS attachment provisions; tax statutes if revenue department.',
       ],
@@ -633,23 +588,14 @@ export const EMERGENCY_SCENARIOS: readonly EmergencyScenario[] = [
       rights: [
         'Tax laws prescribe rights and duties during search/survey; follow professional advice.',
       ],
-      documents: [
-        'Books of account, invoices (as required)',
-        'Authorisation copies, inventories',
-      ],
-      whatNotToDo: [
-        'Do not destroy books or hide assets during proceedings.',
-      ],
-      policeOrCourt: [
-        'Tax department processes; courts for writs/challenges as advised.',
-      ],
+      documents: ['Books of account, invoices (as required)', 'Authorisation copies, inventories'],
+      whatNotToDo: ['Do not destroy books or hide assets during proceedings.'],
+      policeOrCourt: ['Tax department processes; courts for writs/challenges as advised.'],
       timeline: [
         'Immediate: professional representation.',
         'Follow-up: replies and assessments may have strict timelines.',
       ],
-      applicableLaws: [
-        'Income Tax Act, 1961; CGST/SGST Acts and rules; evidence procedures.',
-      ],
+      applicableLaws: ['Income Tax Act, 1961; CGST/SGST Acts and rules; evidence procedures.'],
     }),
   },
   {
@@ -668,22 +614,11 @@ export const EMERGENCY_SCENARIOS: readonly EmergencyScenario[] = [
         'Do not unilaterally relocate without legal advice.',
         'Engage a family lawyer for interim custody/access applications if needed.',
       ],
-      rights: [
-        'Courts decide custody/access based on welfare principle — varies by facts.',
-      ],
-      documents: [
-        'Birth certificate, school records',
-        'Existing court orders',
-      ],
-      whatNotToDo: [
-        'Do not withhold visitation illegally if a court order exists.',
-      ],
-      policeOrCourt: [
-        'Family courts; mediation where ordered.',
-      ],
-      timeline: [
-        'Interim orders can come earlier; final disposal may take time.',
-      ],
+      rights: ['Courts decide custody/access based on welfare principle — varies by facts.'],
+      documents: ['Birth certificate, school records', 'Existing court orders'],
+      whatNotToDo: ['Do not withhold visitation illegally if a court order exists.'],
+      policeOrCourt: ['Family courts; mediation where ordered.'],
+      timeline: ['Interim orders can come earlier; final disposal may take time.'],
       applicableLaws: [
         'Guardians and Wards Act; Hindu Minority and Guardianship Act; personal laws as applicable.',
       ],
@@ -708,10 +643,7 @@ export const EMERGENCY_SCENARIOS: readonly EmergencyScenario[] = [
       rights: [
         'Fair recovery practices norms may apply; criminal threats should be reported with evidence.',
       ],
-      documents: [
-        'Loan agreement, EMI schedule',
-        'Call logs, screenshots',
-      ],
+      documents: ['Loan agreement, EMI schedule', 'Call logs, screenshots'],
       whatNotToDo: [
         'Do not use violence against agents.',
         'Do not ignore legitimate dues without restructuring discussion.',
@@ -719,12 +651,8 @@ export const EMERGENCY_SCENARIOS: readonly EmergencyScenario[] = [
       policeOrCourt: [
         'Police for criminal intimidation if facts support; civil forums for loan disputes.',
       ],
-      timeline: [
-        'Escalate grievance timelines as per lender policy and RBI rules.',
-      ],
-      applicableLaws: [
-        'RBI fair practices; contract law; IPC/BNS for threats where applicable.',
-      ],
+      timeline: ['Escalate grievance timelines as per lender policy and RBI rules.'],
+      applicableLaws: ['RBI fair practices; contract law; IPC/BNS for threats where applicable.'],
     }),
   },
   {
@@ -743,22 +671,13 @@ export const EMERGENCY_SCENARIOS: readonly EmergencyScenario[] = [
         'Do not pay cash without receipts.',
         'Consult a property lawyer before executing.',
       ],
-      rights: [
-        'Registration rights/duties governed by Registration Act and stamp laws.',
-      ],
-      documents: [
-        'Title chain, encumbrance certificate',
-        'Tax receipts, ID proofs',
-      ],
-      whatNotToDo: [
-        'Avoid benami arrangements — serious legal consequences.',
-      ],
+      rights: ['Registration rights/duties governed by Registration Act and stamp laws.'],
+      documents: ['Title chain, encumbrance certificate', 'Tax receipts, ID proofs'],
+      whatNotToDo: ['Avoid benami arrangements — serious legal consequences.'],
       policeOrCourt: [
         'Civil courts for specific performance / cancellation; fraud to police if strong evidence.',
       ],
-      timeline: [
-        'Registration timelines depend on document clearance and queue.',
-      ],
+      timeline: ['Registration timelines depend on document clearance and queue.'],
       applicableLaws: [
         'Registration Act, 1908; Indian Stamp Act / state stamp laws; contract law.',
       ],
@@ -783,19 +702,10 @@ export const EMERGENCY_SCENARIOS: readonly EmergencyScenario[] = [
       rights: [
         'Heirs and legatees have rights as per applicable succession law and will validity.',
       ],
-      documents: [
-        'Will, death certificate',
-        'Property papers, bank statements',
-      ],
-      whatNotToDo: [
-        'Do not forge or alter wills — criminal offences.',
-      ],
-      policeOrCourt: [
-        'Civil court for probate/caveats; criminal only for forgery with evidence.',
-      ],
-      timeline: [
-        'Probate/letters can take months; interim injunctions possible in disputes.',
-      ],
+      documents: ['Will, death certificate', 'Property papers, bank statements'],
+      whatNotToDo: ['Do not forge or alter wills — criminal offences.'],
+      policeOrCourt: ['Civil court for probate/caveats; criminal only for forgery with evidence.'],
+      timeline: ['Probate/letters can take months; interim injunctions possible in disputes.'],
       applicableLaws: [
         'Indian Succession Act; personal laws; Registration Act for registered wills.',
       ],

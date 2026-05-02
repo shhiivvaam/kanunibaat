@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export function ResearchLibrary() {
   const [q, setQ] = useState('');
@@ -20,7 +20,10 @@ export function ResearchLibrary() {
       <Link href="/app/research" className="text-sm text-[#C2410C] hover:underline">
         ← Research home
       </Link>
-      <h1 className="text-xl font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+      <h1
+        className="text-xl font-semibold text-[#1C1917]"
+        style={{ fontFamily: 'var(--font-display)' }}
+      >
         Law library
       </h1>
       <input

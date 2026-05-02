@@ -5,6 +5,7 @@ import { and, asc, desc, eq, isNotNull, isNull, sum } from 'drizzle-orm';
 import { z } from 'zod';
 
 import {
+  consultation,
   lawyerCase,
   lawyerCaseTask,
   lawyerFirmProfile,
@@ -13,13 +14,10 @@ import {
   lawyerInvoiceLine,
   lawyerInvoicePayment,
   lawyerTimeEntry,
-} from '@kb/database/schema';
+} from '@jurisly/database/schema';
 
-import {
-  computeRazorpayClientSignature,
-  createRazorpayOrder,
-  requireConfiguredRazorpay,
-} from '../integrations/razorpay';
+import { createRazorpayOrder, requireConfiguredRazorpay } from '../integrations/razorpay';
+import { verifyRazorpayClientSignature } from '../lib/razorpay-client-signature';
 import { lawyerProcedure, router } from '../init';
 import { indianFyStartYear } from '../practice/fiscal-india';
 import { aggregateInvoiceTax } from '../practice/gst-totals';
@@ -56,10 +54,17 @@ async function recalculateInvoiceTotals(db: Db, invoiceId: string) {
     .where(eq(lawyerInvoiceLine.invoiceId, invoiceId))
     .orderBy(asc(lawyerInvoiceLine.sortOrder), asc(lawyerInvoiceLine.createdAt));
 
-  const [inv] = await db.select().from(lawyerInvoice).where(eq(lawyerInvoice.id, invoiceId)).limit(1);
+  const [inv] = await db
+    .select()
+    .from(lawyerInvoice)
+    .where(eq(lawyerInvoice.id, invoiceId))
+    .limit(1);
   if (!inv) return;
 
-  const taxLines = lines.map((l) => ({ taxableInr: l.taxableInr, taxRatePercent: l.taxRatePercent }));
+  const taxLines = lines.map((l) => ({
+    taxableInr: l.taxableInr,
+    taxRatePercent: l.taxRatePercent,
+  }));
   const totals = aggregateInvoiceTax(taxLines, inv.supplyType);
 
   await db
@@ -80,14 +85,23 @@ async function allocateInvoiceNumber(
   lawyerUserId: string,
   issueDate: Date,
 ): Promise<{ invoiceNumber: string; fyStartYear: number }> {
-  const [firm] = await tx.select().from(lawyerFirmProfile).where(eq(lawyerFirmProfile.userId, lawyerUserId)).limit(1);
+  const [firm] = await tx
+    .select()
+    .from(lawyerFirmProfile)
+    .where(eq(lawyerFirmProfile.userId, lawyerUserId))
+    .limit(1);
   const prefix = (firm?.invoicePrefix ?? 'INV').trim() || 'INV';
   const fy = indianFyStartYear(issueDate);
 
   const [existing] = await tx
     .select()
     .from(lawyerInvoiceCounter)
-    .where(and(eq(lawyerInvoiceCounter.lawyerUserId, lawyerUserId), eq(lawyerInvoiceCounter.fyStartYear, fy)))
+    .where(
+      and(
+        eq(lawyerInvoiceCounter.lawyerUserId, lawyerUserId),
+        eq(lawyerInvoiceCounter.fyStartYear, fy),
+      ),
+    )
     .for('update')
     .limit(1);
 
@@ -103,7 +117,12 @@ async function allocateInvoiceNumber(
     await tx
       .update(lawyerInvoiceCounter)
       .set({ lastSequence: nextSeq, updatedAt: new Date() })
-      .where(and(eq(lawyerInvoiceCounter.lawyerUserId, lawyerUserId), eq(lawyerInvoiceCounter.fyStartYear, fy)));
+      .where(
+        and(
+          eq(lawyerInvoiceCounter.lawyerUserId, lawyerUserId),
+          eq(lawyerInvoiceCounter.fyStartYear, fy),
+        ),
+      );
   }
 
   const invoiceNumber = `${prefix}-${fy}-${String(nextSeq).padStart(4, '0')}`;
@@ -112,6 +131,47 @@ async function allocateInvoiceNumber(
 
 const lineKindSchema = z.enum(['consultation', 'hearing', 'drafting', 'time', 'misc']);
 const supplyTypeSchema = z.enum(['intrastate', 'interstate']);
+
+async function fetchRazorpayPayment(opts: {
+  keyId: string;
+  keySecret: string;
+  paymentId: string;
+}): Promise<{
+  id: string;
+  amount: number;
+  status: string;
+  order_id: string | null;
+}> {
+  const res = await fetch(`https://api.razorpay.com/v1/payments/${opts.paymentId}`, {
+    method: 'GET',
+    headers: {
+      authorization: `Basic ${Buffer.from(`${opts.keyId}:${opts.keySecret}`).toString('base64')}`,
+    },
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new TRPCError({
+      code: 'INTERNAL_SERVER_ERROR',
+      message: `Failed to fetch payment details (${res.status}). ${text}`,
+    });
+  }
+  const json = (await res.json()) as unknown;
+  const parsed = z
+    .object({
+      id: z.string().min(1),
+      amount: z.number().int(),
+      status: z.string().min(1),
+      order_id: z.string().nullable(),
+    })
+    .safeParse(json);
+  if (!parsed.success) {
+    throw new TRPCError({
+      code: 'INTERNAL_SERVER_ERROR',
+      message: 'Invalid Razorpay payment response.',
+    });
+  }
+  return parsed.data;
+}
 
 export const practiceBillingRouter = router({
   firm: router({
@@ -187,20 +247,29 @@ export const practiceBillingRouter = router({
   }),
 
   timeEntry: router({
-    list: lawyerProcedure.input(z.object({ caseId: z.string().uuid() })).query(async ({ ctx, input }) => {
-      await loadCaseForLawyer(ctx.db, ctx.authUserId, input.caseId);
-      return ctx.db
-        .select()
-        .from(lawyerTimeEntry)
-        .where(and(eq(lawyerTimeEntry.caseId, input.caseId), eq(lawyerTimeEntry.lawyerUserId, ctx.authUserId)))
-        .orderBy(desc(lawyerTimeEntry.startedAt));
-    }),
+    list: lawyerProcedure
+      .input(z.object({ caseId: z.string().uuid() }))
+      .query(async ({ ctx, input }) => {
+        await loadCaseForLawyer(ctx.db, ctx.authUserId, input.caseId);
+        return ctx.db
+          .select()
+          .from(lawyerTimeEntry)
+          .where(
+            and(
+              eq(lawyerTimeEntry.caseId, input.caseId),
+              eq(lawyerTimeEntry.lawyerUserId, ctx.authUserId),
+            ),
+          )
+          .orderBy(desc(lawyerTimeEntry.startedAt));
+      }),
 
     active: lawyerProcedure.query(async ({ ctx }) => {
       const [row] = await ctx.db
         .select()
         .from(lawyerTimeEntry)
-        .where(and(eq(lawyerTimeEntry.lawyerUserId, ctx.authUserId), isNull(lawyerTimeEntry.endedAt)))
+        .where(
+          and(eq(lawyerTimeEntry.lawyerUserId, ctx.authUserId), isNull(lawyerTimeEntry.endedAt)),
+        )
         .limit(1);
       return { entry: row ?? null };
     }),
@@ -219,17 +288,24 @@ export const practiceBillingRouter = router({
           const [t] = await ctx.db
             .select()
             .from(lawyerCaseTask)
-            .where(and(eq(lawyerCaseTask.id, input.taskId), eq(lawyerCaseTask.caseId, input.caseId)))
+            .where(
+              and(eq(lawyerCaseTask.id, input.taskId), eq(lawyerCaseTask.caseId, input.caseId)),
+            )
             .limit(1);
           if (!t) throw new TRPCError({ code: 'NOT_FOUND', message: 'Task not found for case.' });
         }
         const [open] = await ctx.db
           .select({ id: lawyerTimeEntry.id })
           .from(lawyerTimeEntry)
-          .where(and(eq(lawyerTimeEntry.lawyerUserId, ctx.authUserId), isNull(lawyerTimeEntry.endedAt)))
+          .where(
+            and(eq(lawyerTimeEntry.lawyerUserId, ctx.authUserId), isNull(lawyerTimeEntry.endedAt)),
+          )
           .limit(1);
         if (open) {
-          throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Stop the running timer before starting another.' });
+          throw new TRPCError({
+            code: 'PRECONDITION_FAILED',
+            message: 'Stop the running timer before starting another.',
+          });
         }
         const now = new Date();
         const [created] = await ctx.db
@@ -246,30 +322,39 @@ export const practiceBillingRouter = router({
         return { entry: created ?? null };
       }),
 
-    stop: lawyerProcedure.input(z.object({ id: z.string().uuid() })).mutation(async ({ ctx, input }) => {
-      const [row] = await ctx.db
-        .select()
-        .from(lawyerTimeEntry)
-        .where(and(eq(lawyerTimeEntry.id, input.id), eq(lawyerTimeEntry.lawyerUserId, ctx.authUserId)))
-        .limit(1);
-      if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Time entry not found.' });
-      if (row.endedAt) {
-        throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Timer already stopped.' });
-      }
-      const ended = new Date();
-      const durationSeconds = Math.max(0, Math.floor((ended.getTime() - row.startedAt.getTime()) / 1000));
-      const [updated] = await ctx.db
-        .update(lawyerTimeEntry)
-        .set({ endedAt: ended, durationSeconds, updatedAt: ended })
-        .where(eq(lawyerTimeEntry.id, row.id))
-        .returning();
-      return { entry: updated ?? null };
-    }),
+    stop: lawyerProcedure
+      .input(z.object({ id: z.string().uuid() }))
+      .mutation(async ({ ctx, input }) => {
+        const [row] = await ctx.db
+          .select()
+          .from(lawyerTimeEntry)
+          .where(
+            and(eq(lawyerTimeEntry.id, input.id), eq(lawyerTimeEntry.lawyerUserId, ctx.authUserId)),
+          )
+          .limit(1);
+        if (!row) throw new TRPCError({ code: 'NOT_FOUND', message: 'Time entry not found.' });
+        if (row.endedAt) {
+          throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Timer already stopped.' });
+        }
+        const ended = new Date();
+        const durationSeconds = Math.max(
+          0,
+          Math.floor((ended.getTime() - row.startedAt.getTime()) / 1000),
+        );
+        const [updated] = await ctx.db
+          .update(lawyerTimeEntry)
+          .set({ endedAt: ended, durationSeconds, updatedAt: ended })
+          .where(eq(lawyerTimeEntry.id, row.id))
+          .returning();
+        return { entry: updated ?? null };
+      }),
   }),
 
   invoice: router({
     list: lawyerProcedure
-      .input(z.object({ limit: z.number().int().min(1).max(100).optional().default(50) }).optional())
+      .input(
+        z.object({ limit: z.number().int().min(1).max(100).optional().default(50) }).optional(),
+      )
       .query(async ({ ctx, input }) => {
         const limit = input?.limit ?? 50;
         return ctx.db
@@ -280,20 +365,22 @@ export const practiceBillingRouter = router({
           .limit(limit);
       }),
 
-    byId: lawyerProcedure.input(z.object({ id: z.string().uuid() })).query(async ({ ctx, input }) => {
-      const inv = await loadInvoiceForLawyer(ctx.db, ctx.authUserId, input.id);
-      const lines = await ctx.db
-        .select()
-        .from(lawyerInvoiceLine)
-        .where(eq(lawyerInvoiceLine.invoiceId, inv.id))
-        .orderBy(asc(lawyerInvoiceLine.sortOrder), asc(lawyerInvoiceLine.createdAt));
-      const payments = await ctx.db
-        .select()
-        .from(lawyerInvoicePayment)
-        .where(eq(lawyerInvoicePayment.invoiceId, inv.id))
-        .orderBy(desc(lawyerInvoicePayment.createdAt));
-      return { invoice: inv, lines, payments };
-    }),
+    byId: lawyerProcedure
+      .input(z.object({ id: z.string().uuid() }))
+      .query(async ({ ctx, input }) => {
+        const inv = await loadInvoiceForLawyer(ctx.db, ctx.authUserId, input.id);
+        const lines = await ctx.db
+          .select()
+          .from(lawyerInvoiceLine)
+          .where(eq(lawyerInvoiceLine.invoiceId, inv.id))
+          .orderBy(asc(lawyerInvoiceLine.sortOrder), asc(lawyerInvoiceLine.createdAt));
+        const payments = await ctx.db
+          .select()
+          .from(lawyerInvoicePayment)
+          .where(eq(lawyerInvoicePayment.invoiceId, inv.id))
+          .orderBy(desc(lawyerInvoicePayment.createdAt));
+        return { invoice: inv, lines, payments };
+      }),
 
     createDraft: lawyerProcedure
       .input(
@@ -313,6 +400,24 @@ export const practiceBillingRouter = router({
       )
       .mutation(async ({ ctx, input }) => {
         if (input.caseId) await loadCaseForLawyer(ctx.db, ctx.authUserId, input.caseId);
+        if (input.consultationId) {
+          const [c] = await ctx.db
+            .select({ id: consultation.id })
+            .from(consultation)
+            .where(
+              and(
+                eq(consultation.id, input.consultationId),
+                eq(consultation.lawyerUserId, ctx.authUserId),
+              ),
+            )
+            .limit(1);
+          if (!c) {
+            throw new TRPCError({
+              code: 'NOT_FOUND',
+              message: 'Consultation not found for this lawyer.',
+            });
+          }
+        }
         const draftNum = `DRAFT-${randomUUID()}`;
         const now = new Date();
         const [inv] = await ctx.db
@@ -354,7 +459,10 @@ export const practiceBillingRouter = router({
       .mutation(async ({ ctx, input }) => {
         const inv = await loadInvoiceForLawyer(ctx.db, ctx.authUserId, input.invoiceId);
         if (inv.status !== 'draft') {
-          throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Only draft invoices can be edited.' });
+          throw new TRPCError({
+            code: 'PRECONDITION_FAILED',
+            message: 'Only draft invoices can be edited.',
+          });
         }
         const taxableInr = Math.round(input.quantity * input.unitRateInr);
         const [firm] = await ctx.db
@@ -398,12 +506,17 @@ export const practiceBillingRouter = router({
       .mutation(async ({ ctx, input }) => {
         const inv = await loadInvoiceForLawyer(ctx.db, ctx.authUserId, input.invoiceId);
         if (inv.status !== 'draft') {
-          throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Only draft invoices can be edited.' });
+          throw new TRPCError({
+            code: 'PRECONDITION_FAILED',
+            message: 'Only draft invoices can be edited.',
+          });
         }
         const [line] = await ctx.db
           .select()
           .from(lawyerInvoiceLine)
-          .where(and(eq(lawyerInvoiceLine.id, input.lineId), eq(lawyerInvoiceLine.invoiceId, inv.id)))
+          .where(
+            and(eq(lawyerInvoiceLine.id, input.lineId), eq(lawyerInvoiceLine.invoiceId, inv.id)),
+          )
           .limit(1);
         if (!line) throw new TRPCError({ code: 'NOT_FOUND', message: 'Line not found.' });
         const qty = input.quantity ?? line.quantity;
@@ -433,11 +546,16 @@ export const practiceBillingRouter = router({
       .mutation(async ({ ctx, input }) => {
         const inv = await loadInvoiceForLawyer(ctx.db, ctx.authUserId, input.invoiceId);
         if (inv.status !== 'draft') {
-          throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Only draft invoices can be edited.' });
+          throw new TRPCError({
+            code: 'PRECONDITION_FAILED',
+            message: 'Only draft invoices can be edited.',
+          });
         }
         await ctx.db
           .delete(lawyerInvoiceLine)
-          .where(and(eq(lawyerInvoiceLine.id, input.lineId), eq(lawyerInvoiceLine.invoiceId, inv.id)));
+          .where(
+            and(eq(lawyerInvoiceLine.id, input.lineId), eq(lawyerInvoiceLine.invoiceId, inv.id)),
+          );
         await recalculateInvoiceTotals(ctx.db, inv.id);
         return { ok: true as const };
       }),
@@ -447,7 +565,10 @@ export const practiceBillingRouter = router({
       .mutation(async ({ ctx, input }) => {
         const inv = await loadInvoiceForLawyer(ctx.db, ctx.authUserId, input.invoiceId);
         if (inv.status !== 'draft') {
-          throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Only draft invoices accept time lines.' });
+          throw new TRPCError({
+            code: 'PRECONDITION_FAILED',
+            message: 'Only draft invoices accept time lines.',
+          });
         }
         if (inv.caseId && inv.caseId !== input.caseId) {
           throw new TRPCError({ code: 'BAD_REQUEST', message: 'Invoice case mismatch.' });
@@ -523,7 +644,10 @@ export const practiceBillingRouter = router({
       .mutation(async ({ ctx, input }) => {
         const inv = await loadInvoiceForLawyer(ctx.db, ctx.authUserId, input.id);
         if (inv.status !== 'draft') {
-          throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Only draft invoices can be updated.' });
+          throw new TRPCError({
+            code: 'PRECONDITION_FAILED',
+            message: 'Only draft invoices can be updated.',
+          });
         }
         const patch: Partial<typeof lawyerInvoice.$inferInsert> = { updatedAt: new Date() };
         if (input.supplyType !== undefined) patch.supplyType = input.supplyType;
@@ -535,118 +659,157 @@ export const practiceBillingRouter = router({
         if (input.issueDate !== undefined) patch.issueDate = input.issueDate;
         if (input.dueDate !== undefined) patch.dueDate = input.dueDate;
         if (input.notes !== undefined) patch.notes = input.notes;
-        const [updated] = await ctx.db.update(lawyerInvoice).set(patch).where(eq(lawyerInvoice.id, inv.id)).returning();
+        const [updated] = await ctx.db
+          .update(lawyerInvoice)
+          .set(patch)
+          .where(eq(lawyerInvoice.id, inv.id))
+          .returning();
         if (input.supplyType !== undefined) {
           await recalculateInvoiceTotals(ctx.db, inv.id);
         }
         return { invoice: updated ?? null };
       }),
 
-    finalize: lawyerProcedure.input(z.object({ id: z.string().uuid() })).mutation(async ({ ctx, input }) => {
-      return ctx.db.transaction(async (tx) => {
-        const inv = await loadInvoiceForLawyer(tx, ctx.authUserId, input.id);
-        if (inv.status !== 'draft') {
-          throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Invoice is not a draft.' });
+    finalize: lawyerProcedure
+      .input(z.object({ id: z.string().uuid() }))
+      .mutation(async ({ ctx, input }) => {
+        return ctx.db.transaction(async (tx) => {
+          const inv = await loadInvoiceForLawyer(tx, ctx.authUserId, input.id);
+          if (inv.status !== 'draft') {
+            throw new TRPCError({
+              code: 'PRECONDITION_FAILED',
+              message: 'Invoice is not a draft.',
+            });
+          }
+          const lines = await tx
+            .select()
+            .from(lawyerInvoiceLine)
+            .where(eq(lawyerInvoiceLine.invoiceId, inv.id))
+            .limit(1);
+          if (lines.length === 0) {
+            throw new TRPCError({
+              code: 'PRECONDITION_FAILED',
+              message: 'Add at least one line before finalizing.',
+            });
+          }
+          await recalculateInvoiceTotals(tx, inv.id);
+          const { invoiceNumber } = await allocateInvoiceNumber(tx, ctx.authUserId, inv.issueDate);
+          const [updated] = await tx
+            .update(lawyerInvoice)
+            .set({
+              invoiceNumber,
+              status: 'sent',
+              updatedAt: new Date(),
+            })
+            .where(eq(lawyerInvoice.id, inv.id))
+            .returning();
+          return { invoice: updated ?? null };
+        });
+      }),
+
+    void: lawyerProcedure
+      .input(z.object({ id: z.string().uuid() }))
+      .mutation(async ({ ctx, input }) => {
+        const inv = await loadInvoiceForLawyer(ctx.db, ctx.authUserId, input.id);
+        if (inv.status === 'paid' || inv.status === 'partially_paid') {
+          throw new TRPCError({
+            code: 'PRECONDITION_FAILED',
+            message: 'Cannot void an invoice with payments.',
+          });
         }
-        const lines = await tx
-          .select()
-          .from(lawyerInvoiceLine)
-          .where(eq(lawyerInvoiceLine.invoiceId, inv.id))
+        const paid = await ctx.db
+          .select({ id: lawyerInvoicePayment.id })
+          .from(lawyerInvoicePayment)
+          .where(
+            and(
+              eq(lawyerInvoicePayment.invoiceId, inv.id),
+              eq(lawyerInvoicePayment.status, 'paid'),
+            ),
+          )
           .limit(1);
-        if (lines.length === 0) {
-          throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Add at least one line before finalizing.' });
+        if (paid.length) {
+          throw new TRPCError({
+            code: 'PRECONDITION_FAILED',
+            message: 'Cannot void a paid invoice.',
+          });
         }
-        await recalculateInvoiceTotals(tx, inv.id);
-        const { invoiceNumber } = await allocateInvoiceNumber(tx, ctx.authUserId, inv.issueDate);
-        const [updated] = await tx
+        await ctx.db
+          .update(lawyerTimeEntry)
+          .set({ billedInvoiceId: null, updatedAt: new Date() })
+          .where(eq(lawyerTimeEntry.billedInvoiceId, inv.id));
+        const [updated] = await ctx.db
           .update(lawyerInvoice)
-          .set({
-            invoiceNumber,
-            status: 'sent',
-            updatedAt: new Date(),
-          })
+          .set({ status: 'void', updatedAt: new Date() })
           .where(eq(lawyerInvoice.id, inv.id))
           .returning();
         return { invoice: updated ?? null };
-      });
-    }),
+      }),
 
-    void: lawyerProcedure.input(z.object({ id: z.string().uuid() })).mutation(async ({ ctx, input }) => {
-      const inv = await loadInvoiceForLawyer(ctx.db, ctx.authUserId, input.id);
-      if (inv.status === 'paid' || inv.status === 'partially_paid') {
-        throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Cannot void an invoice with payments.' });
-      }
-      const paid = await ctx.db
-        .select({ id: lawyerInvoicePayment.id })
-        .from(lawyerInvoicePayment)
-        .where(and(eq(lawyerInvoicePayment.invoiceId, inv.id), eq(lawyerInvoicePayment.status, 'paid')))
-        .limit(1);
-      if (paid.length) {
-        throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Cannot void a paid invoice.' });
-      }
-      await ctx.db
-        .update(lawyerTimeEntry)
-        .set({ billedInvoiceId: null, updatedAt: new Date() })
-        .where(eq(lawyerTimeEntry.billedInvoiceId, inv.id));
-      const [updated] = await ctx.db
-        .update(lawyerInvoice)
-        .set({ status: 'void', updatedAt: new Date() })
-        .where(eq(lawyerInvoice.id, inv.id))
-        .returning();
-      return { invoice: updated ?? null };
-    }),
-
-    pdfBase64: lawyerProcedure.input(z.object({ id: z.string().uuid() })).query(async ({ ctx, input }) => {
-      const inv = await loadInvoiceForLawyer(ctx.db, ctx.authUserId, input.id);
-      const [firm] = await ctx.db
-        .select()
-        .from(lawyerFirmProfile)
-        .where(eq(lawyerFirmProfile.userId, ctx.authUserId))
-        .limit(1);
-      const lines = await ctx.db
-        .select()
-        .from(lawyerInvoiceLine)
-        .where(eq(lawyerInvoiceLine.invoiceId, inv.id))
-        .orderBy(asc(lawyerInvoiceLine.sortOrder));
-      const lawyerAddress = [firm?.addressLine1, firm?.addressLine2, `${firm?.city ?? ''} ${firm?.pincode ?? ''}`]
-        .filter(Boolean)
-        .join('\n');
-      const pdf = await renderInvoicePdfBase64({
-        invoiceNumber: inv.invoiceNumber,
-        issueDateIso: inv.issueDate.toISOString().slice(0, 10),
-        dueDateIso: inv.dueDate ? inv.dueDate.toISOString().slice(0, 10) : null,
-        supplyType: inv.supplyType,
-        lawyerLegalName: firm?.legalName ?? '',
-        lawyerAddress: lawyerAddress || '—',
-        lawyerGstin: firm?.gstin ?? null,
-        clientName: inv.clientName,
-        clientAddress: inv.clientAddress,
-        clientGstin: inv.clientGstin,
-        placeOfSupply: inv.placeOfSupply,
-        lines: lines.map((l) => ({
-          description: l.description,
-          quantity: l.quantity,
-          unitRateInr: l.unitRateInr,
-          taxableInr: l.taxableInr,
-          taxRatePercent: l.taxRatePercent,
-        })),
-        taxableInr: inv.taxableInr,
-        cgstInr: inv.cgstInr,
-        sgstInr: inv.sgstInr,
-        igstInr: inv.igstInr,
-        totalInr: inv.totalInr,
-        notes: inv.notes,
-      });
-      return { fileName: `${inv.invoiceNumber}.pdf`, base64: pdf };
-    }),
+    pdfBase64: lawyerProcedure
+      .input(z.object({ id: z.string().uuid() }))
+      .query(async ({ ctx, input }) => {
+        const inv = await loadInvoiceForLawyer(ctx.db, ctx.authUserId, input.id);
+        const [firm] = await ctx.db
+          .select()
+          .from(lawyerFirmProfile)
+          .where(eq(lawyerFirmProfile.userId, ctx.authUserId))
+          .limit(1);
+        const lines = await ctx.db
+          .select()
+          .from(lawyerInvoiceLine)
+          .where(eq(lawyerInvoiceLine.invoiceId, inv.id))
+          .orderBy(asc(lawyerInvoiceLine.sortOrder));
+        const lawyerAddress = [
+          firm?.addressLine1,
+          firm?.addressLine2,
+          `${firm?.city ?? ''} ${firm?.pincode ?? ''}`,
+        ]
+          .filter(Boolean)
+          .join('\n');
+        const pdf = await renderInvoicePdfBase64({
+          invoiceNumber: inv.invoiceNumber,
+          issueDateIso: inv.issueDate.toISOString().slice(0, 10),
+          dueDateIso: inv.dueDate ? inv.dueDate.toISOString().slice(0, 10) : null,
+          supplyType: inv.supplyType,
+          lawyerLegalName: firm?.legalName ?? '',
+          lawyerAddress: lawyerAddress || '—',
+          lawyerGstin: firm?.gstin ?? null,
+          clientName: inv.clientName,
+          clientAddress: inv.clientAddress,
+          clientGstin: inv.clientGstin,
+          placeOfSupply: inv.placeOfSupply,
+          lines: lines.map((l) => ({
+            description: l.description,
+            quantity: l.quantity,
+            unitRateInr: l.unitRateInr,
+            taxableInr: l.taxableInr,
+            taxRatePercent: l.taxRatePercent,
+          })),
+          taxableInr: inv.taxableInr,
+          cgstInr: inv.cgstInr,
+          sgstInr: inv.sgstInr,
+          igstInr: inv.igstInr,
+          totalInr: inv.totalInr,
+          notes: inv.notes,
+        });
+        return { fileName: `${inv.invoiceNumber}.pdf`, base64: pdf };
+      }),
 
     createPaymentOrder: lawyerProcedure
-      .input(z.object({ invoiceId: z.string().uuid(), amountInr: z.number().int().positive().optional() }))
+      .input(
+        z.object({
+          invoiceId: z.string().uuid(),
+          amountInr: z.number().int().positive().optional(),
+        }),
+      )
       .mutation(async ({ ctx, input }) => {
         const { id: keyId, secret: keySecret } = requireConfiguredRazorpay(ctx);
         const inv = await loadInvoiceForLawyer(ctx.db, ctx.authUserId, input.invoiceId);
         if (inv.status === 'void' || inv.status === 'draft') {
-          throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Invoice must be sent before collecting payment.' });
+          throw new TRPCError({
+            code: 'PRECONDITION_FAILED',
+            message: 'Invoice must be sent before collecting payment.',
+          });
         }
         if (inv.status === 'paid') {
           throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'Invoice already paid.' });
@@ -654,7 +817,12 @@ export const practiceBillingRouter = router({
         const [paidRow] = await ctx.db
           .select({ s: sum(lawyerInvoicePayment.amountInr) })
           .from(lawyerInvoicePayment)
-          .where(and(eq(lawyerInvoicePayment.invoiceId, inv.id), eq(lawyerInvoicePayment.status, 'paid')));
+          .where(
+            and(
+              eq(lawyerInvoicePayment.invoiceId, inv.id),
+              eq(lawyerInvoicePayment.status, 'paid'),
+            ),
+          );
         const paidSum = Number(paidRow?.s ?? 0);
         const remaining = inv.totalInr - paidSum;
         const payAmount = input.amountInr ?? remaining;
@@ -690,24 +858,62 @@ export const practiceBillingRouter = router({
         }),
       )
       .mutation(async ({ ctx, input }) => {
-        const { secret } = requireConfiguredRazorpay(ctx);
-        const expected = computeRazorpayClientSignature({
-          secret,
-          orderId: input.razorpayOrderId,
-          paymentId: input.razorpayPaymentId,
-        });
-        if (expected !== input.razorpaySignature) {
+        const { id: keyId, secret: keySecret } = requireConfiguredRazorpay(ctx);
+        if (
+          !verifyRazorpayClientSignature({
+            secret: keySecret,
+            orderId: input.razorpayOrderId,
+            paymentId: input.razorpayPaymentId,
+            clientSignature: input.razorpaySignature,
+          })
+        ) {
           throw new TRPCError({ code: 'BAD_REQUEST', message: 'Invalid payment signature.' });
         }
+
+        const payment = await fetchRazorpayPayment({
+          keyId,
+          keySecret,
+          paymentId: input.razorpayPaymentId,
+        });
+
+        if (payment.status !== 'captured') {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: `Payment not captured: ${payment.status}`,
+          });
+        }
+
+        if (payment.order_id !== input.razorpayOrderId) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'Payment order mismatch',
+          });
+        }
+
         await ctx.db.transaction(async (tx) => {
           const inv = await loadInvoiceForLawyer(tx, ctx.authUserId, input.invoiceId);
           const [pay] = await tx
             .select()
             .from(lawyerInvoicePayment)
-            .where(and(eq(lawyerInvoicePayment.invoiceId, inv.id), eq(lawyerInvoicePayment.razorpayOrderId, input.razorpayOrderId)))
+            .where(
+              and(
+                eq(lawyerInvoicePayment.invoiceId, inv.id),
+                eq(lawyerInvoicePayment.razorpayOrderId, input.razorpayOrderId),
+              ),
+            )
             .limit(1);
-          if (!pay) throw new TRPCError({ code: 'NOT_FOUND', message: 'Payment record not found.' });
+          if (!pay)
+            throw new TRPCError({ code: 'NOT_FOUND', message: 'Payment record not found.' });
           if (pay.status === 'paid') return;
+
+          const expectedPaise = pay.amountInr * 100;
+          if (payment.amount !== expectedPaise) {
+            throw new TRPCError({
+              code: 'BAD_REQUEST',
+              message: `Payment amount mismatch: expected ${expectedPaise} paise, got ${payment.amount} paise`,
+            });
+          }
+
           const paidAt = new Date();
           await tx
             .update(lawyerInvoicePayment)
@@ -723,12 +929,20 @@ export const practiceBillingRouter = router({
           const [agg] = await tx
             .select({ s: sum(lawyerInvoicePayment.amountInr) })
             .from(lawyerInvoicePayment)
-            .where(and(eq(lawyerInvoicePayment.invoiceId, inv.id), eq(lawyerInvoicePayment.status, 'paid')));
+            .where(
+              and(
+                eq(lawyerInvoicePayment.invoiceId, inv.id),
+                eq(lawyerInvoicePayment.status, 'paid'),
+              ),
+            );
           const paidSum = Number(agg?.s ?? 0);
           let status: typeof inv.status = inv.status;
           if (paidSum >= inv.totalInr) status = 'paid';
           else if (paidSum > 0) status = 'partially_paid';
-          await tx.update(lawyerInvoice).set({ status, updatedAt: new Date() }).where(eq(lawyerInvoice.id, inv.id));
+          await tx
+            .update(lawyerInvoice)
+            .set({ status, updatedAt: new Date() })
+            .where(eq(lawyerInvoice.id, inv.id));
         });
         return { ok: true as const };
       }),

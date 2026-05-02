@@ -48,7 +48,7 @@ From `packages/trpc/src/router.ts`:
 
 Rate limiting is attached at `/trpc` middleware with stricter caps for high-cost routes (personalization, research summarization, PDF generation, billing/subscription mutations, court lookup).
 
-Source: `apps/api/src/http-stack.ts`.
+Source: `apps/api/src/http/http-stack.ts`.
 
 ## Context dependencies
 

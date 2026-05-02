@@ -2,7 +2,7 @@ import { Link } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export default function ResearchLibraryScreen() {
   const [q, setQ] = useState('');
@@ -40,7 +40,13 @@ const styles = StyleSheet.create({
   back: { color: '#C2410C', fontWeight: '600' },
   title: { fontSize: 20, fontWeight: '700', color: '#1C1917', marginBottom: 8 },
   input: { borderWidth: 1, borderColor: '#D6D3D1', borderRadius: 10, padding: 10 },
-  card: { padding: 12, borderRadius: 12, borderWidth: 1, borderColor: '#E7E5E4', backgroundColor: '#fff' },
+  card: {
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E7E5E4',
+    backgroundColor: '#fff',
+  },
   cardTitle: { fontWeight: '700', color: '#1C1917' },
   cardMeta: { marginTop: 4, fontSize: 12, color: '#78716C' },
 });

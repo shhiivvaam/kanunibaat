@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export default function DigiLockerCallbackPage() {
   const sp = useSearchParams();
@@ -28,9 +28,11 @@ export default function DigiLockerCallbackPage() {
       }
       try {
         await exchange.mutateAsync({ code, state });
-        if (!cancelled) setMessage('DigiLocker connected. You can now import documents into your vault.');
+        if (!cancelled)
+          setMessage('DigiLocker connected. You can now import documents into your vault.');
       } catch (e) {
-        if (!cancelled) setMessage(e instanceof Error ? e.message : 'Failed to connect DigiLocker.');
+        if (!cancelled)
+          setMessage(e instanceof Error ? e.message : 'Failed to connect DigiLocker.');
       }
     })();
     return () => {
@@ -40,7 +42,10 @@ export default function DigiLockerCallbackPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-6 py-16" style={{ fontFamily: 'var(--font-body)' }}>
-      <h1 className="text-2xl font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+      <h1
+        className="text-2xl font-semibold text-[#1C1917]"
+        style={{ fontFamily: 'var(--font-display)' }}
+      >
         DigiLocker
       </h1>
       <p className="mt-3 text-sm text-[#57534E]">{message}</p>
@@ -52,4 +57,3 @@ export default function DigiLockerCallbackPage() {
     </div>
   );
 }
-

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 
-import { trpc } from '@kb/api-client';
+import { trpc } from '@jurisly/api-client';
 
 export function PracticeInvoicesList() {
   const router = useRouter();
@@ -38,7 +38,10 @@ export function PracticeInvoicesList() {
           <Link href="/app/practice" className="text-sm text-[#C2410C] hover:underline">
             ← Practice
           </Link>
-          <h1 className="mt-2 text-xl font-semibold text-[#1C1917]" style={{ fontFamily: 'var(--font-display)' }}>
+          <h1
+            className="mt-2 text-xl font-semibold text-[#1C1917]"
+            style={{ fontFamily: 'var(--font-display)' }}
+          >
             Invoices
           </h1>
           <p className="mt-1 text-sm text-[#57534E]">Draft, send, collect payment, export PDF.</p>
@@ -86,19 +89,26 @@ export function PracticeInvoicesList() {
               {(list.data ?? []).map((inv) => (
                 <tr key={inv.id} className="border-b border-[#F5F5F4] last:border-0">
                   <td className="px-4 py-3">
-                    <Link href={`/app/practice/invoices/${inv.id}`} className="font-medium text-[#C2410C] hover:underline">
+                    <Link
+                      href={`/app/practice/invoices/${inv.id}`}
+                      className="font-medium text-[#C2410C] hover:underline"
+                    >
                       {inv.invoiceNumber}
                     </Link>
                   </td>
                   <td className="px-4 py-3 text-[#57534E]">{inv.status}</td>
                   <td className="px-4 py-3 text-[#57534E]">{inv.clientName || '—'}</td>
                   <td className="px-4 py-3 text-right tabular-nums">{inv.totalInr}</td>
-                  <td className="px-4 py-3 text-xs text-[#78716C]">{new Date(inv.updatedAt).toLocaleString()}</td>
+                  <td className="px-4 py-3 text-xs text-[#78716C]">
+                    {new Date(inv.updatedAt).toLocaleString()}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          {(list.data?.length ?? 0) === 0 ? <p className="p-4 text-sm text-[#78716C]">No invoices yet.</p> : null}
+          {(list.data?.length ?? 0) === 0 ? (
+            <p className="p-4 text-sm text-[#78716C]">No invoices yet.</p>
+          ) : null}
         </div>
       )}
     </div>
