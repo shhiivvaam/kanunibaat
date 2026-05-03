@@ -6,10 +6,7 @@ import Colors from '@/constants/Colors';
 import { useClientOnlyValue } from '@/components/useClientOnlyValue';
 import { useColorScheme } from '@/components/useColorScheme';
 
-function TabBarIcon(props: {
-  name: ComponentProps<typeof FontAwesome>['name'];
-  color: string;
-}) {
+function TabBarIcon(props: { name: ComponentProps<typeof FontAwesome>['name']; color: string }) {
   return <FontAwesome size={24} style={{ marginBottom: -2 }} {...props} />;
 }
 

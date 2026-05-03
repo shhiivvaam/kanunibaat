@@ -39,9 +39,7 @@ export default function RightsScreen() {
         renderItem={({ item }) => (
           <Pressable
             style={styles.card}
-            onPress={() =>
-              router.push({ pathname: '/rights/[slug]', params: { slug: item.slug } })
-            }
+            onPress={() => router.push({ pathname: '/rights/[slug]', params: { slug: item.slug } })}
           >
             <Text style={styles.cardMeta}>{item.category || 'general'}</Text>
             <Text style={styles.cardTitle}>{item.titleJson.en ?? item.slug}</Text>

@@ -72,7 +72,9 @@ export default function VaultSharedMarketingScreen() {
             <Text style={styles.meta}>
               {String(q.data.category)} · {Math.round(q.data.byteSize / 1024)} KB ciphertext
             </Text>
-            <Text style={styles.meta}>Share expires {formatUnknownDate(q.data.shareExpiresAt)}</Text>
+            <Text style={styles.meta}>
+              Share expires {formatUnknownDate(q.data.shareExpiresAt)}
+            </Text>
             {q.data.documentExpiresAt ? (
               <Text style={styles.meta}>
                 Document expiry {formatUnknownDate(q.data.documentExpiresAt)}
@@ -102,7 +104,8 @@ export default function VaultSharedMarketingScreen() {
               </View>
             ) : null}
             <Text style={[styles.mini, { marginTop: 14 }]}>
-              Binary export matches the browser “Download decrypted” control on web for full fidelity.
+              Binary export matches the browser “Download decrypted” control on web for full
+              fidelity.
             </Text>
           </View>
         ) : null}

@@ -1,11 +1,5 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
-import {
-  ActivityIndicator,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { trpc } from '@jurisly/api-client';
 
@@ -28,9 +22,7 @@ export default function MarketingNoticeScanResultScreen() {
     <>
       <Stack.Screen options={{ title: 'Notice result' }} />
       <ScrollView contentContainerStyle={styles.container}>
-        {!token ? (
-          <Text style={styles.err}>Missing access token (`t` query param).</Text>
-        ) : null}
+        {!token ? <Text style={styles.err}>Missing access token (`t` query param).</Text> : null}
         {q.isPending ? <ActivityIndicator /> : null}
         {q.error ? <Text style={styles.err}>{q.error.message}</Text> : null}
         {!q.isPending && q.data?.scan ? (

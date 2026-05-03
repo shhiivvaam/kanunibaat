@@ -21,8 +21,7 @@ async function proxyTrpc(req: NextRequest, pathSegments: string[] | undefined): 
   if (cookie) headers.set('cookie', cookie);
   const authorization = req.headers.get('authorization');
   if (authorization) headers.set('authorization', authorization);
-  const requestId =
-    req.headers.get('x-request-id') ?? req.headers.get('x-correlation-id');
+  const requestId = req.headers.get('x-request-id') ?? req.headers.get('x-correlation-id');
   if (requestId) headers.set('x-request-id', requestId);
   else headers.set('x-request-id', randomUUID());
 

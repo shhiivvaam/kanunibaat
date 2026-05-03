@@ -109,7 +109,8 @@ export default function LawyerOnboardingScreen() {
       const blob = await fileRes.blob();
       const contentType = asset.mimeType || 'application/octet-stream';
       const fileName = asset.name || 'document';
-      const byteSize = typeof asset.size === 'number' && asset.size > 0 ? asset.size : blob.size || 1;
+      const byteSize =
+        typeof asset.size === 'number' && asset.size > 0 ? asset.size : blob.size || 1;
       const { documentId, uploadUrl } = await requestUpload.mutateAsync({
         kind,
         fileName,
@@ -136,7 +137,8 @@ export default function LawyerOnboardingScreen() {
       <Stack.Screen options={{ title: 'Lawyer onboarding' }} />
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.intro}>
-          Complete your professional profile, upload required documents, then submit for verification.
+          Complete your professional profile, upload required documents, then submit for
+          verification.
         </Text>
 
         {!law ? (
@@ -188,7 +190,11 @@ export default function LawyerOnboardingScreen() {
                 </View>
               </View>
               <Text style={styles.label}>Practice areas (comma-separated)</Text>
-              <TextInput style={styles.input} value={practiceAreas} onChangeText={setPracticeAreas} />
+              <TextInput
+                style={styles.input}
+                value={practiceAreas}
+                onChangeText={setPracticeAreas}
+              />
               <Text style={styles.label}>Languages (comma-separated)</Text>
               <TextInput style={styles.input} value={languages} onChangeText={setLanguages} />
               <Text style={styles.label}>Years experience</Text>
@@ -198,8 +204,14 @@ export default function LawyerOnboardingScreen() {
                 value={yearsExperience}
                 onChangeText={setYearsExperience}
               />
-              <Pressable style={styles.primaryBtn} onPress={() => void onSaveProfile()} disabled={update.isPending}>
-                <Text style={styles.primaryBtnText}>{update.isPending ? 'Saving…' : 'Save profile'}</Text>
+              <Pressable
+                style={styles.primaryBtn}
+                onPress={() => void onSaveProfile()}
+                disabled={update.isPending}
+              >
+                <Text style={styles.primaryBtnText}>
+                  {update.isPending ? 'Saving…' : 'Save profile'}
+                </Text>
               </Pressable>
               {update.error ? <Text style={styles.err}>{update.error.message}</Text> : null}
             </View>
@@ -244,7 +256,9 @@ export default function LawyerOnboardingScreen() {
 
             <View style={styles.card}>
               <Text style={styles.cardTitle}>Submit for review</Text>
-              <Text style={styles.cardSub}>Bar state, enrollment, and both required documents required.</Text>
+              <Text style={styles.cardSub}>
+                Bar state, enrollment, and both required documents required.
+              </Text>
               <Pressable
                 style={[styles.primaryBtn, { backgroundColor: '#C2410C' }]}
                 onPress={() => submit.mutate()}
@@ -267,8 +281,8 @@ export default function LawyerOnboardingScreen() {
               </Text>
             ) : (
               <Text style={styles.cardSub}>
-                You are verified. Open the Lawyers tab to see your marketplace profile under your slug —{' '}
-                <Text style={{ fontWeight: '700' }}>{law.slug}</Text>
+                You are verified. Open the Lawyers tab to see your marketplace profile under your
+                slug — <Text style={{ fontWeight: '700' }}>{law.slug}</Text>
               </Text>
             )}
           </View>
@@ -301,7 +315,9 @@ function BarCouncilNotice({ data }: { data: Record<string, unknown> }) {
       );
     else body = <Text style={styles.muted}>{String(vr?.message ?? 'Integration pending.')}</Text>;
   } else if (available && !canVerify)
-    body = <Text style={styles.muted}>{String(data.reason ?? 'Provide bar state and enrollment.')}</Text>;
+    body = (
+      <Text style={styles.muted}>{String(data.reason ?? 'Provide bar state and enrollment.')}</Text>
+    );
   return <>{body}</>;
 }
 

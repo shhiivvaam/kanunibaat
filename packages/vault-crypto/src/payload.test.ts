@@ -19,9 +19,8 @@ void describe('encryptVaultPayload / decryptVaultPayload', () => {
 
   void it('fails decrypt with wrong passphrase', async () => {
     const enc = await encryptVaultPayload(new Uint8Array([1, 2, 3]), 'one');
-    await assert.rejects(
-      async () =>
-        decryptVaultPayload(enc.ciphertext, 'two', enc.wrappedDekBase64, enc.keyWrapSaltBase64),
+    await assert.rejects(async () =>
+      decryptVaultPayload(enc.ciphertext, 'two', enc.wrappedDekBase64, enc.keyWrapSaltBase64),
     );
   });
 });

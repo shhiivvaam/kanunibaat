@@ -4,37 +4,37 @@ This document inventories **applications**, **data stores**, **integrations**, a
 
 ## Applications
 
-| App | Path | Role |
-|-----|------|------|
-| API | `apps/api` | NestJS host: tRPC `/trpc`, webhooks, internal cron HTTP, OpenAPI, SSE fan-out for consultation chat |
-| Web | `apps/web` | Next.js: marketing, Better Auth, BFF proxy `/api/trpc` → `INTERNAL_API_URL` |
-| Mobile | `apps/mobile` | Expo: direct tRPC to public API (`EXPO_PUBLIC_API_URL`) |
+| App    | Path          | Role                                                                                                |
+| ------ | ------------- | --------------------------------------------------------------------------------------------------- |
+| API    | `apps/api`    | NestJS host: tRPC `/trpc`, webhooks, internal cron HTTP, OpenAPI, SSE fan-out for consultation chat |
+| Web    | `apps/web`    | Next.js: marketing, Better Auth, BFF proxy `/api/trpc` → `INTERNAL_API_URL`                         |
+| Mobile | `apps/mobile` | Expo: direct tRPC to public API (`EXPO_PUBLIC_API_URL`)                                             |
 
 ## Shared packages (selected)
 
-| Package | Role |
-|---------|------|
-| `packages/trpc` | tRPC `appRouter`, auth context, domain procedures |
-| `packages/database` | Drizzle + Postgres schema, migrations |
-| `packages/search` | Meilisearch client helpers |
-| `packages/storage` | S3 presign and document storage |
+| Package             | Role                                              |
+| ------------------- | ------------------------------------------------- |
+| `packages/trpc`     | tRPC `appRouter`, auth context, domain procedures |
+| `packages/database` | Drizzle + Postgres schema, migrations             |
+| `packages/search`   | Meilisearch client helpers                        |
+| `packages/storage`  | S3 presign and document storage                   |
 
 ## Integrations
 
-| Integration | Used for | Gating env vars (API) |
-|-------------|----------|------------------------|
-| Postgres | Auth sessions, all domain data | `DATABASE_URL` (required in **production** by `loadApiEnv`) |
-| Better Auth | Cookies / bearer sessions | `BETTER_AUTH_SECRET` (required in production); `BETTER_AUTH_URL`, `BETTER_AUTH_SESSION_COOKIE_NAMES`, `NEXT_PUBLIC_APP_URL` optional |
-| Meilisearch | Lawyer + judgment search | `MEILISEARCH_URL` + `MEILISEARCH_MASTER_KEY` (pair validated in production) |
-| AWS S3 | Vault / uploads | All of `AWS_*` bucket fields if any are set (validated in production) |
-| Razorpay | Payments + subscriptions | `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` pair; `RAZORPAY_WEBHOOK_SECRET` mounts webhooks |
-| Resend | transactional email | `RESEND_API_KEY`, `FROM_EMAIL` |
-| LiveKit | consultation video | All `LIVEKIT_*` if any set |
-| WhatsApp | Cloud API webhooks | `WHATSAPP_API_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_VERIFY_TOKEN` together |
-| NJDG bridge | Case tracker / CNR lookup | `NJDG_BRIDGE_URL` + `NJDG_BRIDGE_SECRET` together |
-| OpenAI / Vision | AI features | `OPENAI_API_KEY`, `GOOGLE_CLOUD_VISION_API_KEY` |
-| Upstash Redis | Rate limits / cache (when wired) | `UPSTASH_REDIS_URL`, `UPSTASH_REDIS_TOKEN` |
-| Sentry | Errors | `SENTRY_DSN`, etc. |
+| Integration     | Used for                         | Gating env vars (API)                                                                                                                |
+| --------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Postgres        | Auth sessions, all domain data   | `DATABASE_URL` (required in **production** by `loadApiEnv`)                                                                          |
+| Better Auth     | Cookies / bearer sessions        | `BETTER_AUTH_SECRET` (required in production); `BETTER_AUTH_URL`, `BETTER_AUTH_SESSION_COOKIE_NAMES`, `NEXT_PUBLIC_APP_URL` optional |
+| Meilisearch     | Lawyer + judgment search         | `MEILISEARCH_URL` + `MEILISEARCH_MASTER_KEY` (pair validated in production)                                                          |
+| AWS S3          | Vault / uploads                  | All of `AWS_*` bucket fields if any are set (validated in production)                                                                |
+| Razorpay        | Payments + subscriptions         | `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` pair; `RAZORPAY_WEBHOOK_SECRET` mounts webhooks                                            |
+| Resend          | transactional email              | `RESEND_API_KEY`, `FROM_EMAIL`                                                                                                       |
+| LiveKit         | consultation video               | All `LIVEKIT_*` if any set                                                                                                           |
+| WhatsApp        | Cloud API webhooks               | `WHATSAPP_API_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_VERIFY_TOKEN` together                                                   |
+| NJDG bridge     | Case tracker / CNR lookup        | `NJDG_BRIDGE_URL` + `NJDG_BRIDGE_SECRET` together                                                                                    |
+| OpenAI / Vision | AI features                      | `OPENAI_API_KEY`, `GOOGLE_CLOUD_VISION_API_KEY`                                                                                      |
+| Upstash Redis   | Rate limits / cache (when wired) | `UPSTASH_REDIS_URL`, `UPSTASH_REDIS_TOKEN`                                                                                           |
+| Sentry          | Errors                           | `SENTRY_DSN`, etc.                                                                                                                   |
 
 ## Architecture graph
 

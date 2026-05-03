@@ -4,7 +4,8 @@ import type { inferRouterInputs } from '@trpc/server';
 import type { AppRouter } from '@jurisly/api-client';
 import { trpc } from '@jurisly/api-client';
 
-type BillingSubCreateInput = inferRouterInputs<AppRouter>['billing']['subscription']['createOrUpdate'];
+type BillingSubCreateInput =
+  inferRouterInputs<AppRouter>['billing']['subscription']['createOrUpdate'];
 
 export default function BillingScreen() {
   const plans = trpc.billing.plans.list.useQuery();

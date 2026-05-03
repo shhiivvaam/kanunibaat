@@ -41,12 +41,15 @@ function appendScoped(entries, fragments) {
   return entries;
 }
 
-const scopedBlocks = appendScoped([], [
-  js.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
-  ...tseslint.configs.stylisticTypeChecked,
-  eslintConfigPrettier,
-]);
+const scopedBlocks = appendScoped(
+  [],
+  [
+    js.configs.recommended,
+    ...tseslint.configs.recommendedTypeChecked,
+    ...tseslint.configs.stylisticTypeChecked,
+    eslintConfigPrettier,
+  ],
+);
 
 export default tseslint.config(
   {

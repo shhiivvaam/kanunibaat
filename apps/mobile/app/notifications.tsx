@@ -1,12 +1,5 @@
 import { Stack } from 'expo-router';
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { trpc } from '@jurisly/api-client';
 
@@ -21,8 +14,12 @@ export default function NotificationsScreen() {
     <>
       <Stack.Screen options={{ title: 'Notifications' }} />
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.lead}>This device registers for push automatically when logged in.</Text>
-        <Text style={styles.hint}>Disable a destination below to stop pushes for that endpoint.</Text>
+        <Text style={styles.lead}>
+          This device registers for push automatically when logged in.
+        </Text>
+        <Text style={styles.hint}>
+          Disable a destination below to stop pushes for that endpoint.
+        </Text>
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Registered destinations</Text>
@@ -36,8 +33,7 @@ export default function NotificationsScreen() {
               <View style={{ flex: 1 }}>
                 <Text style={styles.destMain}>
                   {d.platform}
-                  {d.deviceLabel ? ` · ${d.deviceLabel}` : ''}{' '}
-                  {!d.enabled ? '(disabled)' : ''}
+                  {d.deviceLabel ? ` · ${d.deviceLabel}` : ''} {!d.enabled ? '(disabled)' : ''}
                 </Text>
               </View>
               {d.enabled ? (

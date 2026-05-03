@@ -3,7 +3,11 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { trpc } from '@jurisly/api-client';
 
-type HomeShortcut = { title: string; subtitle: string; href: '/lawyers' | '/consultations' | '/notice-scanner' | '/guide' | '/vault' };
+type HomeShortcut = {
+  title: string;
+  subtitle: string;
+  href: '/lawyers' | '/consultations' | '/notice-scanner' | '/guide' | '/vault';
+};
 
 const SHORTCUTS: HomeShortcut[] = [
   {
@@ -71,8 +75,8 @@ export default function HomeScreen() {
       </View>
 
       <Text style={styles.footerHint}>
-        Use Settings for notifications, onboarding, integrations, and admin — all native now. Explore
-        web-equivalent marketing pages under Marketing hub.
+        Use Settings for notifications, onboarding, integrations, and admin — all native now.
+        Explore web-equivalent marketing pages under Marketing hub.
       </Text>
     </ScrollView>
   );

@@ -23,10 +23,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
             staleTime: 30_000,
             gcTime: 5 * 60_000,
             retry: (failureCount, error) => {
-              const msg =
-                error instanceof Error ? error.message : String(error ?? '');
-              if (msg.includes('UNAUTHORIZED') || msg.includes('FORBIDDEN'))
-                return false;
+              const msg = error instanceof Error ? error.message : String(error ?? '');
+              if (msg.includes('UNAUTHORIZED') || msg.includes('FORBIDDEN')) return false;
               return failureCount < 2;
             },
           },

@@ -97,9 +97,9 @@ export default function SettingsScreen() {
       >
         <Text style={{ fontSize: 16, fontWeight: '600' }}>Account & tools</Text>
         <Text style={{ fontSize: 13, color: '#57534E' }}>
-          Notifications, onboarding, integrations, and admin verification run natively — same APIs as web.
-          Set <Text style={{ fontWeight: '600' }}>EXPO_PUBLIC_APP_URL</Text> so DigiLocker OAuth returns to your
-          site callback.
+          Notifications, onboarding, integrations, and admin verification run natively — same APIs
+          as web. Set <Text style={{ fontWeight: '600' }}>EXPO_PUBLIC_APP_URL</Text> so DigiLocker
+          OAuth returns to your site callback.
         </Text>
         <View style={{ gap: 8 }}>
           {NATIVE_ROUTES.map((row) => (
@@ -143,7 +143,14 @@ export default function SettingsScreen() {
       </View>
 
       <TouchableOpacity onPress={() => openWebMarketingRoot()} style={{ paddingVertical: 12 }}>
-        <Text style={{ fontSize: 13, color: '#C2410C', fontWeight: '600', textDecorationLine: 'underline' }}>
+        <Text
+          style={{
+            fontSize: 13,
+            color: '#C2410C',
+            fontWeight: '600',
+            textDecorationLine: 'underline',
+          }}
+        >
           Open canonical web site ({locale}) in browser
         </Text>
       </TouchableOpacity>

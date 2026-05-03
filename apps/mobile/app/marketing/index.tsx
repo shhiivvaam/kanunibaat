@@ -35,7 +35,8 @@ export default function MarketingHubScreen() {
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.intro}>
           Native mirror of pages that live under the web `[locale]/(marketing)` tree. Tabs stay the
-          primary entry for product surfaces; deeper pages extend parity for SEO-equivalent journeys.
+          primary entry for product surfaces; deeper pages extend parity for SEO-equivalent
+          journeys.
         </Text>
 
         <Text style={styles.section}>Informational</Text>
@@ -73,10 +74,14 @@ export default function MarketingHubScreen() {
         </TouchableOpacity>
 
         <Text style={styles.section}>Vault shared link</Text>
-        <Text style={styles.hint}>Open vault shared tokens from `/marketing/vault/shared/[token]` via deep navigation.</Text>
+        <Text style={styles.hint}>
+          Open vault shared tokens from `/marketing/vault/shared/[token]` via deep navigation.
+        </Text>
 
         <Text style={styles.section}>Notice scan result</Text>
-        <Text style={styles.hint}>Use `/marketing/notice-scanner/result/[scanId]?t=` with the emailed access token.</Text>
+        <Text style={styles.hint}>
+          Use `/marketing/notice-scanner/result/[scanId]?t=` with the emailed access token.
+        </Text>
       </ScrollView>
     </>
   );

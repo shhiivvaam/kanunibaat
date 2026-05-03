@@ -221,7 +221,11 @@ export default function IntegrationsScreen() {
               <Text style={styles.mini}>Import limit: 2 MB per document</Text>
 
               <Text style={[styles.label, { marginTop: 10 }]}>Display name</Text>
-              <TextInput style={styles.input} value={dlDisplayName} onChangeText={setDlDisplayName} />
+              <TextInput
+                style={styles.input}
+                value={dlDisplayName}
+                onChangeText={setDlDisplayName}
+              />
               <Text style={[styles.label, { marginTop: 8 }]}>Vault passphrase</Text>
               <TextInput
                 style={styles.input}
@@ -232,7 +236,11 @@ export default function IntegrationsScreen() {
                 autoCorrect={false}
               />
 
-              <Pressable style={styles.primaryBtn} onPress={() => void onImportSelected()} disabled={dlBusy}>
+              <Pressable
+                style={styles.primaryBtn}
+                onPress={() => void onImportSelected()}
+                disabled={dlBusy}
+              >
                 {dlBusy ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
