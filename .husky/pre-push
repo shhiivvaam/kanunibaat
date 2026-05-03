@@ -13,4 +13,4 @@ if [ ! -x "$PNPM" ]; then
   echo "  (Do not use pnpm install --ignore-scripts — that skips hook setup.)" >&2
   exit 1
 fi
-exec "$PNPM" verify
+exec "$PNPM" format && "$PNPM" verify
