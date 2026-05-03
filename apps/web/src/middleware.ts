@@ -37,7 +37,8 @@ export default function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const intlResponse = intlMiddleware(request);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const intlResponse = intlMiddleware(request as any);
 
   if (!isWaitlistCampaignEnv()) {
     return intlResponse;
