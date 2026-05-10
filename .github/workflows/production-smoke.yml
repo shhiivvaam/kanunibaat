@@ -1,0 +1,74 @@
+name: Production smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      api_base_url:
+        description: Production API base URL (no trailing slash), e.g. https://your-api.onrender.com
+        required: true
+        type: string
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-smoke-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  HUSKY: '0'
+
+jobs:
+  smoke:
+    name: API health and tRPC smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'workflow_dispatch' || vars.PRODUCTION_API_URL != ''
+    steps:
+      - name: Resolve API base URL
+        id: url
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "base=${{ github.event.inputs.api_base_url }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "base=${{ vars.PRODUCTION_API_URL }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Approve dependency build scripts
+        run: pnpm approve-builds --all
+
+      - name: GET /health
+        run: curl -fsS "${BASE}/health"
+        env:
+          BASE: ${{ steps.url.outputs.base }}
+
+      - name: GET /health/ready
+        run: curl -fsS "${BASE}/health/ready"
+        env:
+          BASE: ${{ steps.url.outputs.base }}
+
+      - name: tRPC smoke
+        run: pnpm --filter api run smoke:trpc
+        env:
+          SMOKE_API_URL: ${{ steps.url.outputs.base }}

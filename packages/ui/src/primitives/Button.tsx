@@ -24,4 +24,3 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
 
   return <button ref={ref} style={{ ...base, ...variants[variant], ...style }} {...props} />;
 });
-

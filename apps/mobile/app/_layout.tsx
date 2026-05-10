@@ -1,33 +1,43 @@
+import '@/lib/crypto-polyfill';
+
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import * as SecureStore from 'expo-secure-store';
+import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
 
+import { TrpcProvider } from '@/components/TrpcProvider';
 import { useColorScheme } from '@/components/useColorScheme';
+import { PushNotificationsClient } from '@/components/PushNotificationsClient';
+import { I18nProvider, mobileLocales, type MobileLocale } from '@/src/i18n';
+import * as Sentry from '@sentry/react-native';
 
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from 'expo-router';
+const mobileDsn = process.env.EXPO_PUBLIC_SENTRY_DSN;
+if (mobileDsn) {
+  Sentry.init({
+    dsn: mobileDsn,
+    enableLogs: true,
+    sendDefaultPii: false,
+  });
+}
+
+export { ErrorBoundary } from 'expo-router';
 
 export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: '(tabs)',
 };
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+export default Sentry.wrap(function RootLayout() {
   const [loaded, error] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
   });
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
   }, [error]);
@@ -43,17 +53,46 @@ export default function RootLayout() {
   }
 
   return <RootLayoutNav />;
-}
+});
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
+  const [initialLocale, setInitialLocale] = useState<MobileLocale | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const stored = await SecureStore.getItemAsync('kb.locale');
+        const next =
+          stored && (mobileLocales as readonly string[]).includes(stored)
+            ? (stored as MobileLocale)
+            : null;
+        if (!cancelled) setInitialLocale(next);
+      } catch {
+        if (!cancelled) setInitialLocale(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-      </Stack>
-    </ThemeProvider>
+    <TrpcProvider>
+      <I18nProvider initialLocale={initialLocale ?? undefined}>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <PushNotificationsClient />
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="notifications" options={{ title: 'Notifications' }} />
+            <Stack.Screen name="admin" options={{ title: 'Admin' }} />
+            <Stack.Screen name="lawyer/onboarding" options={{ title: 'Lawyer onboarding' }} />
+            <Stack.Screen name="integrations" options={{ headerShown: false }} />
+            <Stack.Screen name="marketing" options={{ headerShown: false }} />
+          </Stack>
+        </ThemeProvider>
+      </I18nProvider>
+    </TrpcProvider>
   );
 }

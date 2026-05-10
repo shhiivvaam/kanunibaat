@@ -1,5 +1,5 @@
 {
-  "name": "@kb/api-client",
+  "name": "@jurisly/api-client",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -18,8 +18,8 @@
     "test": "node -e \"console.log('no tests yet')\""
   },
   "dependencies": {
-    "@kb/trpc": "workspace:*",
-    "@kb/types": "workspace:*",
+    "@jurisly/trpc": "workspace:*",
+    "@jurisly/types": "workspace:*",
     "@tanstack/react-query": "^5.66.0",
     "@trpc/client": "^11.16.0",
     "@trpc/react-query": "^11.16.0"
@@ -32,4 +32,3 @@
     "typescript": "^5.9.2"
   }
 }
-

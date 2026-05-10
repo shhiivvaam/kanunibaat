@@ -17,7 +17,8 @@ const LAWYERS = [
     fee: 800,
     languages: ['English', 'Hindi', 'Marathi'],
     budget: 'mid',
-    avatar: 'https://images.unsplash.com/photo-1659353219808-39d96fb9dc91?w=100&h=100&fit=crop&auto=format',
+    avatar:
+      'https://images.unsplash.com/photo-1659353219808-39d96fb9dc91?w=100&h=100&fit=crop&auto=format',
     experience: '12 years',
     online: true,
   },
@@ -31,7 +32,8 @@ const LAWYERS = [
     fee: 1200,
     languages: ['English', 'Kannada', 'Tamil'],
     budget: 'high',
-    avatar: 'https://images.unsplash.com/photo-1649433658557-54cf58577c68?w=100&h=100&fit=crop&auto=format',
+    avatar:
+      'https://images.unsplash.com/photo-1649433658557-54cf58577c68?w=100&h=100&fit=crop&auto=format',
     experience: '18 years',
     online: false,
   },
@@ -45,7 +47,8 @@ const LAWYERS = [
     fee: 500,
     languages: ['Hindi', 'English'],
     budget: 'low',
-    avatar: 'https://images.unsplash.com/photo-1607990283143-e81e7a2c9349?w=100&h=100&fit=crop&auto=format',
+    avatar:
+      'https://images.unsplash.com/photo-1607990283143-e81e7a2c9349?w=100&h=100&fit=crop&auto=format',
     experience: '8 years',
     online: true,
   },
@@ -59,7 +62,8 @@ const LAWYERS = [
     fee: 700,
     languages: ['English', 'Urdu', 'Telugu'],
     budget: 'mid',
-    avatar: 'https://images.unsplash.com/photo-1764084051438-369ad6a09334?w=100&h=100&fit=crop&auto=format',
+    avatar:
+      'https://images.unsplash.com/photo-1764084051438-369ad6a09334?w=100&h=100&fit=crop&auto=format',
     experience: '14 years',
     online: true,
   },
@@ -73,7 +77,8 @@ const LAWYERS = [
     fee: 1000,
     languages: ['Malayalam', 'English', 'Hindi'],
     budget: 'high',
-    avatar: 'https://images.unsplash.com/photo-1659353219808-39d96fb9dc91?w=120&h=120&fit=crop&auto=format',
+    avatar:
+      'https://images.unsplash.com/photo-1659353219808-39d96fb9dc91?w=120&h=120&fit=crop&auto=format',
     experience: '22 years',
     online: false,
   },
@@ -87,7 +92,8 @@ const LAWYERS = [
     fee: 1500,
     languages: ['English', 'Hindi', 'Marathi'],
     budget: 'high',
-    avatar: 'https://images.unsplash.com/photo-1649433658557-54cf58577c68?w=120&h=120&fit=crop&auto=format',
+    avatar:
+      'https://images.unsplash.com/photo-1649433658557-54cf58577c68?w=120&h=120&fit=crop&auto=format',
     experience: '10 years',
     online: true,
   },
@@ -159,12 +165,18 @@ export function LawyerConnectPage() {
     <div className="min-h-screen bg-[#FAFAF9]">
       <div className="border-b border-[#E7E5E4] bg-white px-6 py-4">
         <div className="mx-auto max-w-[1200px]">
-          <div className="flex items-center gap-2 text-sm text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
+          <div
+            className="flex items-center gap-2 text-sm text-[#78716C]"
+            style={{ fontFamily: 'var(--font-body)' }}
+          >
             <span>Home</span>
             <span>/</span>
             <span className="text-[#C2410C]">Lawyer Connect</span>
           </div>
-          <h1 className="mt-1 text-[#1C1917]" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '28px' }}>
+          <h1
+            className="mt-1 text-[#1C1917]"
+            style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '28px' }}
+          >
             Find a Lawyer
           </h1>
           <p className="mt-1 text-sm text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
@@ -266,7 +278,12 @@ export function LawyerConnectPage() {
                   style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
                 >
                   {chip.includes(':') ? chip.slice(chip.indexOf(':') + 1) : chip}
-                  <button type="button" onClick={() => removeChip(chip)} className="hover:text-[#9a3409]" aria-label="Remove filter">
+                  <button
+                    type="button"
+                    onClick={() => removeChip(chip)}
+                    className="hover:text-[#9a3409]"
+                    aria-label="Remove filter"
+                  >
                     <X size={12} />
                   </button>
                 </div>
@@ -297,7 +314,10 @@ export function LawyerConnectPage() {
                   )}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[#1C1917]" style={{ fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: '15px' }}>
+                  <p
+                    className="text-[#1C1917]"
+                    style={{ fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: '15px' }}
+                  >
                     {lawyer.name}
                   </p>
                   <span
@@ -322,7 +342,10 @@ export function LawyerConnectPage() {
                       />
                     ))}
                 </div>
-                <span className="text-sm text-[#1C1917]" style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}>
+                <span
+                  className="text-sm text-[#1C1917]"
+                  style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}
+                >
                   {lawyer.rating}
                 </span>
                 <span className="text-xs text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
@@ -344,14 +367,20 @@ export function LawyerConnectPage() {
 
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-[#1C1917]" style={{ fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: '15px' }}>
+                  <p
+                    className="text-[#1C1917]"
+                    style={{ fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: '15px' }}
+                  >
                     ₹{lawyer.fee}
                   </p>
                   <p className="text-xs text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
                     / 30 min consultation
                   </p>
                 </div>
-                <div className="flex items-center gap-1 text-xs text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
+                <div
+                  className="flex items-center gap-1 text-xs text-[#78716C]"
+                  style={{ fontFamily: 'var(--font-body)' }}
+                >
                   <MapPin size={11} />
                   {lawyer.city}
                 </div>
@@ -375,7 +404,10 @@ export function LawyerConnectPage() {
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-[20px] bg-[#FFF7ED]">
               <Search size={28} className="text-[#C2410C]" />
             </div>
-            <p className="mb-2 text-lg text-[#1C1917]" style={{ fontFamily: 'var(--font-display)', fontWeight: 700 }}>
+            <p
+              className="mb-2 text-lg text-[#1C1917]"
+              style={{ fontFamily: 'var(--font-display)', fontWeight: 700 }}
+            >
               No lawyers found
             </p>
             <p className="text-sm text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>

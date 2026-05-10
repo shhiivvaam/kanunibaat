@@ -1,4 +1,4 @@
-import type { LanguageCode } from '@kb/types';
+import type { LanguageCode } from '@jurisly/types';
 
 export const LANGUAGES: readonly { code: LanguageCode; label: string }[] = [
   { code: 'en', label: 'English' },
@@ -14,4 +14,3 @@ export const LANGUAGES: readonly { code: LanguageCode; label: string }[] = [
   { code: 'or', label: 'ଓଡ଼ିଆ' },
   { code: 'as', label: 'অসমীয়া' },
 ] as const;
-

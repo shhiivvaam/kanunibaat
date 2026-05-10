@@ -1,0 +1,16 @@
+# Render Blueprint — Jurisly API (NestJS), production only (branch: main).
+# Apply from the Render dashboard: New → Blueprint → connect this repo.
+# Set secret env vars in the Render UI (DATABASE_URL, BETTER_AUTH_SECRET, …) — see docs/DEPLOYMENT-FREE-TIER.md and docs/DEPLOYMENT-PRODUCTION.md
+services:
+  - type: web
+    name: jurisly-api
+    branch: main
+    runtime: node
+    plan: free
+    nodeVersion: 22
+    buildCommand: corepack prepare pnpm@10.33.0 --activate && pnpm install && pnpm approve-builds --all && pnpm exec turbo build --filter=api
+    startCommand: pnpm --filter api start:prod
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production

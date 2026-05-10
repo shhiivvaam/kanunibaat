@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -24,10 +20,10 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@kb/api-client": ["../../packages/api-client/src/index.ts"],
-      "@kb/database": ["../../packages/database/src/index.ts"],
-      "@kb/database/schema": ["../../packages/database/src/schema/index.ts"],
-      "@kb/trpc": ["../../packages/trpc/src/index.ts"]
+      "@jurisly/api-client": ["../../packages/api-client/src/index.ts"],
+      "@jurisly/database": ["../../packages/database/src/index.ts"],
+      "@jurisly/database/schema": ["../../packages/database/src/schema/index.ts"],
+      "@jurisly/trpc": ["../../packages/trpc/src/index.ts"]
     }
   },
   "include": [
@@ -35,10 +31,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts",
-    "**/*.mts"
+    "**/*.mts",
+    ".next/dev/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules", ".next/dev"]
 }

@@ -33,6 +33,5 @@ export const INDIAN_STATES_AND_UTS: readonly { code: string; name: string }[] = 
   { code: 'TR', name: 'Tripura' },
   { code: 'UK', name: 'Uttarakhand' },
   { code: 'UP', name: 'Uttar Pradesh' },
-  { code: 'WB', name: 'West Bengal' }
+  { code: 'WB', name: 'West Bengal' },
 ] as const;
-
