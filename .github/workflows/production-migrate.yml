@@ -1,0 +1,57 @@
+name: Production database migrate
+
+# Runs Drizzle migrations against the DB in GitHub Environment secret DATABASE_URL.
+# Create a GitHub Environment named "production" with DATABASE_URL (and optional reviewers).
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: Type migrate to confirm (prevents accidental runs)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-migrate
+  cancel-in-progress: false
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  HUSKY: '0'
+
+jobs:
+  migrate:
+    name: db:migrate (Drizzle)
+    runs-on: ubuntu-latest
+    if: github.event.inputs.confirm == 'migrate'
+    environment: production
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Approve dependency build scripts
+        run: pnpm approve-builds --all
+
+      - name: Run migrations
+        run: pnpm --filter @jurisly/database db:migrate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}

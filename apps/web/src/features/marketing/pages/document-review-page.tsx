@@ -1,6 +1,14 @@
 'use client';
 
-import { AlertTriangle, CheckCircle, ChevronDown, Download, FileText, Upload, X } from 'lucide-react';
+import {
+  AlertTriangle,
+  CheckCircle,
+  ChevronDown,
+  Download,
+  FileText,
+  Upload,
+  X,
+} from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useOpenAuth } from '@/features/marketing/open-auth-context';
@@ -112,12 +120,18 @@ export function DocumentReviewPage() {
     <div className="min-h-screen bg-[#FAFAF9]">
       <div className="border-b border-[#E7E5E4] bg-white px-6 py-4">
         <div className="mx-auto max-w-[900px]">
-          <div className="flex items-center gap-2 text-sm text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
+          <div
+            className="flex items-center gap-2 text-sm text-[#78716C]"
+            style={{ fontFamily: 'var(--font-body)' }}
+          >
             <span>Home</span>
             <span>/</span>
             <span className="text-[#C2410C]">Document Review</span>
           </div>
-          <h1 className="mt-1 text-[#1C1917]" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '28px' }}>
+          <h1
+            className="mt-1 text-[#1C1917]"
+            style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '28px' }}
+          >
             Document Review
           </h1>
           <p className="mt-1 text-sm text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
@@ -156,11 +170,17 @@ export function DocumentReviewPage() {
               <Upload size={28} className="text-[#C2410C]" />
             </div>
             <div className="text-center">
-              <p className="mb-1 text-[#1C1917]" style={{ fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: '16px' }}>
+              <p
+                className="mb-1 text-[#1C1917]"
+                style={{ fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: '16px' }}
+              >
                 Drag your document here
               </p>
               <p className="text-sm text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
-                or <span className="text-[#C2410C] hover:underline" style={{ fontWeight: 600 }}>Browse files</span>
+                or{' '}
+                <span className="text-[#C2410C] hover:underline" style={{ fontWeight: 600 }}>
+                  Browse files
+                </span>
               </p>
               <p className="mt-3 text-xs text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
                 PDF, DOCX, JPG — max 10MB
@@ -183,7 +203,9 @@ export function DocumentReviewPage() {
             </div>
             <div className="w-full max-w-sm">
               <div className="mb-2 flex justify-between text-sm text-[#78716C]">
-                <span style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}>Analysing document…</span>
+                <span style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}>
+                  Analysing document…
+                </span>
                 <span style={{ fontFamily: 'var(--font-mono)' }}>{Math.round(progress)}%</span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-[#E7E5E4]">
@@ -207,7 +229,10 @@ export function DocumentReviewPage() {
                   <FileText size={18} className="text-[#C2410C]" />
                 </div>
                 <div>
-                  <p className="text-sm text-[#1C1917]" style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}>
+                  <p
+                    className="text-sm text-[#1C1917]"
+                    style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}
+                  >
                     {mockReview.filename}
                   </p>
                   <p className="text-xs text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
@@ -241,14 +266,23 @@ export function DocumentReviewPage() {
                   >
                     <div className="flex items-center gap-3">
                       <span className="text-[#C2410C]">{acc.icon}</span>
-                      <span className="text-[#1C1917]" style={{ fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: '15px' }}>
+                      <span
+                        className="text-[#1C1917]"
+                        style={{
+                          fontFamily: 'var(--font-body)',
+                          fontWeight: 600,
+                          fontSize: '15px',
+                        }}
+                      >
                         {acc.label}
                       </span>
                     </div>
                     <ChevronDown
                       size={18}
                       className="text-[#78716C] transition-transform duration-200"
-                      style={{ transform: openAccordion === acc.id ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                      style={{
+                        transform: openAccordion === acc.id ? 'rotate(180deg)' : 'rotate(0deg)',
+                      }}
                     />
                   </button>
 
@@ -258,7 +292,14 @@ export function DocumentReviewPage() {
                       style={{ animation: 'kb-marketing-panel-reveal 250ms ease-out' }}
                     >
                       {acc.id === 'summary' && (
-                        <p className="leading-relaxed" style={{ fontFamily: 'var(--font-body)', fontSize: '15px', lineHeight: 1.7 }}>
+                        <p
+                          className="leading-relaxed"
+                          style={{
+                            fontFamily: 'var(--font-body)',
+                            fontSize: '15px',
+                            lineHeight: 1.7,
+                          }}
+                        >
                           {mockReview.summary}
                         </p>
                       )}
@@ -266,11 +307,28 @@ export function DocumentReviewPage() {
                       {acc.id === 'clauses' && (
                         <div className="space-y-4">
                           {mockReview.keyClauses.map((clause) => (
-                            <div key={clause.title} className="rounded-[12px] border border-[#E7E5E4] bg-[#FAFAF9] p-4">
-                              <p className="mb-1.5 text-[#1C1917]" style={{ fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: '14px' }}>
+                            <div
+                              key={clause.title}
+                              className="rounded-[12px] border border-[#E7E5E4] bg-[#FAFAF9] p-4"
+                            >
+                              <p
+                                className="mb-1.5 text-[#1C1917]"
+                                style={{
+                                  fontFamily: 'var(--font-body)',
+                                  fontWeight: 600,
+                                  fontSize: '14px',
+                                }}
+                              >
                                 {clause.title}
                               </p>
-                              <p className="text-[#78716C]" style={{ fontFamily: 'var(--font-body)', fontSize: '14px', lineHeight: 1.6 }}>
+                              <p
+                                className="text-[#78716C]"
+                                style={{
+                                  fontFamily: 'var(--font-body)',
+                                  fontSize: '14px',
+                                  lineHeight: 1.6,
+                                }}
+                              >
                                 {clause.content}
                               </p>
                             </div>
@@ -281,14 +339,18 @@ export function DocumentReviewPage() {
                       {acc.id === 'flags' && (
                         <div className="space-y-3">
                           {mockReview.redFlags.map((flag, i) => {
-                            const colors = severityColor[flag.severity as keyof typeof severityColor];
+                            const colors =
+                              severityColor[flag.severity as keyof typeof severityColor];
                             return (
                               <div
                                 key={i}
                                 className="flex items-start gap-3 rounded-[12px] border p-4"
                                 style={{ background: colors.bg, borderColor: colors.border }}
                               >
-                                <AlertTriangle size={16} style={{ color: colors.text, marginTop: '2px', flexShrink: 0 }} />
+                                <AlertTriangle
+                                  size={16}
+                                  style={{ color: colors.text, marginTop: '2px', flexShrink: 0 }}
+                                />
                                 <div>
                                   <span
                                     className="mr-2 rounded-full px-2 py-0.5 text-xs"
@@ -301,7 +363,14 @@ export function DocumentReviewPage() {
                                   >
                                     {colors.label}
                                   </span>
-                                  <p className="mt-1.5 text-[#1C1917]" style={{ fontFamily: 'var(--font-body)', fontSize: '14px', lineHeight: 1.6 }}>
+                                  <p
+                                    className="mt-1.5 text-[#1C1917]"
+                                    style={{
+                                      fontFamily: 'var(--font-body)',
+                                      fontSize: '14px',
+                                      lineHeight: 1.6,
+                                    }}
+                                  >
                                     {flag.text}
                                   </p>
                                 </div>
@@ -344,7 +413,6 @@ export function DocumentReviewPage() {
           </div>
         )}
       </div>
-
     </div>
   );
 }

@@ -1,0 +1,104 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1775910323891,
+      "tag": "0000_unknown_excalibur",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1776000000000,
+      "tag": "0001_phase3_marketplace",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1776285011145,
+      "tag": "0002_phase4_notice_scanner",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1776288000000,
+      "tag": "0003_phase5_consultations_payments",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1776290000000,
+      "tag": "0004_phase7_vault",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1776292000000,
+      "tag": "0005_phase8_lawyer_case_management",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1776294000000,
+      "tag": "0006_phase9_ai_legal_research",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1776296000000,
+      "tag": "0007_phase10_practice_billing",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1776298000000,
+      "tag": "0008_phase11_notifications",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1776300000000,
+      "tag": "0009_phase11_case_tracker",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1776302000000,
+      "tag": "0010_phase12_content_qna",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1776304000000,
+      "tag": "0011_phase13_subscriptions",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1776306000000,
+      "tag": "0012_phase15_whatsapp",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1776308000000,
+      "tag": "0013_phase15_digilocker",
+      "breakpoints": true
+    }
+  ]
+}

@@ -1,36 +1,91 @@
-# KanuniBaat — Monorepo Architecture
+# Jurisly — Architecture
 
-This repository implements the **KanuniBaat** platform as a **pnpm + Turborepo** monorepo.
+Jurisly is a **pnpm + Turborepo monorepo** with a shared type-safe API contract, a Postgres/Drizzle data layer, and product surfaces across web, mobile, and backend integrations.
 
-## Layout
+## System overview
 
-| Path | Role |
-|------|------|
-| `apps/web` | Next.js (App Router) — marketing + authenticated web app, Better Auth routes, tRPC client |
-| `apps/api` | NestJS — REST + **tRPC** HTTP adapter on `/trpc`, health checks |
-| `apps/mobile` | Expo (Expo Router) — primary mobile client |
-| `packages/config` | Shared Prettier, TypeScript base, ESLint patterns, Tailwind theme tokens |
-| `packages/database` | Drizzle ORM + Postgres (`DATABASE_URL`), schema including **Better Auth** core tables |
-| `packages/trpc` | `@kb/trpc` — shared `AppRouter` and procedures (imported by API + typed client) |
-| `packages/api-client` | `@kb/api-client` — `createTRPCReact` instance + types for web/mobile |
-| `packages/types` | Shared Zod enums / TS types |
-| `packages/utils` | Shared formatters, constants, validators |
-| `packages/ui` | Shared React (web) primitives |
+| Layer                | Primary stack                                             | Responsibility                                                             |
+| -------------------- | --------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Web app              | Next.js App Router (`apps/web`)                           | Marketing + authenticated app surfaces, Better Auth host, locale-routed UI |
+| API app              | NestJS (`apps/api`)                                       | Public HTTP stack, `/trpc` adapter, webhooks, internal cron endpoints      |
+| Mobile app           | Expo Router (`apps/mobile`)                               | Mobile-first product surface using shared tRPC contract                    |
+| Shared API           | `@jurisly/trpc` (`packages/trpc`)                         | Domain routers, RBAC procedures, integration glue                          |
+| Database             | Drizzle + PostgreSQL (`packages/database`)                | Schema + migrations for product domains                                    |
+| Shared clients/types | `@jurisly/api-client`, `@jurisly/types`, `@jurisly/utils` | Typed API client, domain constants/schemas, reusable utilities             |
 
-## Data & auth
+## Monorepo topology
 
-- **PostgreSQL** is accessed via **Drizzle** + `postgres` (Node). Use the Supabase **transaction pooler** connection string in production.
-- **Better Auth** runs in **`apps/web`** (route handler `src/app/api/auth/[...all]/route.ts`) and uses the Drizzle adapter against the same schema as `@kb/database`.
+- `apps/web`: locale-prefixed routes in `src/app/[locale]` for marketing and `/app` surfaces.
+- `apps/api`: Nest bootstrap + Express middleware stack for tRPC and webhook endpoints.
+- `apps/mobile`: Expo app with typed API access through shared packages.
+- `packages/database`: single source of truth for schema + migrations.
+- `packages/trpc`: domain routers including marketplace, notices, consultations, vault, cases, research, notifications, case tracker, content/QA, billing, integrations.
+- `packages/emergency-guide`: curated scenario catalog and personalization contracts.
 
-## API surface
+## Request and data flow
 
-- **tRPC**: `POST/GET {API_URL}/trpc` (used by `@kb/api-client` from the web app). CORS allows the web origin via `CORS_ORIGIN`.
-- **Health**: `GET {API_URL}/health`
+1. Client calls web proxy (`/api/trpc`) or API (`/trpc`) directly.
+2. API resolves auth session into `authUserId` using Bearer/session token context.
+3. Router-level RBAC middleware (`public`, `protected`, role-gated procedures) authorizes access.
+4. Domain procedure reads/writes Postgres via Drizzle.
+5. Optional integration calls run (Meili, S3, OCR/AI, Razorpay, LiveKit, WhatsApp, DigiLocker).
+6. Typed response returns to web/mobile through shared `AppRouter`.
 
-## Environment
+## Auth and identity model
 
-See the repo root `.env.example`. Copy to `.env` locally; never commit secrets.
+- Better Auth is hosted in web route handlers and persists against shared Postgres tables.
+- API trusts validated session context and exposes role-protected procedures.
+- Core identity domain includes user profile + role assignment + lawyer profile lifecycle.
+- Lawyer/admin routes are implemented in-product under locale app routes; future host split remains possible via CORS/token strategy in ADR.
 
-## Docs index
+## Integration surfaces (current)
 
-- [Phase 0 checklist](./PHASE-0.md) — foundation tasks and how they map to this repo.
+- **Search**: Meilisearch for lawyers and judgments with database fallback paths in domain flows.
+- **Storage**: S3 document flows for uploads and vault/case document patterns.
+- **AI/OCR**: OpenAI/vision-backed analysis routes with fallback behavior where configured.
+- **Payments**: Razorpay orders/subscriptions plus webhook endpoints.
+- **Realtime/media**: LiveKit credential wiring for consultation sessions.
+- **Notifications/case polling**: internal secured endpoints for dispatch and polling jobs.
+- **Channels**: WhatsApp webhook endpoint and DigiLocker integration router.
+
+## Public HTTP surfaces (API app)
+
+- `GET /health` - health check.
+- `GET/POST /trpc` - shared tRPC API.
+- `POST /webhooks/razorpay` - payment webhook.
+- `POST /webhooks/razorpay/subscriptions` - subscription webhook.
+- `GET /webhooks/whatsapp` - webhook verification challenge.
+- `POST /webhooks/whatsapp` - inbound WhatsApp events.
+- `POST /internal/notifications/dispatch` - internal notifier job.
+- `POST /internal/case-tracker/poll` - internal case tracker polling job.
+
+## Data domains covered through Phase 14
+
+- Marketing + waitlist intake
+- Auth/profile/role and lawyer onboarding
+- Lawyer marketplace and public profiles
+- Notice scanner and analysis result flows
+- Consultations and payment foundations
+- Emergency guide scenario personalization
+- Document vault and shared access links
+- Lawyer practice/case management
+- Legal research and drafting workflow surfaces
+- Practice analytics and invoicing
+- Notifications and case tracking
+- Rights/content/QA platform
+- Subscription state and monetization paths
+- Locale-first routing with 8 language catalogs
+
+## Configuration model
+
+- Runtime environment is validated in API at startup (`apps/api/src/config/env.ts`).
+- `.env.example` is the canonical config contract for local/staging/prod parity.
+- Sensitive integration values remain environment-only.
+
+## Related docs
+
+- [Onboarding guide](./ONBOARDING.md)
+- [Project flows](./PROJECT-FLOWS.md)
+- [API surface](./API-SURFACE.md)
+- [Mobile auth & deep links](./MOBILE-AUTH-DEEPLINKS.md)
+- [Phase docs (`PHASE-0` to `PHASE-14`)](../README.md)

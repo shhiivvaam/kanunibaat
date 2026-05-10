@@ -16,4 +16,3 @@ export const LanguageCodeSchema = z.enum([
 ]);
 
 export type LanguageCode = z.infer<typeof LanguageCodeSchema>;
-

@@ -1,0 +1,26 @@
+{
+  "common": {
+    "appName": "कानूनीबात",
+    "language": "भाषा"
+  },
+  "nav": {
+    "consultations": "परामर्श",
+    "vault": "वॉल्ट",
+    "notifications": "सूचनाएँ",
+    "billing": "बिलिंग",
+    "practice": "प्रैक्टिस",
+    "analytics": "एनालिटिक्स",
+    "invoices": "इनवॉइस",
+    "research": "रिसर्च",
+    "marketingSite": "मार्केटिंग साइट"
+  },
+  "billing": {
+    "title": "बिलिंग",
+    "subtitle": "अपनी सदस्यता और बिलिंग इतिहास देखें।",
+    "currentPlan": "वर्तमान प्लान",
+    "plans": "प्लान",
+    "billingHistory": "बिलिंग इतिहास",
+    "subscribe": "सदस्यता लें",
+    "cancelAtPeriodEnd": "पीरियड के अंत में कैंसल करें"
+  }
+}

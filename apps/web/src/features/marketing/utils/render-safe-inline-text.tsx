@@ -18,9 +18,7 @@ export const renderSafeInlineText = (text: string, keyPrefix: string): ReactNode
       nodes.push(text.slice(currentIndex, matchStart));
     }
 
-    nodes.push(
-      <strong key={`${keyPrefix}-strong-${matchStart}`}>{emphasizedText}</strong>,
-    );
+    nodes.push(<strong key={`${keyPrefix}-strong-${matchStart}`}>{emphasizedText}</strong>);
 
     currentIndex = matchStart + fullMatch.length;
   }

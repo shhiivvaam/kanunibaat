@@ -1,6 +1,6 @@
 import { createTRPCReact } from '@trpc/react-query';
 
-import type { AppRouter } from '@kb/trpc';
+import type { AppRouter } from '@jurisly/trpc';
 
 export const trpc: ReturnType<typeof createTRPCReact<AppRouter>> = createTRPCReact<AppRouter>();
 

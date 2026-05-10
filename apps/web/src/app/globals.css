@@ -1,11 +1,15 @@
-@import "tailwindcss";
-@import "@kb/config/tailwind/theme.css";
+@import 'tailwindcss';
+@import '@jurisly/config/tailwind/theme.css';
 
 :root {
   --background: #fafaf9;
   --foreground: #1c1917;
-  --font-display: var(--font-kb-display), Georgia, serif;
-  --font-body: var(--font-kb-body), system-ui, sans-serif;
+  /* Match families loaded in `[locale]/layout.tsx` (avoids next/font build-time fetches). */
+  --font-kb-display: 'Fraunces', Georgia, serif;
+  --font-kb-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-geist-mono: 'Geist Mono', ui-monospace, monospace;
+  --font-display: var(--font-kb-display);
+  --font-body: var(--font-kb-body);
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 

@@ -4,18 +4,51 @@ import {
   ArrowRight,
   BookOpen,
   Check,
+  ChevronDown,
   FileText,
   Globe2,
-  IndianRupee,
   MessageSquare,
-  ShieldCheck,
   Star,
   Users,
   Zap,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useState } from 'react';
 
-import { useOpenAuth } from '@/features/marketing/open-auth-context';
+const homeFaqs = [
+  {
+    q: 'Is my data safe?',
+    a: 'We design for the Digital Personal Data Protection Act: minimal collection, encryption in transit, and clear retention rules. Read our Privacy Policy and Privacy Charter for details.',
+  },
+  {
+    q: 'Are the lawyers on Jurisly real and verified?',
+    a: 'Yes. Advocates go through Bar Council enrollment checks and manual review before they receive a verified badge. We do not list anonymous or unverified “experts”.',
+  },
+  {
+    q: 'Is Jurisly giving me legal advice?',
+    a: 'No. AI and articles provide general information. For your specific matter you should consult a qualified lawyer — we help you find one.',
+  },
+  {
+    q: 'What languages do you support?',
+    a: 'The marketing site and product are rolling out in English and Hindi first, with more Indian languages on the roadmap.',
+  },
+  {
+    q: 'How much does it cost?',
+    a: 'Naagrik Free stays free. Naagrik Pro and advocate plans are listed on our Pricing page — no hidden fees.',
+  },
+  {
+    q: 'Can I use this in an emergency?',
+    a: 'For police detention, violence, or immediate danger, call emergency services and a lawyer. Jurisly guides education and next steps — it is not a substitute for emergency response.',
+  },
+  {
+    q: 'What if the AI makes a mistake?',
+    a: 'Always cross-check important steps. If something looks wrong, stop and speak to an advocate. We continuously improve safety and citations.',
+  },
+  {
+    q: 'How do I delete my account or data?',
+    a: 'Once accounts are live, you can request deletion from settings or email privacy@tryjurisly.com. We respond under DPDP timelines.',
+  },
+] as const;
 
 const testimonials = [
   {
@@ -25,7 +58,7 @@ const testimonials = [
     initial: 'P',
     color: '#C2410C',
     quote:
-      'I was dealing with a wrongful eviction. KanooniBaat explained the Rent Control Act to me in Tamil Nadu context — clearly, without jargon. I knew exactly what to do next.',
+      'I was dealing with a wrongful eviction. Jurisly explained the Rent Control Act to me in Tamil Nadu context — clearly, without jargon. I knew exactly what to do next.',
     rating: 5,
   },
   {
@@ -144,7 +177,7 @@ const services = [
 ];
 
 export function HomePage() {
-  const openAuth = useOpenAuth();
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   return (
     <div className="w-full">
@@ -177,19 +210,18 @@ export function HomePage() {
                 className="mx-auto mb-8 max-w-xl text-[#78716C] lg:mx-0"
                 style={{ fontFamily: 'var(--font-body)', fontSize: '18px', lineHeight: 1.7 }}
               >
-                KanooniBaat makes Indian law understandable for everyone. Ask questions, review documents, and
-                connect with lawyers — starting at ₹0.
+                Jurisly makes Indian law understandable for everyone. Ask questions, review
+                documents, and connect with lawyers — starting at ₹0.
               </p>
 
               <div className="flex flex-col justify-center gap-3 sm:flex-row lg:justify-start">
-                <button
-                  type="button"
-                  onClick={() => openAuth('signup')}
+                <Link
+                  href="/waitlist"
                   className="flex h-12 items-center justify-center gap-2 rounded-[16px] bg-[#C2410C] px-7 text-white transition-all duration-100 hover:bg-[#9a3409] active:scale-[0.97]"
                   style={{ fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: '15px' }}
                 >
-                  Get started free <ArrowRight size={16} />
-                </button>
+                  Join app waitlist <ArrowRight size={16} />
+                </Link>
                 <Link
                   href="/legal-qa"
                   className="flex h-12 items-center justify-center gap-2 rounded-[16px] border border-[#1C1917] text-[#1C1917] transition-all duration-150 hover:bg-[#1C1917] hover:text-white"
@@ -199,11 +231,27 @@ export function HomePage() {
                 </Link>
               </div>
 
-              <div className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 lg:justify-start">
+              <div
+                className="mt-8 rounded-[14px] border border-[#E7E5E4] bg-[#FAFAF9] px-4 py-3 text-center text-xs text-[#57534E] sm:text-left lg:text-left"
+                style={{ fontFamily: 'var(--font-body)', fontWeight: 500, lineHeight: 1.5 }}
+              >
+                <span className="text-[#1C1917]">40M+ pending cases in India</span>
+                <span className="mx-2 hidden text-[#D6D3D1] sm:inline" aria-hidden>
+                  |
+                </span>
+                <span className="mt-1 block sm:mt-0 sm:inline">1.7M+ registered lawyers</span>
+                <span className="mx-2 hidden text-[#D6D3D1] sm:inline" aria-hidden>
+                  |
+                </span>
+                <span className="mt-1 block text-[#C2410C] sm:mt-0 sm:inline">
+                  Your legal partner is here
+                </span>
+              </div>
+              <div className="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-2 lg:justify-start">
                 {[
-                  { icon: <ShieldCheck size={14} />, text: 'Trusted by 2,000+ users' },
                   { icon: <Globe2 size={14} />, text: 'Hindi & English' },
-                  { icon: <IndianRupee size={14} />, text: 'Starting ₹0' },
+                  { icon: <Users size={14} />, text: 'Early users joining weekly' },
+                  { icon: <Zap size={14} />, text: 'Starting at ₹0' },
                 ].map((item) => (
                   <div
                     key={item.text}
@@ -229,7 +277,7 @@ export function HomePage() {
                     <div className="h-3 w-3 rounded-full bg-[#FED7AA]" />
                   </div>
                   <div className="mx-3 flex h-6 flex-1 items-center rounded-lg bg-[#E7E5E4]/60 px-3">
-                    <span className="text-[10px] text-[#78716C]">kanoonibaat.in/legal-qa</span>
+                    <span className="text-[10px] text-[#78716C]">tryjurisly.com/legal-qa</span>
                   </div>
                 </div>
 
@@ -239,7 +287,8 @@ export function HomePage() {
                       className="max-w-[85%] rounded-[16px] rounded-tr-sm bg-[#C2410C] px-4 py-3 text-sm leading-relaxed text-white"
                       style={{ fontFamily: 'var(--font-body)' }}
                     >
-                      My landlord is refusing to return my security deposit after I moved out 2 months ago.
+                      My landlord is refusing to return my security deposit after I moved out 2
+                      months ago.
                     </div>
                   </div>
 
@@ -261,8 +310,9 @@ export function HomePage() {
                         className="mb-2 text-sm leading-relaxed text-[#1C1917]"
                         style={{ fontFamily: 'var(--font-body)' }}
                       >
-                        Under the <strong>Transfer of Property Act</strong>, your landlord must return the deposit
-                        within 30 days of vacating. Since it&apos;s been 2 months, you can:
+                        Under the <strong>Transfer of Property Act</strong>, your landlord must
+                        return the deposit within 30 days of vacating. Since it&apos;s been 2
+                        months, you can:
                       </p>
                       <ul className="space-y-1">
                         {[
@@ -362,7 +412,10 @@ export function HomePage() {
                 >
                   {p.problem}
                 </h3>
-                <p className="leading-relaxed text-[#78716C]" style={{ fontFamily: 'var(--font-body)', fontSize: '15px' }}>
+                <p
+                  className="leading-relaxed text-[#78716C]"
+                  style={{ fontFamily: 'var(--font-body)', fontSize: '15px' }}
+                >
                   {p.detail}
                 </p>
               </div>
@@ -410,7 +463,7 @@ export function HomePage() {
               {
                 num: '03',
                 title: 'Act with confidence',
-                desc: 'Need personal advice? Book a consultation with a verified lawyer directly through KanooniBaat.',
+                desc: 'Need personal advice? Book a consultation with a verified lawyer directly through Jurisly.',
               },
             ].map((step) => (
               <div key={step.num} className="flex flex-col items-start">
@@ -432,7 +485,10 @@ export function HomePage() {
                 >
                   {step.title}
                 </h3>
-                <p className="leading-relaxed text-[#78716C]" style={{ fontFamily: 'var(--font-body)', fontSize: '15px' }}>
+                <p
+                  className="leading-relaxed text-[#78716C]"
+                  style={{ fontFamily: 'var(--font-body)', fontSize: '15px' }}
+                >
                   {step.desc}
                 </p>
               </div>
@@ -440,14 +496,13 @@ export function HomePage() {
           </div>
 
           <div className="mt-12 text-center">
-            <button
-              type="button"
-              onClick={() => openAuth('signup')}
+            <Link
+              href="/waitlist"
               className="inline-flex items-center gap-2 text-[#C2410C] transition-all hover:gap-3"
               style={{ fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: '15px' }}
             >
-              Get started for free <ArrowRight size={16} />
-            </button>
+              Join the waitlist <ArrowRight size={16} />
+            </Link>
           </div>
         </div>
       </section>
@@ -491,7 +546,10 @@ export function HomePage() {
                   >
                     {s.name}
                   </h3>
-                  <p className="leading-relaxed text-[#78716C]" style={{ fontFamily: 'var(--font-body)', fontSize: '15px' }}>
+                  <p
+                    className="leading-relaxed text-[#78716C]"
+                    style={{ fontFamily: 'var(--font-body)', fontSize: '15px' }}
+                  >
                     {s.desc}
                   </p>
                 </div>
@@ -516,7 +574,10 @@ export function HomePage() {
                 .map((_, i) => (
                   <Star key={i} size={16} fill="#C2410C" color="#C2410C" />
                 ))}
-              <span className="ml-2 text-sm text-[#78716C]" style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}>
+              <span
+                className="ml-2 text-sm text-[#78716C]"
+                style={{ fontFamily: 'var(--font-body)', fontWeight: 500 }}
+              >
                 4.8/5 from 800+ reviews
               </span>
             </div>
@@ -535,7 +596,10 @@ export function HomePage() {
 
           <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3">
             {testimonials.map((t) => (
-              <div key={t.id} className="flex flex-col gap-4 rounded-[20px] border border-[#E7E5E4] bg-white p-6">
+              <div
+                key={t.id}
+                className="flex flex-col gap-4 rounded-[20px] border border-[#E7E5E4] bg-white p-6"
+              >
                 <div className="flex items-center gap-1">
                   {Array(t.rating)
                     .fill(0)
@@ -557,15 +621,26 @@ export function HomePage() {
                 <div className="flex items-center gap-3 border-t border-[#E7E5E4] pt-2">
                   <div
                     className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white"
-                    style={{ background: t.color, fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '16px' }}
+                    style={{
+                      background: t.color,
+                      fontFamily: 'var(--font-display)',
+                      fontWeight: 700,
+                      fontSize: '16px',
+                    }}
                   >
                     {t.initial}
                   </div>
                   <div>
-                    <p className="text-sm text-[#1C1917]" style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}>
+                    <p
+                      className="text-sm text-[#1C1917]"
+                      style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}
+                    >
                       {t.name}
                     </p>
-                    <p className="text-xs text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
+                    <p
+                      className="text-xs text-[#78716C]"
+                      style={{ fontFamily: 'var(--font-body)' }}
+                    >
                       {t.city}
                     </p>
                   </div>
@@ -600,14 +675,31 @@ export function HomePage() {
 
           <div className="mx-auto grid max-w-2xl grid-cols-1 gap-6 md:grid-cols-2">
             <div className="rounded-[24px] border border-[#E7E5E4] bg-white p-8">
-              <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '22px', color: '#1C1917' }}>
-                Free
+              <h3
+                style={{
+                  fontFamily: 'var(--font-display)',
+                  fontWeight: 700,
+                  fontSize: '22px',
+                  color: '#1C1917',
+                }}
+              >
+                Naagrik Free
               </h3>
-              <p className="mb-6 mt-1 text-sm text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
-                For occasional legal queries
+              <p
+                className="mb-6 mt-1 text-sm text-[#78716C]"
+                style={{ fontFamily: 'var(--font-body)' }}
+              >
+                Notice scans, guides, and discovery
               </p>
               <div className="mb-8 flex items-baseline gap-1">
-                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '40px', color: '#1C1917' }}>
+                <span
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    fontWeight: 700,
+                    fontSize: '40px',
+                    color: '#1C1917',
+                  }}
+                >
                   ₹0
                 </span>
                 <span className="text-sm text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
@@ -616,10 +708,10 @@ export function HomePage() {
               </div>
               <ul className="mb-8 space-y-3">
                 {[
-                  '3 legal questions per month',
-                  '1 document review per month',
-                  'Know Your Rights access',
-                  'Hindi & English support',
+                  'Notice scanner (2 / month)',
+                  'Emergency guide + Know Your Rights',
+                  'Basic lawyer search',
+                  'Vault for up to 5 documents',
                 ].map((f) => (
                   <li
                     key={f}
@@ -631,14 +723,13 @@ export function HomePage() {
                   </li>
                 ))}
               </ul>
-              <button
-                type="button"
-                onClick={() => openAuth('signup')}
-                className="h-11 w-full rounded-[16px] border border-[#1C1917] text-sm text-[#1C1917] transition-all duration-150 hover:bg-[#1C1917] hover:text-white active:scale-[0.97]"
+              <Link
+                href="/waitlist"
+                className="flex h-11 w-full items-center justify-center rounded-[16px] border border-[#1C1917] text-sm text-[#1C1917] transition-all duration-150 hover:bg-[#1C1917] hover:text-white active:scale-[0.97]"
                 style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}
               >
-                Get started free
-              </button>
+                Join waitlist
+              </Link>
             </div>
 
             <div className="relative rounded-[24px] border border-[#C2410C] bg-[#FFF7ED] p-8">
@@ -648,15 +739,32 @@ export function HomePage() {
               >
                 Most Popular
               </div>
-              <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '22px', color: '#1C1917' }}>
-                Pro
+              <h3
+                style={{
+                  fontFamily: 'var(--font-display)',
+                  fontWeight: 700,
+                  fontSize: '22px',
+                  color: '#1C1917',
+                }}
+              >
+                Naagrik Pro
               </h3>
-              <p className="mb-6 mt-1 text-sm text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
-                For regular legal needs
+              <p
+                className="mb-6 mt-1 text-sm text-[#78716C]"
+                style={{ fontFamily: 'var(--font-body)' }}
+              >
+                Unlimited scans & priority matching
               </p>
               <div className="mb-8 flex items-baseline gap-1">
-                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '40px', color: '#C2410C' }}>
-                  ₹299
+                <span
+                  style={{
+                    fontFamily: 'var(--font-display)',
+                    fontWeight: 700,
+                    fontSize: '40px',
+                    color: '#C2410C',
+                  }}
+                >
+                  ₹199
                 </span>
                 <span className="text-sm text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
                   /month
@@ -664,11 +772,11 @@ export function HomePage() {
               </div>
               <ul className="mb-8 space-y-3">
                 {[
-                  'Unlimited legal questions',
-                  '10 document reviews/month',
-                  'Priority answers (under 2 min)',
-                  'Chat history & saved answers',
-                  'Direct lawyer booking',
+                  'Unlimited notice scans',
+                  'Priority lawyer matching',
+                  'Larger document vault (~5 GB)',
+                  'Case tracker + AI insights',
+                  'Hindi & English support',
                 ].map((f) => (
                   <li
                     key={f}
@@ -680,14 +788,13 @@ export function HomePage() {
                   </li>
                 ))}
               </ul>
-              <button
-                type="button"
-                onClick={() => openAuth('signup')}
-                className="h-11 w-full rounded-[16px] bg-[#C2410C] text-sm text-white transition-all duration-150 hover:bg-[#9a3409] active:scale-[0.97]"
+              <Link
+                href="/waitlist"
+                className="flex h-11 w-full items-center justify-center rounded-[16px] bg-[#C2410C] text-sm text-white transition-all duration-150 hover:bg-[#9a3409] active:scale-[0.97]"
                 style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}
               >
-                Start Pro trial →
-              </button>
+                Join waitlist for Pro →
+              </Link>
             </div>
           </div>
 
@@ -697,8 +804,63 @@ export function HomePage() {
               className="text-sm text-[#78716C] transition-colors hover:text-[#C2410C]"
               style={{ fontFamily: 'var(--font-body)' }}
             >
-              See all plans including Lawyer Access →
+              See Naagrik Plus & Vakil plans →
             </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="w-full bg-[#FAFAF9] py-20">
+        <div className="mx-auto max-w-[720px] px-6">
+          <h2
+            className="mb-10 text-center text-[#1C1917]"
+            style={{
+              fontFamily: 'var(--font-display)',
+              fontWeight: 700,
+              fontSize: 'clamp(28px, 4vw, 42px)',
+              lineHeight: 1.2,
+            }}
+          >
+            Frequently asked questions
+          </h2>
+          <div className="space-y-3">
+            {homeFaqs.map((faq, i) => (
+              <div
+                key={faq.q}
+                className="overflow-hidden rounded-[16px] border border-[#E7E5E4] bg-white"
+              >
+                <button
+                  type="button"
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="flex w-full items-center justify-between px-6 py-5 text-left"
+                >
+                  <span
+                    className="pr-4 text-[#1C1917]"
+                    style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}
+                  >
+                    {faq.q}
+                  </span>
+                  <ChevronDown
+                    size={18}
+                    className="shrink-0 text-[#78716C] transition-transform duration-200"
+                    style={{ transform: openFaq === i ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                  />
+                </button>
+                {openFaq === i ? (
+                  <div
+                    className="px-6 pb-5"
+                    style={{ animation: 'kb-marketing-panel-reveal 250ms ease-out' }}
+                  >
+                    <p
+                      className="leading-relaxed text-[#78716C]"
+                      style={{ fontFamily: 'var(--font-body)', fontSize: '15px' }}
+                    >
+                      {faq.a}
+                    </p>
+                  </div>
+                ) : null}
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -720,16 +882,15 @@ export function HomePage() {
             className="mx-auto mb-8 max-w-xl text-[#FED7AA]"
             style={{ fontFamily: 'var(--font-body)', fontSize: '17px', lineHeight: 1.6 }}
           >
-            Join 2,000+ citizens who already use KanooniBaat to navigate Indian law with confidence.
+            Join 2,000+ citizens who already use Jurisly to navigate Indian law with confidence.
           </p>
-          <button
-            type="button"
-            onClick={() => openAuth('signup')}
+          <Link
+            href="/waitlist"
             className="inline-flex h-12 items-center gap-2 rounded-[16px] bg-white px-8 text-sm text-[#C2410C] transition-all duration-150 hover:bg-[#FFF7ED] active:scale-[0.97]"
             style={{ fontFamily: 'var(--font-body)', fontWeight: 700 }}
           >
-            Get started free — it&apos;s ₹0 <ArrowRight size={16} />
-          </button>
+            Join the waitlist <ArrowRight size={16} />
+          </Link>
         </div>
       </section>
 

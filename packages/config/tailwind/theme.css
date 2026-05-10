@@ -1,6 +1,6 @@
 /**
- * KanuniBaat design tokens (Tailwind CSS v4 @theme).
- * Import from app globals: `@import "@kb/config/tailwind/theme.css";` (see apps/web).
+ * Jurisly design tokens (Tailwind CSS v4 @theme).
+ * Import from app globals: `@import "@jurisly/config/tailwind/theme.css";` (see apps/web).
  */
 @theme inline {
   --color-kb-navy: #0f172a;

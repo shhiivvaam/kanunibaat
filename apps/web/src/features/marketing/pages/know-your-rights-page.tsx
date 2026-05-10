@@ -132,7 +132,9 @@ export function KnowYourRightsPage() {
       (entries) => {
         if (isProgrammaticScrollRef.current) {
           const targetSection = targetSectionRef.current;
-          const targetEntry = entries.find((entry) => entry.isIntersecting && entry.target.id === targetSection);
+          const targetEntry = entries.find(
+            (entry) => entry.isIntersecting && entry.target.id === targetSection,
+          );
           if (targetEntry) {
             setActiveSection(targetEntry.target.id);
             isProgrammaticScrollRef.current = false;
@@ -176,12 +178,18 @@ export function KnowYourRightsPage() {
     <div className="min-h-screen bg-[#FAFAF9]">
       <div className="border-b border-[#E7E5E4] bg-white px-6 py-4">
         <div className="mx-auto max-w-[1200px]">
-          <div className="flex items-center gap-2 text-sm text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
+          <div
+            className="flex items-center gap-2 text-sm text-[#78716C]"
+            style={{ fontFamily: 'var(--font-body)' }}
+          >
             <span>Home</span>
             <span>/</span>
             <span className="text-[#C2410C]">Know Your Rights</span>
           </div>
-          <h1 className="mt-1 text-[#1C1917]" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '28px' }}>
+          <h1
+            className="mt-1 text-[#1C1917]"
+            style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '28px' }}
+          >
             Know Your Rights
           </h1>
           <p className="mt-1 text-sm text-[#78716C]" style={{ fontFamily: 'var(--font-body)' }}>
@@ -195,7 +203,10 @@ export function KnowYourRightsPage() {
           <aside className="shrink-0 lg:w-[240px]">
             <div className="overflow-hidden rounded-[20px] border border-[#E7E5E4] bg-white lg:sticky lg:top-[80px]">
               <div className="border-b border-[#E7E5E4] px-5 py-4">
-                <p className="text-xs uppercase tracking-wide text-[#1C1917]" style={{ fontFamily: 'var(--font-body)', fontWeight: 700 }}>
+                <p
+                  className="text-xs uppercase tracking-wide text-[#1C1917]"
+                  style={{ fontFamily: 'var(--font-body)', fontWeight: 700 }}
+                >
                   Table of Contents
                 </p>
               </div>
@@ -210,7 +221,8 @@ export function KnowYourRightsPage() {
                     fontWeight: activeSection === sec.id ? 600 : 400,
                     color: activeSection === sec.id ? '#C2410C' : '#1C1917',
                     background: activeSection === sec.id ? '#FFF7ED' : 'white',
-                    borderLeft: activeSection === sec.id ? '3px solid #C2410C' : '3px solid transparent',
+                    borderLeft:
+                      activeSection === sec.id ? '3px solid #C2410C' : '3px solid transparent',
                   }}
                 >
                   <span>{sec.emoji}</span>
@@ -232,23 +244,39 @@ export function KnowYourRightsPage() {
               >
                 <div className="mb-6 flex items-center gap-3">
                   <span style={{ fontSize: '28px' }}>{sec.emoji}</span>
-                  <h2 className="text-[#1C1917]" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '26px' }}>
+                  <h2
+                    className="text-[#1C1917]"
+                    style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '26px' }}
+                  >
                     {sec.title}
                   </h2>
                 </div>
 
                 <div className="space-y-6">
                   {sec.rights.map((right) => (
-                    <div key={right.headline} className="overflow-hidden rounded-[20px] border border-[#E7E5E4] bg-white">
+                    <div
+                      key={right.headline}
+                      className="overflow-hidden rounded-[20px] border border-[#E7E5E4] bg-white"
+                    >
                       <div className="h-1" style={{ background: sec.color }} />
 
                       <div className="space-y-5 p-6">
-                        <h3 className="text-[#1C1917]" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '20px' }}>
+                        <h3
+                          className="text-[#1C1917]"
+                          style={{
+                            fontFamily: 'var(--font-display)',
+                            fontWeight: 700,
+                            fontSize: '20px',
+                          }}
+                        >
                           {right.headline}
                         </h3>
 
                         <div className="rounded-[12px] border border-[#E7E5E4] bg-[#FAFAF9] p-4">
-                          <p className="mb-2 text-xs uppercase tracking-wide text-[#78716C]" style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}>
+                          <p
+                            className="mb-2 text-xs uppercase tracking-wide text-[#78716C]"
+                            style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}
+                          >
                             Scenario
                           </p>
                           <p
@@ -265,22 +293,39 @@ export function KnowYourRightsPage() {
                         </div>
 
                         <div>
-                          <p className="mb-2 text-xs uppercase tracking-wide text-[#78716C]" style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}>
+                          <p
+                            className="mb-2 text-xs uppercase tracking-wide text-[#78716C]"
+                            style={{ fontFamily: 'var(--font-body)', fontWeight: 600 }}
+                          >
                             What the law says
                           </p>
                           <p
                             className="leading-relaxed text-[#1C1917]"
-                            style={{ fontFamily: 'var(--font-body)', fontSize: '15px', lineHeight: 1.7 }}
+                            style={{
+                              fontFamily: 'var(--font-body)',
+                              fontSize: '15px',
+                              lineHeight: 1.7,
+                            }}
                           >
                             {renderSafeInlineText(right.law, `${sec.id}-${right.headline}`)}
                           </p>
                         </div>
 
                         <div className="rounded-[12px] border border-[#FED7AA] bg-[#FFF7ED] p-4">
-                          <p className="mb-2 text-xs uppercase tracking-wide text-[#C2410C]" style={{ fontFamily: 'var(--font-body)', fontWeight: 700 }}>
+                          <p
+                            className="mb-2 text-xs uppercase tracking-wide text-[#C2410C]"
+                            style={{ fontFamily: 'var(--font-body)', fontWeight: 700 }}
+                          >
                             What you can do
                           </p>
-                          <p className="leading-relaxed text-[#1C1917]" style={{ fontFamily: 'var(--font-body)', fontSize: '15px', lineHeight: 1.7 }}>
+                          <p
+                            className="leading-relaxed text-[#1C1917]"
+                            style={{
+                              fontFamily: 'var(--font-body)',
+                              fontSize: '15px',
+                              lineHeight: 1.7,
+                            }}
+                          >
                             {right.action}
                           </p>
                         </div>

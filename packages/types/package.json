@@ -1,5 +1,5 @@
 {
-  "name": "@kb/types",
+  "name": "@jurisly/types",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -24,4 +24,3 @@
     "typescript": "^5.9.2"
   }
 }
-

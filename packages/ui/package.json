@@ -1,5 +1,5 @@
 {
-  "name": "@kb/ui",
+  "name": "@jurisly/ui",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -27,4 +27,3 @@
     "typescript": "^5.9.2"
   }
 }
-

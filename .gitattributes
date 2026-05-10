@@ -1,0 +1,3 @@
+# Keep hook scripts POSIX and LF so they run on all OSes and Git clients.
+.husky/pre-commit text eol=lf
+.husky/pre-push text eol=lf
