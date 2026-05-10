@@ -1,4 +1,4 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig } from '@playwright/test';
 
 /**
  * Browser E2E (not part of default `pnpm test` / CI — run locally after `pnpm exec playwright install`).
@@ -15,5 +15,5 @@ export default defineConfig({
     baseURL,
     trace: 'on-first-retry',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [{ name: 'chromium', use: { viewport: { width: 1280, height: 720 } } }],
 });
