@@ -7,7 +7,7 @@ services:
     branch: main
     runtime: node
     plan: free
-    nodeVersion: 22
+    runtimeVersion: 22
     buildCommand: corepack prepare pnpm@10.33.0 --activate && pnpm install && pnpm approve-builds --all && pnpm exec turbo build --filter=api
     startCommand: pnpm --filter api start:prod
     healthCheckPath: /health
