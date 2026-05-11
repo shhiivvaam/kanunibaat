@@ -60,14 +60,14 @@ export default withSentryConfig(withNextIntl(nextConfig), {
   // side errors will fail.
   tunnelRoute: '/monitoring',
 
-  // Disable automatic instrumentation of the Next.js App Router directory.
-  // Sentry's auto-wrapping of `global-error` injects a React context provider that calls
-  // `useContext` during prerendering — when the React dispatcher is null — causing:
-  //   TypeError: Cannot read properties of null (reading 'useContext')
-  // We instrument error capturing manually in `global-error.tsx` instead.
-  autoInstrumentAppDirectory: false,
-
   webpack: {
+    // Disable automatic instrumentation of the Next.js App Router directory.
+    // Sentry's auto-wrapping of `global-error` injects a React context provider that calls
+    // `useContext` during prerendering — when the React dispatcher is null — causing:
+    //   TypeError: Cannot read properties of null (reading 'useContext')
+    // We instrument error capturing manually in `global-error.tsx` instead.
+    autoInstrumentAppDirectory: false,
+
     // Enables automatic instrumentation of Vercel Cron Monitors. (Does not yet work with App Router route handlers.)
     // See the following for more information:
     // https://docs.sentry.io/product/crons/
