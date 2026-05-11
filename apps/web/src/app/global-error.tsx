@@ -1,14 +1,11 @@
-'use client';
-
 export default function GlobalError({
   error,
-  reset,
 }: {
   error: Error & { digest?: string };
-  reset: () => void;
 }) {
   // Note: Error reporting to Sentry is handled by the error boundary in layout.tsx
-  // Global error should be minimal and server-compatible
+  // Global error must be server-compatible for prerendering
+  // Reset functionality is handled by the browser's natural refresh behavior
 
   return (
     <html>
@@ -17,12 +14,9 @@ export default function GlobalError({
           <div className="text-center">
             <h1 className="mb-4 text-4xl font-bold">Something went wrong</h1>
             <p className="mb-8 text-gray-600">{error.message || 'An unexpected error occurred'}</p>
-            <button
-              onClick={reset}
-              className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-            >
-              Try again
-            </button>
+            <div className="text-sm text-gray-500">
+              Please refresh the page to try again
+            </div>
           </div>
         </div>
       </body>
