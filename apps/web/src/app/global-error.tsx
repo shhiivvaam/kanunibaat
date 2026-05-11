@@ -1,7 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
-
 export default function GlobalError({
   error,
   reset,
@@ -9,14 +7,8 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  // Dynamically import Sentry only on client side to avoid prerender errors.
-  // Sentry's SDK calls useContext during module initialization which crashes
-  // during static prerender when React dispatcher is null.
-  useEffect(() => {
-    import('@sentry/nextjs').then((Sentry) => {
-      Sentry.captureException(error);
-    });
-  }, [error]);
+  // Note: Error reporting to Sentry is handled by the error boundary in layout.tsx
+  // Global error should be minimal and server-compatible
 
   return (
     <html>

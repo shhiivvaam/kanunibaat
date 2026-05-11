@@ -7,9 +7,17 @@ services:
     branch: main
     runtime: node
     plan: free
-    buildCommand: corepack prepare pnpm@10.33.0 --activate && pnpm install && pnpm approve-builds --all && pnpm exec turbo build --filter=api
+    buildCommand: corepack prepare pnpm@10.33.0 --activate && pnpm install --ignore-scripts && pnpm --filter api build
     startCommand: pnpm --filter api start:prod
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: BETTER_AUTH_SECRET
+        sync: false
+      - key: BETTER_AUTH_URL
+        sync: false
+      - key: VAULT_MALWARE_SCAN_PROVIDER
+        value: stub
