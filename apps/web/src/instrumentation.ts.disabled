@@ -1,7 +1,12 @@
+// Skip instrumentation during build to avoid React context issues
+if (process.env.NEXT_PHASE === 'phase-production-build') {
+  // Return early during build - don't load Sentry
+}
+
 export async function register() {
-  if (!process.env.NEXT_PUBLIC_SENTRY_DSN) return;
-  // Skip Sentry initialization during build/prerender to avoid issues with React context
+  // Only initialize Sentry at runtime, not during build
   if (process.env.NEXT_PHASE === 'phase-production-build') return;
+  if (!process.env.NEXT_PUBLIC_SENTRY_DSN) return;
 
   const Sentry = await import('@sentry/nextjs');
 
