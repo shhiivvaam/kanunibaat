@@ -7,7 +7,7 @@ services:
     branch: main
     runtime: node
     plan: free
-    buildCommand: corepack prepare pnpm@10.33.0 --activate && pnpm install --ignore-scripts && pnpm --filter api build
+    buildCommand: corepack prepare pnpm@10.33.0 --activate && pnpm install --ignore-scripts && pnpm --filter @jurisly/database build && pnpm --filter @jurisly/search build && pnpm --filter @jurisly/storage build && pnpm --filter @jurisly/trpc build && pnpm --filter @jurisly/waitlist build && pnpm --filter api build
     startCommand: pnpm --filter api start:prod
     healthCheckPath: /health
     envVars:
