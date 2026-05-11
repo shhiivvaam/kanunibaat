@@ -1,9 +1,9 @@
-import * as Sentry from '@sentry/nextjs';
-
 export async function register() {
   if (!process.env.NEXT_PUBLIC_SENTRY_DSN) return;
   // Skip Sentry initialization during build/prerender to avoid issues with React context
   if (process.env.NEXT_PHASE === 'phase-production-build') return;
+
+  const Sentry = await import('@sentry/nextjs');
 
   Sentry.init({
     dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
