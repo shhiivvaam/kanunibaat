@@ -1,5 +1,8 @@
 'use client';
 
+// Force dynamic rendering to prevent prerender issues
+export const dynamic = 'force-dynamic';
+
 export default function GlobalError({
   error,
   reset,
@@ -7,8 +10,8 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  // Note: Error reporting to Sentry is handled by the error boundary in layout.tsx
-  // Global error should be minimal and server-compatible
+  // Simple client component without useEffect to avoid prerender issues
+  // Error reporting is handled elsewhere in the app
 
   return (
     <html>
