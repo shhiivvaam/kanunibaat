@@ -1,8 +1,5 @@
 'use client';
 
-import * as Sentry from '@sentry/nextjs';
-import { useEffect } from 'react';
-
 export default function Error({
   error,
   reset,
@@ -10,9 +7,8 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  useEffect(() => {
-    Sentry.captureException(error);
-  }, [error]);
+  // Error reporting is handled by Sentry's automatic error capture
+  // No useEffect needed to avoid prerender issues
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">
