@@ -31,7 +31,7 @@
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
-    "@nestjs/swagger": "^11.2.7",
+    "@nestjs/swagger": "^11.4.3",
     "@sentry/node": "^9.34.0",
     "@trpc/server": "^11.16.0",
     "express-rate-limit": "^7.5.0",
