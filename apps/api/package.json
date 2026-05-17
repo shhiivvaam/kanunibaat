@@ -29,7 +29,7 @@
     "@jurisly/trpc": "workspace:*",
     "@jurisly/waitlist": "workspace:*",
     "@nestjs/common": "^11.0.1",
-    "@nestjs/core": "^11.0.1",
+    "@nestjs/core": "^11.1.21",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/swagger": "^11.2.7",
     "@sentry/node": "^9.34.0",
