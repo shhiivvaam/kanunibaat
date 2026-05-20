@@ -6,7 +6,7 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "prepare": "turbo run build && husky",
+    "prepare": "husky",
     "dev": "turbo dev",
     "build": "turbo build",
     "lint": "turbo lint",
