@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "installCommand": "cd ../.. && corepack enable && corepack prepare pnpm@10.33.0 --activate && pnpm install && pnpm approve-builds --all",
+  "installCommand": "cd ../.. && corepack enable && corepack prepare pnpm@10.33.0 --activate && pnpm install",
   "buildCommand": "cd ../.. && pnpm turbo build --filter=web"
 }
