@@ -1,5 +1,10 @@
 'use client';
 
+// Prevent Next.js from statically prerendering this page at build time,
+// which fails when next-intl's instrumentation tries to call useContext
+// without a locale provider in scope.
+export const dynamic = 'force-dynamic';
+
 export default function GlobalError({
   reset,
 }: {
